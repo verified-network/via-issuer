@@ -34,8 +34,20 @@ library stringutils { // Only relevant functions
         return string(result);
     }
 
-    function append(string memory a, string memory b) internal pure returns (string memory) {
+    function append(string memory a, string memory b) public view returns (string memory) {
         return string(abi.encodePacked(a, b));
     }
+
+    //convert from string to bytes32
+    function stringToBytes32(string memory source) public view returns (bytes32 result) {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+
+        assembly {
+            result := mload(add(source, 32))
+    }
+}
 
 }

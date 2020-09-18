@@ -14,11 +14,11 @@ contract Token is ERC20, Initializable, Ownable {
     //Via token attributes (eg, name : Via-USD, product : ViaBond, symbol : bond identifier)
     bytes32 public name;
     bytes32 public product;
-    bytes public symbol;
+    bytes32 public symbol;
     address payable issuer;
 
     //initiliaze proxies
-    function initialize(bytes32 _name, address payable _owner, bytes32 _product, bytes memory _symbol) public {
+    function initialize(bytes32 _name, address payable _owner, bytes32 _product, bytes32 _symbol) public {
         Ownable.initialize(_owner);
         issuer = _owner;
         name = _name;
@@ -27,11 +27,17 @@ contract Token is ERC20, Initializable, Ownable {
     }
 
     function addTotalSupply(bytes16 amount) external{
+        //adjust total supply
         totalSupply_ = ABDKMathQuad.add(totalSupply_, amount);
     }
 
-    function reduceSupply(bytes16 amount) external{
+    function reduceSupply(bytes16 amount) external{        
         totalSupply_ = ABDKMathQuad.sub(totalSupply_, amount);
+    }
+
+    function addBalance(address party, bytes16 amount) external{
+        //add via to this contract's balance first (ie issue them first)
+        balances[party] = ABDKMathQuad.add(balances[party], amount);
     }
 
     function reduceBalance(address party, bytes16 amount) external{
@@ -39,7 +45,10 @@ contract Token is ERC20, Initializable, Ownable {
     }
 
     function transferFrom(address sender, address receiver, uint256 tokens) public returns (bool){
-        if(Bond(issuer).transferFoward(msg.sender, address(this), sender, receiver, tokens))
+        //ensure sender has enough tokens in balance before transferring or redeeming them
+        require(ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==1 ||
+                ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==0);
+        if(Bond(issuer).transferFoward(symbol, address(this), sender, receiver, tokens))
             return true;
         else
             return false;

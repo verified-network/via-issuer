@@ -25,7 +25,7 @@ contract Factory is ProxyFactory {
     address[] public tokens;
 
     //list of issued token products
-    mapping(bytes => address) products;
+    mapping(bytes32 => address) products;
 
     //list of token product issuers
     mapping(bytes32 => mapping(bytes32 => address)) issuers;
@@ -46,7 +46,7 @@ contract Factory is ProxyFactory {
     }
 
     //retrieve token product address for given identifier (symbol)
-    function getProduct(bytes memory symbol) public returns(address){
+    function getProduct(bytes32 symbol) public returns(address){
         return products[symbol];
     }
 
@@ -57,9 +57,9 @@ contract Factory is ProxyFactory {
 
     //token issuer factory 
     function createIssuer(address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token) external{
-        address _owner = msg.sender;
+        address _owner = address(this);
 
-        bytes memory _payload = abi.encodeWithSignature("initialize(bytes32,bytes32,address,address,address)", tokenName, tokenType, address(this), _oracle, _token);
+        bytes memory _payload = abi.encodeWithSignature("initialize(bytes32,bytes32,address,address,address)", tokenName, tokenType, _owner, _oracle, _token);
 
         // Deploy proxy
         address _issuer = deployMinimal(_target, _payload);
@@ -78,7 +78,7 @@ contract Factory is ProxyFactory {
     }
     
     //token factory
-    function createToken(address _target, bytes32 tokenName, bytes32 tokenProduct, bytes memory tokenSymbol) public returns(address){
+    function createToken(address _target, bytes32 tokenName, bytes32 tokenProduct, bytes32 tokenSymbol) public returns(address){
         address _owner = msg.sender;
 
         bytes memory _payload = abi.encodeWithSignature("initialize(bytes32,address,bytes32,bytes32)", tokenName, _owner, tokenProduct, tokenSymbol);

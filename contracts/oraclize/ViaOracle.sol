@@ -72,7 +72,7 @@ contract ViaOracle is usingProvable {
         delete pendingQueries[_myid]; 
     }
 
-    function request(bytes memory _currency, bytes32 _ratetype, bytes32 _tokenType, address payable _tokenContract)
+    function request(bytes32 _currency, bytes32 _ratetype, bytes32 _tokenType, address payable _tokenContract)
         public
         payable
         returns (bytes32)

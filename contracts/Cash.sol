@@ -9,8 +9,11 @@ import "./Factory.sol";
 import "abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
+import "./utilities/StringUtils.sol";
 
 contract Cash is ERC20, Initializable, Ownable {
+
+    using stringutils for *;
 
     using ABDKMathQuad for uint256;
     using ABDKMathQuad for int256;
@@ -99,6 +102,13 @@ contract Cash is ERC20, Initializable, Ownable {
             else
                 return false;
         }
+        //else if cash tokens are paid into bond issuers, then request for issue of bonds
+        else if(factory.getType(receiver)=="ViaBond"){
+            if(Bond(address(uint160(receiver))).issue(ABDKMathQuad.fromUInt(tokens), sender, name, address(this)))
+                    return true;
+                else
+                    return false;
+        }
         else{
             //else, tokens are being sent to another user's account
             //sending contract should be allowed by token owner to make this transfer
@@ -162,24 +172,24 @@ contract Cash is ERC20, Initializable, Ownable {
         require(amount != 0);
         //find amount of via cash tokens to transfer after applying exchange rate
         if(currency=="ether"){
-            //if ether is paid in for issue of non-USD cash token, we need the exchange rate of ether to the USD (ethusd)
-            //and the exchange rate of Via-USD to the requested non-USD cash token (eg, Via-EUR)
-            if(name!="Via-USD"){
-                ViaXid = oracle.request(abi.encodePacked("Via_USD_to_", name),"ver","Cash", address(this)); 
-                EthXid = oracle.request("eth","ethusd","EthCash", address(this)); 
-                conversionQ[ViaXid] = conversion(buyer, "issue", currency, name, EthXid, amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(0));
-            }
             //if ether is paid in for issue of Via-USD cash token, then all we need is the exchange rate of ether to USD (ethusd)
             //since the exchange rate of USD to Via-USD is always 1
-            else{
+            if(name=="Via_USD"){
                 EthXid = oracle.request("eth","ethusd","EthCash", address(this)); 
                 conversionQ[EthXid] = conversion(buyer, "issue", currency, name, EthXid, amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(1));
+            }
+            //if ether is paid in for issue of non-USD cash token, we need the exchange rate of ether to the USD (ethusd)
+            //and the exchange rate of Via-USD to the requested non-USD cash token (eg, Via-EUR)
+            else{
+                //ViaXid = oracle.request(string(abi.encodePacked("Via_USD_to_", name)).stringToBytes32(),"ver","Cash", address(this)); 
+                //EthXid = oracle.request("eth","ethusd","EthCash", address(this)); 
+                //conversionQ[ViaXid] = conversion(buyer, "issue", currency, name, EthXid, amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(0));
             }
         }
         //if ether is not paid in and instead, some other Via cash token is paid in
         //we need to find the exchange rate between the paid in Via cash token and the cash token this cash contract represents
         else{
-            ViaXid = oracle.request(abi.encodePacked(currency, "_to_", name),"er","Cash", address(this)); 
+            ViaXid = oracle.request(string(abi.encodePacked(currency, "_to_", name)).stringToBytes32(),"er","Cash", address(this)); 
             conversionQ[ViaXid] = conversion(buyer, "issue", currency, name, ABDKMathQuad.fromUInt(0), amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(0));
         }
         return true;
@@ -216,23 +226,23 @@ contract Cash is ERC20, Initializable, Ownable {
             }
             //if currency that this cash token can be redeemed in is ether
             if(currency_in_deposit=="ether"){
-                //and if cash token to redeem is not Via USD, we need to get the exchange rate of ether to the Via-USD, 
-                //and then the exchange rate of this Via cash token to redeeem and the Via-USD
-                if(token!="Via_USD"){
-                    EthXid = oracle.request("eth","ethusd","EthCash", address(this)); 
-                    ViaXid = oracle.request(abi.encodePacked(token, "_to_Via_USD"),"ver","Cash", address(this)); 
-                    conversionQ[ViaXid] = conversion(seller, "redeem", token, currency_in_deposit, EthXid, amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(0));
-                }
-                //otherwise if the cash token to redeem is a Via USD, all we need is the exchange rate of ether to the USD
-                else{
+                //if the cash token to redeem is a Via USD, all we need is the exchange rate of ether to the USD
+                if(token=="Via_USD"){
                     EthXid = oracle.request("eth","ethusd","Cash", address(this)); 
                     conversionQ[EthXid] = conversion(seller, "redeem", token, currency_in_deposit, EthXid, amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(1));
+                }
+                //and if cash token to redeem is not Via USD, we need to get the exchange rate of ether to the Via-USD, 
+                //and then the exchange rate of this Via cash token to redeeem and the Via-USD
+                else{
+                    EthXid = oracle.request("eth","ethusd","EthCash", address(this)); 
+                    ViaXid = oracle.request(string(abi.encodePacked(token, "_to_Via_USD")).stringToBytes32(),"ver","Cash", address(this)); 
+                    conversionQ[ViaXid] = conversion(seller, "redeem", token, currency_in_deposit, EthXid, amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(0));
                 }
             }
             //else if the currency this cash token can be redeemed is another Via cash token,
             //we just need the exchange rate of this Via cash token to redeem and the currency that is in deposit
             else{
-                ViaXid = oracle.request(abi.encodePacked(token, "_to_", currency_in_deposit),"er","Cash", address(this)); //"1234"; //only for testing
+                ViaXid = oracle.request(string(abi.encodePacked(token, "_to_", currency_in_deposit)).stringToBytes32(),"er","Cash", address(this)); //"1234"; //only for testing
                 conversionQ[ViaXid] = conversion(seller, "redeem", token, currency_in_deposit, ABDKMathQuad.fromUInt(0), amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(0));
             }
         }
@@ -396,7 +406,7 @@ contract Cash is ERC20, Initializable, Ownable {
             //to first convert amount of ether passed to this function to USD
             bytes16 amountInUSD = ABDKMathQuad.div(ABDKMathQuad.mul(amount, ethusd), ABDKMathQuad.fromUInt(1000000000000000000));
             //to then convert USD to Via-currency if currency of this contract is not USD itself
-            if(name!="Via-USD"){
+            if(name!="Via_USD"){
                 bytes16 inVia = ABDKMathQuad.mul(amountInUSD, viarate);
                 return inVia;
             }
