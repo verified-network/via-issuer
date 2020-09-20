@@ -38,7 +38,7 @@ This implementation follows the ERC20 standard because we want the Via to be usa
 
 5.  Start ethereum-bridge for Oraclize by opening a new terminal
 
-    ``` ethereum-bridge -H localhost:9545 -a 1 ```
+    ``` ethereum-bridge -H localhost:8545 -a 9 ```
 
 6.  ``` truffle migrate ```
 
