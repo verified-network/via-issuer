@@ -181,9 +181,9 @@ contract Cash is ERC20, Initializable, Ownable {
             //if ether is paid in for issue of non-USD cash token, we need the exchange rate of ether to the USD (ethusd)
             //and the exchange rate of Via-USD to the requested non-USD cash token (eg, Via-EUR)
             else{
-                //ViaXid = oracle.request(string(abi.encodePacked("Via_USD_to_", name)).stringToBytes32(),"ver","Cash", address(this)); 
-                //EthXid = oracle.request("eth","ethusd","EthCash", address(this)); 
-                //conversionQ[ViaXid] = conversion(buyer, "issue", currency, name, EthXid, amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(0));
+                ViaXid = oracle.request(string(abi.encodePacked("Via_USD_to_", name)).stringToBytes32(),"ver","Cash", address(this)); 
+                EthXid = oracle.request("eth","ethusd","EthCash", address(this)); 
+                conversionQ[ViaXid] = conversion(buyer, "issue", currency, name, EthXid, amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(0));
             }
         }
         //if ether is not paid in and instead, some other Via cash token is paid in
@@ -401,7 +401,7 @@ contract Cash is ERC20, Initializable, Ownable {
     }
     
     //get Via exchange rates from oracle and convert given currency and amount to via cash token
-    function convertToVia(bytes16 amount, bytes32 paid_in_currency, bytes16 ethusd, bytes16 viarate) private returns(bytes16){
+    function convertToVia(bytes16 amount, bytes32 paid_in_currency, bytes16 ethusd, bytes16 viarate) private view returns(bytes16){
         if(paid_in_currency=="ether"){
             //to first convert amount of ether passed to this function to USD
             bytes16 amountInUSD = ABDKMathQuad.div(ABDKMathQuad.mul(amount, ethusd), ABDKMathQuad.fromUInt(1000000000000000000));
@@ -424,7 +424,7 @@ contract Cash is ERC20, Initializable, Ownable {
     //convert Via-currency (eg, Via-EUR, Via-INR, Via-USD) to Ether or another Via currency
     //viarate is 1 if pay out currency is ether and this via cash token to redeem is Via-USD, otherwise viarate is exchange rate between this cash token to Via-USD
     //if pay out currency is not ether, then viarate is exchange rate between this cash token and cash token to pay out 
-    function convertFromVia(bytes16 amount, bytes32 payout_currency, bytes16 ethusd, bytes16 viarate) private returns(bytes16){
+    function convertFromVia(bytes16 amount, bytes32 payout_currency, bytes16 ethusd, bytes16 viarate) private pure returns(bytes16){
         //if currency to convert to is ether
         if(payout_currency=="ether"){
             bytes16 amountInViaUSD = ABDKMathQuad.mul(amount, viarate);

@@ -3,7 +3,7 @@ pragma solidity >=0.5.0 <0.7.0;
 library stringutils { // Only relevant functions
     
     //added from https://ethereum.stackexchange.com/questions/62371/convert-a-string-to-a-uint256-with-error-handling
-    function stringToUint(string memory s) public view returns (uint) {
+    function stringToUint(string memory s) public pure returns (uint) {
         bool hasError = false;
         bytes memory b = bytes(s);
         uint result = 0;
@@ -34,12 +34,12 @@ library stringutils { // Only relevant functions
         return string(result);
     }
 
-    function append(string memory a, string memory b) public view returns (string memory) {
+    function append(string memory a, string memory b) public pure returns (string memory) {
         return string(abi.encodePacked(a, b));
     }
 
     //convert from string to bytes32
-    function stringToBytes32(string memory source) public view returns (bytes32 result) {
+    function stringToBytes32(string memory source) public pure returns (bytes32 result) {
         bytes memory tempEmptyStringTest = bytes(source);
         if (tempEmptyStringTest.length == 0) {
             return 0x0;

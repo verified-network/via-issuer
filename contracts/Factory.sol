@@ -46,12 +46,12 @@ contract Factory is ProxyFactory {
     }
 
     //retrieve token product address for given identifier (symbol)
-    function getProduct(bytes32 symbol) public returns(address){
+    function getProduct(bytes32 symbol) public view returns(address){
         return products[symbol];
     }
 
     //retrieve token product issuer address for given token name and type
-    function getIssuer(bytes32 tokenType, bytes32 tokenName) public returns(address){
+    function getIssuer(bytes32 tokenType, bytes32 tokenName) public view returns(address){
         return issuers[tokenType][tokenName];
     }
 

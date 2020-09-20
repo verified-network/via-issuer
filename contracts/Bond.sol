@@ -476,7 +476,7 @@ contract Bond is ERC20, Initializable, Ownable {
     }
 
     //convert given currency and amount to via cash token
-    function convertToVia(bytes16 amount, bytes32 currency, bytes16 ethusd, bytes16 viarate) private returns(bytes16){
+    function convertToVia(bytes16 amount, bytes32 currency, bytes16 ethusd, bytes16 viarate) private view returns(bytes16){
         if(currency=="ether"){
             //to first convert amount of ether passed to this function to USD
             bytes16 amountInUSD = ABDKMathQuad.mul(ABDKMathQuad.div(amount, ABDKMathQuad.fromUInt(1000000000000000000)), ethusd);
