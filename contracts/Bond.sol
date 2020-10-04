@@ -92,13 +92,14 @@ contract Bond is ERC20, Initializable, Ownable {
     event ViaBondRedeemed(bytes32 currency, uint256 value, uint256 price, uint256 tenure);
 
     //initiliaze proxies
-    function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token) public {
+    function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token) public initializer {
         Ownable.initialize(_owner);
         factory = Factory(_owner);
         oracle = ViaOracle(_oracle);
         name = _name;
         symbol = _type;
         token = _token;
+        decimals = 2;
     }
 
     //handling pay in of ether for issue of via bond tokens

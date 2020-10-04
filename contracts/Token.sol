@@ -24,6 +24,7 @@ contract Token is ERC20, Initializable, Ownable {
         name = _name;
         symbol = _symbol;
         product = _product;
+        decimals = 2;
     }
 
     function addTotalSupply(bytes16 amount) external{
