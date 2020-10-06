@@ -10,7 +10,7 @@ const {
 
 async function main() {
     // Set up web3 object, connected to the network, initialize the Upgrades library
-    const web3 = new Web3("http://localhost:7545"); //change as required
+    const web3 = new Web3("http://127.0.0.1:8545"); //change as required
     ZWeb3.initialize(web3.currentProvider);
     const loader = setupLoader({ provider: web3 }).web3;
 
@@ -48,7 +48,7 @@ async function main() {
     console.log("via_eur_bond_proxy : ", via_eur_bond_proxy.options.address);
     const via_inr_bond_proxy = await project.upgradeProxy(via_inr_bond, bond);
     console.log("via_inr_bond_proxy : ", via_inr_bond_proxy.options.address);
-
+    
   }
 
   main();

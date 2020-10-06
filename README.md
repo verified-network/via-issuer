@@ -25,8 +25,6 @@ This implementation follows the ERC20 standard because we want the Via to be usa
 
     ``` npm install -g ethereum-bridge ```
 
-    And copy ``` OAR = OracleAddrResolverI(0x..............);``` to the constructor in ViaOracle.sol in \contracts\oraclize folder
-
 3.  ``` truffle compile ```
 
 4.  For local testing make sure to have a test blockchain such as Ganache or [Ganache Cli] installed and running before executing migrate:
@@ -39,6 +37,8 @@ This implementation follows the ERC20 standard because we want the Via to be usa
 5.  Start ethereum-bridge for Oraclize by opening a new terminal
 
     ``` ethereum-bridge -H localhost:8545 -a 9 ```
+
+    And copy ``` OAR = OracleAddrResolverI(0x..............);``` to the constructor in ViaOracle.sol in \contracts\oraclize folder
 
 6.  ``` truffle migrate ```
 
