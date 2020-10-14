@@ -79,6 +79,7 @@ contract Factory is ProxyFactory {
     
     //token factory
     function createToken(address _target, bytes32 tokenName, bytes32 tokenProduct, bytes32 tokenSymbol) public returns(address){
+        require(getType(msg.sender) == "ViaBond");
         address _owner = msg.sender;
 
         bytes memory _payload = abi.encodeWithSignature("initialize(bytes32,address,bytes32,bytes32)", tokenName, _owner, tokenProduct, tokenSymbol);

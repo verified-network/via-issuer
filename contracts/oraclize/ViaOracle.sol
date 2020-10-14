@@ -23,6 +23,8 @@ contract ViaOracle is usingProvable {
         bytes32 rateType;
     }
 
+    uint constant CUSTOM_GASLIMIT = 500000;
+
     mapping (bytes32 => params) public pendingQueries;
 
     event LogNewProvableQuery(string description);
@@ -35,7 +37,7 @@ contract ViaOracle is usingProvable {
         // note : replace OAR if you are testing Oracle with ethereum-bridge (https://github.com/provable-things/ethereum-bridge)
         OAR = OracleAddrResolverI(0x6f485C8BF6fc43eA212E93BBF8ce046C7f1cb475); 
         provable_setProof(proofType_TLSNotary | proofStorage_IPFS);
-        provable_setCustomGasPrice(1000000000 wei); // i.e. 1 GWei
+        provable_setCustomGasPrice(4000000000); // i.e. 4 GWei
     }                              
 
     function __callback(
@@ -69,7 +71,7 @@ contract ViaOracle is usingProvable {
             bond.convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
 
-        delete pendingQueries[_myid]; 
+        //delete pendingQueries[_myid]; 
     }
 
     function request(bytes32 _currency, bytes32 _ratetype, bytes32 _tokenType, address payable _tokenContract)
@@ -77,11 +79,11 @@ contract ViaOracle is usingProvable {
         payable
         returns (bytes32)
     {  
-        if (provable_getPrice("URL") > address(this).balance) {
+        if (provable_getPrice("URL", CUSTOM_GASLIMIT) > address(this).balance) {
             emit LogNewProvableQuery("Provable query was NOT sent, please add some ETH to cover for the query fee!");
         } else {
             if(_ratetype == "er" || _ratetype == "ver"){
-                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://url/rates/er/",_currency,").rate")),500000);  
+                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://url/er/",_currency,").rate")),CUSTOM_GASLIMIT);  
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
                 emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via exchange rates, with query id= ",queryId,
                                         " token type= ",_tokenType," rate type= ",_ratetype," currency= ", 
@@ -89,7 +91,7 @@ contract ViaOracle is usingProvable {
                 return queryId;
             }
             else if(_ratetype == "ir"){
-                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://url/rates/ir/",_currency,").rate")),500000);
+                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://url/ir/",_currency,").rate")),CUSTOM_GASLIMIT);
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
                 emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via interest rates, with query id= ",queryId,
                                         " token type= ",_tokenType," rate type= ",_ratetype," currency= ", 
@@ -97,7 +99,7 @@ contract ViaOracle is usingProvable {
                 return queryId;
             }
             else if(_ratetype == "ethusd"){
-                bytes32 queryId = provable_query("URL", "json(https://api.pro.coinbase.com/products/ETH-USD/ticker).price",500000);
+                bytes32 queryId = provable_query("URL", "json(https://api.pro.coinbase.com/products/ETH-USD/ticker).price",CUSTOM_GASLIMIT);
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
                 emit LogNewProvableQuery("Provable query was sent for ETH-USD, standing by for the answer...");
                 return queryId;

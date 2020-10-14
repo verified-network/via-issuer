@@ -28,20 +28,24 @@ contract Token is ERC20, Initializable, Ownable {
     }
 
     function addTotalSupply(bytes16 amount) external{
+        require(issuer==msg.sender);
         //adjust total supply
         totalSupply_ = ABDKMathQuad.add(totalSupply_, amount);
     }
 
     function reduceSupply(bytes16 amount) external{        
+        require(issuer==msg.sender);
         totalSupply_ = ABDKMathQuad.sub(totalSupply_, amount);
     }
 
     function addBalance(address party, bytes16 amount) external{
+        require(issuer==msg.sender);
         //add via to this contract's balance first (ie issue them first)
         balances[party] = ABDKMathQuad.add(balances[party], amount);
     }
 
     function reduceBalance(address party, bytes16 amount) external{
+        require(issuer==msg.sender);
         balances[party] = ABDKMathQuad.sub(balances[party], amount);
     }
 
@@ -56,6 +60,7 @@ contract Token is ERC20, Initializable, Ownable {
     }
 
     function transferToken(address sender, address receiver, uint256 tokens) public returns (bool){
+        require(issuer==msg.sender);
         //owner should have more tokens than being transferred
         if(ABDKMathQuad.cmp(ABDKMathQuad.fromUInt(tokens), balances[sender])==-1 || ABDKMathQuad.cmp(ABDKMathQuad.fromUInt(tokens), balances[sender])==0){
             //sending contract should be allowed by token owner to make this transfer

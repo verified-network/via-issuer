@@ -24,6 +24,7 @@ contract Cash is ERC20, Initializable, Ownable {
 
     //via oracle
     ViaOracle private oracle;
+    address viaoracle;
 
     //name of Via cash token (eg, Via-USD)
     bytes32 public name;
@@ -60,6 +61,7 @@ contract Cash is ERC20, Initializable, Ownable {
         Ownable.initialize(_owner);
         factory = Factory(_owner);
         oracle = ViaOracle(_oracle);
+        viaoracle = _oracle;
         name = _name;
         symbol = _type;
     }
@@ -122,7 +124,9 @@ contract Cash is ERC20, Initializable, Ownable {
 
     //transfer tokens between one user to another user account, or
     //transfer tokens between one user account to this contract for future redemption
-    function transferToken(address sender, address receiver, uint256 tokens) public returns (bool){
+    function transferToken(address sender, address receiver, uint256 tokens) private returns (bool){
+        require(ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==1 ||
+                ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==0);
         balances[sender] = ABDKMathQuad.sub(balances[sender], ABDKMathQuad.fromUInt(tokens));
         balances[receiver] = ABDKMathQuad.add(balances[receiver], ABDKMathQuad.fromUInt(tokens));
         //transfer paid in deposit from sender as well
@@ -137,9 +141,11 @@ contract Cash is ERC20, Initializable, Ownable {
         }
         return false;
     }
+
     
     //add to token balance of this contract from token balance of sender
     function addToBalance(bytes16 tokens, address sender) public returns (bool){
+        require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
         //sender should have more tokens than being transferred
         if(ABDKMathQuad.cmp(tokens, balances[sender])==-1 || ABDKMathQuad.cmp(tokens, balances[sender])==0){
             balances[sender] = ABDKMathQuad.sub(balances[sender], tokens);
@@ -152,6 +158,7 @@ contract Cash is ERC20, Initializable, Ownable {
 
     //deduct token balance from this contract and add token balance to receiver
     function deductFromBalance(bytes16 tokens, address receiver) public returns (bytes16){
+        require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
         //this cash token issuer should have more tokens than being deducted
         if(ABDKMathQuad.cmp(tokens, balances[address(this)])==-1 || ABDKMathQuad.cmp(tokens, balances[address(this)])==0){
             balances[address(this)] = ABDKMathQuad.sub(balances[address(this)], tokens);
@@ -168,6 +175,7 @@ contract Cash is ERC20, Initializable, Ownable {
 
     //requesting issue of Via to buyer for amount of ether or some other via cash token paid in and stored in cashContract
     function issue(bytes16 amount, address buyer, bytes32 currency) public returns(bool){
+        require(factory.getType(msg.sender) == "ViaCash");
         //ensure that brought amount is not zero
         require(amount != 0);
         //find amount of via cash tokens to transfer after applying exchange rate
@@ -253,6 +261,7 @@ contract Cash is ERC20, Initializable, Ownable {
 
     //function called back from Via oracle
     function convert(bytes32 txId, bytes16 result, bytes32 rtype) public {
+        require(viaoracle == msg.sender);
         //check type of result returned
         if(rtype =="ethusd"){
             conversionQ[txId].EthXvalue = result;

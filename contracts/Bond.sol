@@ -26,6 +26,7 @@ contract Bond is ERC20, Initializable, Ownable {
 
     //via oracle
     ViaOracle private oracle;
+    address viaoracle;
 
     //name of Via token (eg, Via-USD)
     bytes32 public name;
@@ -96,6 +97,7 @@ contract Bond is ERC20, Initializable, Ownable {
         Ownable.initialize(_owner);
         factory = Factory(_owner);
         oracle = ViaOracle(_oracle);
+        viaoracle = _oracle;
         name = _name;
         symbol = _type;
         token = _token;
@@ -112,6 +114,7 @@ contract Bond is ERC20, Initializable, Ownable {
 
     //forwarding call from issued bond token if at all such a call arrives
     function transferFoward(bytes32 _symbol, address _forwarder, address _sender, address _receiver, uint256 _tokens) public returns (bool){
+        require(factory.getProduct(_symbol)==_forwarder);
         bondSymbol = _symbol;
         forwarder = _forwarder;
         if(transferFrom(_sender, _receiver, _tokens))
@@ -152,6 +155,7 @@ contract Bond is ERC20, Initializable, Ownable {
     //requesting issue of Via bonds to payer (issuer) that can pay in ether, or 
     //requesting transfer of Via bonds to payer (buyer) that can pay in via cash tokens
     function issue(bytes16 amount, address payer, bytes32 currency, address cashContract) public returns(bool){
+        require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
         //ensure that brought amount is not zero
         require(amount != 0);
         //adds paid in amount to the paid in currency's cash balance
@@ -380,6 +384,7 @@ contract Bond is ERC20, Initializable, Ownable {
 
     //function called back from Oraclize
     function convert(bytes32 txId, bytes16 result, bytes32 rtype) public {
+        require(viaoracle == msg.sender);
         //check type of result returned
         if(rtype =="ethusd"){
             conversionQ[txId].EthXvalue = result;
