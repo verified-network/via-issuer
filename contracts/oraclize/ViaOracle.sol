@@ -5,6 +5,7 @@ pragma solidity >=0.5.0 <0.7.0;
 
 import "./provableAPI.sol";
 import "../utilities/StringUtils.sol";
+import "../Factory.sol";
 import "../Cash.sol";
 import "../Bond.sol";
 import "abdk-libraries-solidity/ABDKMathQuad.sol";
@@ -16,6 +17,9 @@ contract ViaOracle is usingProvable {
     using ABDKMathQuad for uint256;
     using ABDKMathQuad for int256;
     using ABDKMathQuad for bytes16;
+
+    //via factory address
+    Factory private factory;
 
     struct params{
         address payable caller;
@@ -30,7 +34,7 @@ contract ViaOracle is usingProvable {
     event LogNewProvableQuery(string description);
     event LogResult(address payable caller, bytes32 myid, bytes32 tokenType, bytes32 rateType, string result);
 
-    constructor()
+    constructor(address _factory)
         public
         payable
     {
@@ -38,6 +42,7 @@ contract ViaOracle is usingProvable {
         OAR = OracleAddrResolverI(0x6f485C8BF6fc43eA212E93BBF8ce046C7f1cb475); 
         provable_setProof(proofType_TLSNotary | proofStorage_IPFS);
         provable_setCustomGasPrice(4000000000); // i.e. 4 GWei
+        factory = Factory(_factory);
     }                              
 
     function __callback(
@@ -49,8 +54,6 @@ contract ViaOracle is usingProvable {
     {
         //to do : lines below throw error
         require(msg.sender == provable_cbAddress());
-        //require (pendingQueries[_myid].tokenType == "Cash" || pendingQueries[_myid].tokenType == "Bond"
-        //    || pendingQueries[_myid].tokenType == "EthCash" || pendingQueries[_myid].tokenType == "EthBond");
 
         emit LogResult(pendingQueries[_myid].caller, _myid, pendingQueries[_myid].tokenType, pendingQueries[_myid].rateType, _result);
         
@@ -79,6 +82,7 @@ contract ViaOracle is usingProvable {
         payable
         returns (bytes32)
     {  
+        require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
         if (provable_getPrice("URL", CUSTOM_GASLIMIT) > address(this).balance) {
             emit LogNewProvableQuery("Provable query was NOT sent, please add some ETH to cover for the query fee!");
         } else {

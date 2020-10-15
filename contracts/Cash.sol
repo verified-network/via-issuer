@@ -6,6 +6,7 @@ pragma solidity >=0.5.0 <0.7.0;
 import "./erc/ERC20.sol";
 import "./oraclize/ViaOracle.sol";
 import "./Factory.sol";
+import "./Bond.sol";
 import "abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
@@ -57,7 +58,7 @@ contract Cash is ERC20, Initializable, Ownable {
     event ViaCashRedeemed(bytes32 currency, bytes16 value);
 
     //initiliaze proxies
-    function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token) public {
+    function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token) public initializer{
         Ownable.initialize(_owner);
         factory = Factory(_owner);
         oracle = ViaOracle(_oracle);
@@ -70,6 +71,8 @@ contract Cash is ERC20, Initializable, Ownable {
     function() external payable{
         //ether paid in
         require(msg.value !=0);
+        //only to pay in ether
+        require(msg.data.length==0);
         //issue via cash tokens
         issue(ABDKMathQuad.fromUInt(msg.value), msg.sender, "ether");
     }
@@ -349,7 +352,9 @@ contract Cash is ERC20, Initializable, Ownable {
             if(ABDKMathQuad.cmp(deposits[party]["ether"], value)==1 || ABDKMathQuad.cmp(deposits[party]["ether"], value)==0){
                 deposits[party]["ether"] = ABDKMathQuad.sub(deposits[party]["ether"], value);
                 //send redeemed ether to party
-                address(uint160(party)).transfer(ABDKMathQuad.toUInt(value));
+                //address(uint160(party)).transfer(ABDKMathQuad.toUInt(value));
+                (bool success, )=address(uint160(party)).call.value(ABDKMathQuad.toUInt(value))("");
+                require(success, "Transfer failed");
                 //reduces balances
                 balances[party] = ABDKMathQuad.sub(balances[party], amount);
                 //adjust total supply
@@ -363,7 +368,9 @@ contract Cash is ERC20, Initializable, Ownable {
                 bytes16 proportionRedeemed = ABDKMathQuad.div(deposits[party]["ether"], value);
                 bytes16 balanceToRedeem = ABDKMathQuad.mul(amount,ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1), proportionRedeemed));
                 //send redeemed ether to party which is all of the ether in deposit with this user (party)
-                address(uint160(party)).transfer(ABDKMathQuad.toUInt(deposits[party]["ether"]));
+                //address(uint160(party)).transfer(ABDKMathQuad.toUInt(deposits[party]["ether"]));
+                (bool success, )=address(uint160(party)).call.value(ABDKMathQuad.toUInt(deposits[party]["ether"]))("");
+                require(success, "Transfer failed");
                 //reduces balances
                 balances[party] = ABDKMathQuad.sub(balances[party], ABDKMathQuad.mul(amount, proportionRedeemed));
                 //adjust total supply

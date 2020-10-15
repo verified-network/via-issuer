@@ -18,7 +18,7 @@ contract Token is ERC20, Initializable, Ownable {
     address payable issuer;
 
     //initiliaze proxies
-    function initialize(bytes32 _name, address payable _owner, bytes32 _product, bytes32 _symbol) public {
+    function initialize(bytes32 _name, address payable _owner, bytes32 _product, bytes32 _symbol) public initializer{
         Ownable.initialize(_owner);
         issuer = _owner;
         name = _name;

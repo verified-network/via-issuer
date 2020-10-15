@@ -108,6 +108,8 @@ contract Bond is ERC20, Initializable, Ownable {
     function() external payable{
         //ether paid in
         require(msg.value !=0);
+        //only to pay in ether
+        require(msg.data.length==0);
         //issue via bond tokens
         issue(ABDKMathQuad.fromUInt(msg.value), msg.sender, "ether", address(this));
     }
@@ -264,7 +266,9 @@ contract Bond is ERC20, Initializable, Ownable {
                             //if collateral is ether, transfer ether from issuer to purchaser (redeemer) of bond
                             if(purchases[payer][bondsIssued[q]].collateralCurrency=="ether"){
                                 //send redeemed ether to payer
-                                address(uint160(payer)).transfer(ABDKMathQuad.toUInt(redemptionAmount));
+                                //address(uint160(payer)).transfer(ABDKMathQuad.toUInt(redemptionAmount));
+                                (bool success, )=address(uint160(payer)).call.value(ABDKMathQuad.toUInt(redemptionAmount))("");
+                                require(success, "Transfer failed");
                                 //adjust total supply of this via bond
                                 Token(bondsIssued[q]).reduceSupply(amount);
                                 //reduce payer's balance of bond held
@@ -288,7 +292,9 @@ contract Bond is ERC20, Initializable, Ownable {
                     //if collateral is ether, transfer ether from issuer to issuer (redeemer) of bond
                     if(issues[payer][bondsIssued[q]].collateralCurrency=="ether"){
                         //send redeemed ether to payer
-                        address(uint160(payer)).transfer(ABDKMathQuad.toUInt(uncumberedAmount));
+                        //address(uint160(payer)).transfer(ABDKMathQuad.toUInt(uncumberedAmount));
+                        (bool success, )=address(uint160(payer)).call.value(ABDKMathQuad.toUInt(uncumberedAmount))("");
+                        require(success, "Transfer failed");
                         //adjust total supply of this via bond
                         Token(bondsIssued[q]).reduceSupply(amount);
                         //reduce payer's balance of bond held
@@ -372,10 +378,15 @@ contract Bond is ERC20, Initializable, Ownable {
                     //returned redeemed proportion of collateral to payer (issuer)
                     bytes16 etherToRedeem = ABDKMathQuad.mul(issues[payer][bondsIssued[q]].collateralAmount, ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1), proportionToRedeem));
                     //send redeemed ether to payer
-                    address(uint160(payer)).transfer(ABDKMathQuad.toUInt(etherToRedeem));                                   
+                    //address(uint160(payer)).transfer(ABDKMathQuad.toUInt(etherToRedeem));   
+                    (bool success, )=address(uint160(payer)).call.value(ABDKMathQuad.toUInt(etherToRedeem))("");
+                    require(success, "Transfer failed");                                
                     //if any balance amount remains after redemptions, return the balance to the issuer
-                    if(amount>0)
-                        address(uint160(payer)).transfer(ABDKMathQuad.toUInt(amount));
+                    if(amount>0){
+                        //address(uint160(payer)).transfer(ABDKMathQuad.toUInt(amount));
+                        (bool trsfr, )=address(uint160(payer)).call.value(ABDKMathQuad.toUInt(amount))("");
+                        require(trsfr, "Transfer failed"); 
+                    }
                 }
             }
             return status;
