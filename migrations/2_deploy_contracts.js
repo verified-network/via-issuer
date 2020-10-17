@@ -20,7 +20,7 @@ module.exports = function(deployer, network, accounts) {
     deployer.link(ABDKMathQuad,[Cash, Bond, ViaOracle, ERC20, Token]);
 
     deployer.deploy(usingProvable);
-    //deployer.deploy(ViaOracle, {from: accounts[0], gas:6721975, value: 0.25e18});
+    deployer.deploy(ViaOracle, {from: accounts[0], gas:6721975, value: 0.25e18});
     deployer.deploy(ERC20);
     deployer.deploy(Cash);
     deployer.deploy(Bond);
@@ -30,26 +30,26 @@ module.exports = function(deployer, network, accounts) {
         const factory = await Factory.deployed();
         const cash = await Cash.deployed();
         const bond = await Bond.deployed();
-        //const oracle = await ViaOracle.deployed();
+        const oracle = await ViaOracle.deployed();
         const token = await Token.deployed();
-        deployer.deploy(ViaOracle, factory, {from: accounts[0], gas:6721975, value: 0.25e18}).then(async() => {
-            const oracle = await ViaOracle.deployed();
-            await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
-            await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
-            await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_INR"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
 
-            await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
-            await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
-            await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_INR"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
+        await oracle.initialize(factory.address);
 
-            for (let i = 0; i < 6; i++) {
-                var factoryTokenAddress = await factory.tokens(i);
-                console.log("Token address:", factoryTokenAddress);
-                console.log("Token name:", web3.utils.hexToUtf8(await factory.getName(factoryTokenAddress)));
-                console.log("Token type:", web3.utils.hexToUtf8(await factory.getType(factoryTokenAddress)));
-                console.log();
-            }       
-        });
+        await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
+        await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
+        await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_INR"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
+
+        await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
+        await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
+        await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_INR"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
+
+        for (let i = 0; i < 6; i++) {
+            var factoryTokenAddress = await factory.tokens(i);
+            console.log("Token address:", factoryTokenAddress);
+            console.log("Token name:", web3.utils.hexToUtf8(await factory.getName(factoryTokenAddress)));
+            console.log("Token type:", web3.utils.hexToUtf8(await factory.getType(factoryTokenAddress)));
+            console.log();
+        }       
     });
     
 }

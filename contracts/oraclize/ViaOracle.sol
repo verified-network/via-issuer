@@ -34,7 +34,7 @@ contract ViaOracle is usingProvable {
     event LogNewProvableQuery(string description);
     event LogResult(address payable caller, bytes32 myid, bytes32 tokenType, bytes32 rateType, string result);
 
-    constructor(address _factory)
+    constructor()
         public
         payable
     {
@@ -42,6 +42,10 @@ contract ViaOracle is usingProvable {
         OAR = OracleAddrResolverI(0x6f485C8BF6fc43eA212E93BBF8ce046C7f1cb475); 
         provable_setProof(proofType_TLSNotary | proofStorage_IPFS);
         provable_setCustomGasPrice(4000000000); // i.e. 4 GWei
+    }
+
+    function initialize(address _factory) external {
+        require(address(factory)==address(0x0));
         factory = Factory(_factory);
     }                              
 
@@ -87,7 +91,7 @@ contract ViaOracle is usingProvable {
             emit LogNewProvableQuery("Provable query was NOT sent, please add some ETH to cover for the query fee!");
         } else {
             if(_ratetype == "er" || _ratetype == "ver"){
-                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://url/er/",_currency,").rate")),CUSTOM_GASLIMIT);  
+                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/er/",_currency,").rate")),CUSTOM_GASLIMIT);  
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
                 emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via exchange rates, with query id= ",queryId,
                                         " token type= ",_tokenType," rate type= ",_ratetype," currency= ", 
@@ -95,12 +99,13 @@ contract ViaOracle is usingProvable {
                 return queryId;
             }
             else if(_ratetype == "ir"){
-                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://url/ir/",_currency,").rate")),CUSTOM_GASLIMIT);
+                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/ir/",_currency,").rate")),CUSTOM_GASLIMIT);
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
                 emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via interest rates, with query id= ",queryId,
                                         " token type= ",_tokenType," rate type= ",_ratetype," currency= ", 
                                         _currency," standing by for the answer...")));
                 return queryId;
+                
             }
             else if(_ratetype == "ethusd"){
                 bytes32 queryId = provable_query("URL", "json(https://api.pro.coinbase.com/products/ETH-USD/ticker).price",CUSTOM_GASLIMIT);
