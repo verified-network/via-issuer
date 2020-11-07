@@ -4,15 +4,16 @@
 pragma solidity >=0.5.0 <0.7.0;
 
 import "./erc/ERC20.sol";
-import "./oraclize/ViaOracle.sol";
+import "./oraclize/Oracle.sol";
 import "./Factory.sol";
-import "./Bond.sol";
+import "./ViaCash.sol";
+import "./ViaBond.sol";
 import "abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "./utilities/StringUtils.sol";
 
-contract Cash is ERC20, Initializable, Ownable {
+contract Cash is ViaCash, ERC20, Initializable, Ownable {
 
     using stringutils for *;
 
@@ -24,7 +25,7 @@ contract Cash is ERC20, Initializable, Ownable {
     Factory private factory;
 
     //via oracle
-    ViaOracle private oracle;
+    Oracle private oracle;
     address viaoracle;
 
     //name of Via cash token (eg, Via-USD)
@@ -61,7 +62,7 @@ contract Cash is ERC20, Initializable, Ownable {
     function initialize(string memory _name, string memory _type, address _owner, address _oracle, address _token) public initializer{
         Ownable.initialize(_owner);
         factory = Factory(_owner);
-        oracle = ViaOracle(_oracle);
+        oracle = Oracle(_oracle);
         viaoracle = _oracle;
         name = _name;
         symbol = _type;
@@ -109,7 +110,7 @@ contract Cash is ERC20, Initializable, Ownable {
         }
         //else if cash tokens are paid into bond issuers, then request for issue of bonds
         else if(factory.getType(receiver)=="ViaBond"){
-            if(Bond(address(uint160(receiver))).issue(ABDKMathQuad.fromUInt(tokens), sender, name.stringToBytes32(), address(this)))
+            if(ViaBond(address(uint160(receiver))).requestIssue(ABDKMathQuad.fromUInt(tokens), sender, name.stringToBytes32(), address(this)))
                     return true;
                 else
                     return false;
@@ -147,7 +148,7 @@ contract Cash is ERC20, Initializable, Ownable {
 
     
     //add to token balance of this contract from token balance of sender
-    function addToBalance(bytes16 tokens, address sender) public returns (bool){
+    function addToBalance(bytes16 tokens, address sender) external returns (bool){
         require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
         //sender should have more tokens than being transferred
         if(ABDKMathQuad.cmp(tokens, balances[sender])==-1 || ABDKMathQuad.cmp(tokens, balances[sender])==0){
@@ -160,7 +161,7 @@ contract Cash is ERC20, Initializable, Ownable {
     }
 
     //deduct token balance from this contract and add token balance to receiver
-    function deductFromBalance(bytes16 tokens, address receiver) public returns (bytes16){
+    function deductFromBalance(bytes16 tokens, address receiver) external returns (bytes16){
         require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
         //this cash token issuer should have more tokens than being deducted
         if(ABDKMathQuad.cmp(tokens, balances[address(this)])==-1 || ABDKMathQuad.cmp(tokens, balances[address(this)])==0){
@@ -263,7 +264,7 @@ contract Cash is ERC20, Initializable, Ownable {
     }    
 
     //function called back from Via oracle
-    function convert(bytes32 txId, bytes16 result, bytes32 rtype) public {
+    function convert(bytes32 txId, bytes16 result, bytes32 rtype) external {
         require(viaoracle == msg.sender);
         //check type of result returned
         if(rtype =="ethusd"){

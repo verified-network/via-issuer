@@ -4,13 +4,14 @@
 pragma solidity >=0.5.0 <0.7.0;
 
 import "./provableAPI.sol";
+import "./Oracle.sol";
 import "../utilities/StringUtils.sol";
 import "../Factory.sol";
-import "../Cash.sol";
-import "../Bond.sol";
+import "../ViaCash.sol";
+import "../ViaBond.sol";
 import "abdk-libraries-solidity/ABDKMathQuad.sol";
 
-contract ViaOracle is usingProvable {
+contract ViaOracle is Oracle, usingProvable {
 
     using stringutils for *;
 
@@ -62,27 +63,23 @@ contract ViaOracle is usingProvable {
         emit LogResult(pendingQueries[_myid].caller, _myid, pendingQueries[_myid].tokenType, pendingQueries[_myid].rateType, _result);
         
         if(pendingQueries[_myid].tokenType == "Cash"){
-            Cash cash = Cash(pendingQueries[_myid].caller);
-            cash.convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+            ViaCash(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "Bond"){
-            Bond bond = Bond(pendingQueries[_myid].caller);
-            bond.convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+            ViaBond(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "EthCash"){
-            Cash cash = Cash(pendingQueries[_myid].caller);
-            cash.convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+            ViaCash(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "EthBond"){
-            Bond bond = Bond(pendingQueries[_myid].caller);
-            bond.convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+            ViaBond(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
 
-        //delete pendingQueries[_myid]; 
+        delete pendingQueries[_myid]; 
     }
 
     function request(bytes32 _currency, bytes32 _ratetype, bytes32 _tokenType, address payable _tokenContract)
-        public
+        external
         payable
         returns (bytes32)
     {  

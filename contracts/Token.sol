@@ -4,7 +4,7 @@
 pragma solidity >=0.5.0 <0.7.0;
 
 import "./erc/ERC20.sol";
-import "./Bond.sol";
+import "./ViaBond.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "abdk-libraries-solidity/ABDKMathQuad.sol";
@@ -56,7 +56,7 @@ contract Token is ERC20, Initializable, Ownable {
         //ensure sender has enough tokens in balance before transferring or redeeming them
         require(ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==1 ||
                 ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==0);
-        if(Bond(issuer).transferFoward(symbol, address(this), sender, receiver, tokens))
+        if(ViaBond(issuer).transferFoward(symbol.stringToBytes32(), address(this), sender, receiver, tokens))
             return true;
         else
             return false;

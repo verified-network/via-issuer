@@ -4,16 +4,17 @@
 pragma solidity >=0.5.0 <0.7.0;
 
 import "./erc/ERC20.sol";
-import "./oraclize/ViaOracle.sol";
+import "./oraclize/Oracle.sol";
 import "abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "./Factory.sol";
-import "./Cash.sol";
+import "./ViaCash.sol";
+import "./ViaBond.sol";
 import "./Token.sol";
 import "./utilities/StringUtils.sol";
 
-contract Bond is ERC20, Initializable, Ownable {
+contract Bond is ViaBond, ERC20, Initializable, Ownable {
 
     using stringutils for *;
 
@@ -25,7 +26,7 @@ contract Bond is ERC20, Initializable, Ownable {
     Factory private factory;
 
     //via oracle
-    ViaOracle private oracle;
+    Oracle private oracle;
     address viaoracle;
 
     //name of Via token (eg, Via-USD)
@@ -96,7 +97,7 @@ contract Bond is ERC20, Initializable, Ownable {
     function initialize(string memory _name, string memory _type, address _owner, address _oracle, address _token) public initializer {
         Ownable.initialize(_owner);
         factory = Factory(_owner);
-        oracle = ViaOracle(_oracle);
+        oracle = Oracle(_oracle);
         viaoracle = _oracle;
         name = _name;
         symbol = _type;
@@ -115,9 +116,9 @@ contract Bond is ERC20, Initializable, Ownable {
     }
 
     //forwarding call from issued bond token if at all such a call arrives
-    function transferFoward(string memory _symbol, address _forwarder, address _sender, address _receiver, uint256 _tokens) public returns (bool){
-        require(factory.getProduct(_symbol.stringToBytes32())==_forwarder);
-        bondSymbol = _symbol;
+    function transferFoward(bytes32 _symbol, address _forwarder, address _sender, address _receiver, uint256 _tokens) external returns (bool){
+        require(factory.getProduct(_symbol)==_forwarder);
+        bondSymbol = _symbol.bytes32ToString();
         forwarder = _forwarder;
         if(transferFrom(_sender, _receiver, _tokens))
             return true;
@@ -154,15 +155,19 @@ contract Bond is ERC20, Initializable, Ownable {
         }
     }
 
+    function requestIssue(bytes16 amount, address payer, bytes32 currency, address cashContract) external returns(bool){
+        issue(amount, payer, currency, cashContract);
+    }
+
     //requesting issue of Via bonds to payer (issuer) that can pay in ether, or 
     //requesting transfer of Via bonds to payer (buyer) that can pay in via cash tokens
-    function issue(bytes16 amount, address payer, bytes32 currency, address cashContract) public returns(bool){
+    function issue(bytes16 amount, address payer, bytes32 currency, address cashContract) private returns(bool){
         require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
         //ensure that brought amount is not zero
         require(amount != 0);
         //adds paid in amount to the paid in currency's cash balance
         if(currency!="ether")
-            if(!Cash(address(uint160(cashContract))).addToBalance(amount, payer))
+            if(!ViaCash(address(uint160(cashContract))).addToBalance(amount, payer))
                 return false;
         //call Via Oracle to fetch data for bond pricing
         if(currency=="ether"){
@@ -343,7 +348,7 @@ contract Bond is ERC20, Initializable, Ownable {
                                 //send paid in amount to bond purchaser
                                 viaAddress = factory.getIssuer("ViaCash", tokenName);
                                 if(viaAddress!=address(0x0)){
-                                    bytes16 balanceToRedeem = Cash(address(uint160(viaAddress))).deductFromBalance(redemptionAmount, cp);
+                                    bytes16 balanceToRedeem = ViaCash(address(uint160(viaAddress))).deductFromBalance(redemptionAmount, cp);
                                     //adjust total supply of this via bond
                                     Token(bondsIssued[q]).reduceSupply(redemptionAmount);     
                                     //reduce counter party's balance of bond held
@@ -394,7 +399,7 @@ contract Bond is ERC20, Initializable, Ownable {
     }
 
     //function called back from Oraclize
-    function convert(bytes32 txId, bytes16 result, bytes32 rtype) public {
+    function convert(bytes32 txId, bytes16 result, bytes32 rtype) external {
         require(viaoracle == msg.sender);
         //check type of result returned
         if(rtype =="ethusd"){
@@ -482,7 +487,7 @@ contract Bond is ERC20, Initializable, Ownable {
                         address viaAddress = factory.getIssuer("ViaCash", paidInCashToken);
                         if(viaAddress!=address(0x0)){
                             //deduct paid out cash token from purchaser cash balance
-                            Cash(address(uint160(viaAddress))).deductFromBalance(paidInAmount, issuers[i]);
+                            ViaCash(address(uint160(viaAddress))).deductFromBalance(paidInAmount, issuers[i]);
                         }
                     }
                 }

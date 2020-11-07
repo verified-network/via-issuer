@@ -3,8 +3,6 @@
 
 pragma solidity >=0.5.0 <0.7.0;
 
-import "./Cash.sol";
-import "./Bond.sol";
 import "@openzeppelin/upgrades/contracts/upgradeability/ProxyFactory.sol";
 import "./utilities/StringUtils.sol";
 
