@@ -8,17 +8,20 @@ import "./Bond.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "abdk-libraries-solidity/ABDKMathQuad.sol";
+import "./utilities/StringUtils.sol";
 
 contract Token is ERC20, Initializable, Ownable {
 
+    using stringutils for *;
+
     //Via token attributes (eg, name : Via-USD, product : ViaBond, symbol : bond identifier)
-    bytes32 public name;
+    string public name;
     bytes32 public product;
-    bytes32 public symbol;
+    string public symbol;
     address payable issuer;
 
     //initiliaze proxies
-    function initialize(bytes32 _name, address payable _owner, bytes32 _product, bytes32 _symbol) public initializer{
+    function initialize(string memory _name, address payable _owner, bytes32 _product, string memory _symbol) public initializer{
         Ownable.initialize(_owner);
         issuer = _owner;
         name = _name;

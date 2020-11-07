@@ -93,17 +93,13 @@ contract ViaOracle is usingProvable {
             if(_ratetype == "er" || _ratetype == "ver"){
                 bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/er/",_currency,").rate")),CUSTOM_GASLIMIT);  
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
-                emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via exchange rates, with query id= ",queryId,
-                                        " token type= ",_tokenType," rate type= ",_ratetype," currency= ", 
-                                        _currency," standing by for the answer...")));
+                emit LogNewProvableQuery("Provable query was sent for Via exchange rates...");
                 return queryId;
             }
             else if(_ratetype == "ir"){
                 bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/ir/",_currency,").rate")),CUSTOM_GASLIMIT);
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
-                emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via interest rates, with query id= ",queryId,
-                                        " token type= ",_tokenType," rate type= ",_ratetype," currency= ", 
-                                        _currency," standing by for the answer...")));
+                emit LogNewProvableQuery("Provable query was sent for Via interest rates...");
                 return queryId;
                 
             }

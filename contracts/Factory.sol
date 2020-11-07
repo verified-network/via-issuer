@@ -6,18 +6,17 @@ pragma solidity >=0.5.0 <0.7.0;
 import "./Cash.sol";
 import "./Bond.sol";
 import "@openzeppelin/upgrades/contracts/upgradeability/ProxyFactory.sol";
+import "./utilities/StringUtils.sol";
 
 contract Factory is ProxyFactory {
+
+    using stringutils for *;
 
     //data structure for token proxies
     struct via{
         bytes32 tokenType;
         bytes32 name;
     }
-
-    //address of Via contracts
-    address ViaBond;
-    address ViaCash;
 
     //addresses of all Via proxies
     mapping(address => via) public token;
@@ -59,7 +58,7 @@ contract Factory is ProxyFactory {
     function createIssuer(address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token) external{
         address _owner = address(this);
 
-        bytes memory _payload = abi.encodeWithSignature("initialize(bytes32,bytes32,address,address,address)", tokenName, tokenType, _owner, _oracle, _token);
+        bytes memory _payload = abi.encodeWithSignature("initialize(string,string,address,address,address)", tokenName.bytes32ToString(), tokenType.bytes32ToString(), _owner, _oracle, _token);
 
         // Deploy proxy
         address _issuer = deployMinimal(_target, _payload);
@@ -82,7 +81,7 @@ contract Factory is ProxyFactory {
         require(getType(msg.sender) == "ViaBond");
         address _owner = msg.sender;
 
-        bytes memory _payload = abi.encodeWithSignature("initialize(bytes32,address,bytes32,bytes32)", tokenName, _owner, tokenProduct, tokenSymbol);
+        bytes memory _payload = abi.encodeWithSignature("initialize(string,address,bytes32,string)", tokenName.bytes32ToString(), _owner, tokenProduct, tokenSymbol.bytes32ToString());
 
         // Deploy proxy
         address _token = deployMinimal(_target, _payload);
