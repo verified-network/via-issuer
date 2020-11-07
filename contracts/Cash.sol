@@ -5,7 +5,7 @@ pragma solidity >=0.5.0 <0.7.0;
 
 import "./erc/ERC20.sol";
 import "./oraclize/Oracle.sol";
-import "./Factory.sol";
+import "./ViaFactory.sol";
 import "./ViaCash.sol";
 import "./ViaBond.sol";
 import "abdk-libraries-solidity/ABDKMathQuad.sol";
@@ -22,7 +22,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
     using ABDKMathQuad for bytes16;
 
     //via factory address
-    Factory private factory;
+    ViaFactory private factory;
 
     //via oracle
     Oracle private oracle;
@@ -61,7 +61,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
     //initiliaze proxies
     function initialize(string memory _name, string memory _type, address _owner, address _oracle, address _token) public initializer{
         Ownable.initialize(_owner);
-        factory = Factory(_owner);
+        factory = ViaFactory(_owner);
         oracle = Oracle(_oracle);
         viaoracle = _oracle;
         name = _name;
@@ -135,7 +135,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
         balances[receiver] = ABDKMathQuad.add(balances[receiver], ABDKMathQuad.fromUInt(tokens));
         //transfer paid in deposit from sender as well
         for(uint256 q=0; q<factory.getTokenCount(); q++){
-            address viaAddress = factory.tokens(q);
+            address viaAddress = factory.getToken(q);
             if(factory.getType(viaAddress) == "ViaCash" && factory.getName(viaAddress) == name.stringToBytes32()){
                 deposits[receiver][name.stringToBytes32()] = ABDKMathQuad.add(deposits[receiver][name.stringToBytes32()], ABDKMathQuad.fromUInt(tokens));
                 deposits[sender][name.stringToBytes32()] = ABDKMathQuad.sub(deposits[sender][name.stringToBytes32()], ABDKMathQuad.fromUInt(tokens));
@@ -214,7 +214,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
             bytes32 currency_in_deposit;
             //find currency that seller had deposited earlier
             for(uint256 q=0; q<factory.getTokenCount(); q++){
-                address viaAddress = factory.tokens(q);
+                address viaAddress = factory.getToken(q);
                 if(factory.getType(viaAddress) == "ViaCash" && deposits[seller][factory.getName(viaAddress)]>0){
                     currency_in_deposit = factory.getName(viaAddress);
                 }
@@ -226,7 +226,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                 //if seller has no deposits against paid in tokens, the tokens could have been transferred to this user from a redemption of tokens
                 //which were transferred to this user from another user
                 for(uint256 q=0; q<factory.getTokenCount(); q++){
-                    address viaAddress = factory.tokens(q);
+                    address viaAddress = factory.getToken(q);
                     if(factory.getType(viaAddress) == "ViaCash" && deposits[address(this)][factory.getName(viaAddress)]>0){
                         currency_in_deposit = factory.getName(viaAddress);
                     }
@@ -386,7 +386,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
         //else currency to redeem is not ether
         else{
             for(uint256 q=0; q<factory.getTokenCount(); q++){
-                address viaAddress = factory.tokens(q);
+                address viaAddress = factory.getToken(q);
                 if(factory.getName(viaAddress) == currency && factory.getType(viaAddress) == "ViaCash"){
                     if(ABDKMathQuad.cmp(Cash(address(uint160(viaAddress))).deductFromBalance(value, party),0)==1){
                         deposits[party][currency] = ABDKMathQuad.sub(deposits[party][currency], value);

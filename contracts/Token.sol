@@ -5,12 +5,13 @@ pragma solidity >=0.5.0 <0.7.0;
 
 import "./erc/ERC20.sol";
 import "./ViaBond.sol";
+import "./ViaToken.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "abdk-libraries-solidity/ABDKMathQuad.sol";
 import "./utilities/StringUtils.sol";
 
-contract Token is ERC20, Initializable, Ownable {
+contract Token is ViaToken, ERC20, Initializable, Ownable {
 
     using stringutils for *;
 
@@ -62,7 +63,7 @@ contract Token is ERC20, Initializable, Ownable {
             return false;
     }
 
-    function transferToken(address sender, address receiver, uint256 tokens) public returns (bool){
+    function transferToken(address sender, address receiver, uint256 tokens) external returns (bool){
         require(issuer==msg.sender);
         //owner should have more tokens than being transferred
         if(ABDKMathQuad.cmp(ABDKMathQuad.fromUInt(tokens), balances[sender])==-1 || ABDKMathQuad.cmp(ABDKMathQuad.fromUInt(tokens), balances[sender])==0){
@@ -74,6 +75,11 @@ contract Token is ERC20, Initializable, Ownable {
             return true;
         }
         return false;
+    }   
+
+
+    function requestTransfer(address receiver, uint tokens) external returns (bool){
+        transfer(receiver, tokens);
     }    
 
 }

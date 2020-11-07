@@ -6,7 +6,7 @@ pragma solidity >=0.5.0 <0.7.0;
 import "./provableAPI.sol";
 import "./Oracle.sol";
 import "../utilities/StringUtils.sol";
-import "../Factory.sol";
+import "../ViaFactory.sol";
 import "../ViaCash.sol";
 import "../ViaBond.sol";
 import "abdk-libraries-solidity/ABDKMathQuad.sol";
@@ -20,7 +20,7 @@ contract ViaOracle is Oracle, usingProvable {
     using ABDKMathQuad for bytes16;
 
     //via factory address
-    Factory private factory;
+    ViaFactory private factory;
 
     struct params{
         address payable caller;
@@ -47,7 +47,7 @@ contract ViaOracle is Oracle, usingProvable {
 
     function initialize(address _factory) external {
         require(address(factory)==address(0x0));
-        factory = Factory(_factory);
+        factory = ViaFactory(_factory);
     }                              
 
     function __callback(
