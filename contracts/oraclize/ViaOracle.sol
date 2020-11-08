@@ -9,7 +9,7 @@ import "../utilities/StringUtils.sol";
 import "../ViaFactory.sol";
 import "../ViaCash.sol";
 import "../ViaBond.sol";
-import "abdk-libraries-solidity/ABDKMathQuad.sol";
+import "../abdk-libraries-solidity/ABDKMathQuad.sol";
 
 contract ViaOracle is Oracle, usingProvable {
 

@@ -3,7 +3,7 @@
 
 pragma solidity >=0.5.0 <0.7.0;
 
-import "abdk-libraries-solidity/ABDKMathQuad.sol";
+import "../abdk-libraries-solidity/ABDKMathQuad.sol";
 
 contract ERC20{
 
