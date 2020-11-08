@@ -13,3 +13,9 @@ Requires having installed `truffle-flattener` and flattening contracts. See Flat
 * Install slither with `pip3 install slither-analyzer`
 * Run slither against flattened contracts with `make slither` (this will take sometime, possibly around 2 minutes)
 * Analysis results will be stored in `slither_*_analysis.txt` and displayed on stdout
+
+
+# Flattening
+
+* Install `truffler-flattener` with `npm install -g truffle-flattener`
+* Flatten contracts with `make flatten`
