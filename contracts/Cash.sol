@@ -61,9 +61,9 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
         factory = ViaFactory(_owner);
         oracle = Oracle(_oracle);
         viaoracle = _oracle;
-        name = _name.bytes32ToString();
+        name = string(abi.encodePacked(_name));
+        symbol = string(abi.encodePacked(_type));
         cashtokenName = _name;
-        symbol = _type.bytes32ToString();
     }
 
     //handling pay in of ether for issue of via cash tokens
