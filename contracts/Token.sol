@@ -19,14 +19,16 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
     string public name;
     bytes32 public product;
     string public symbol;
+    bytes32 public tokenSymbol;
     address payable issuer;
 
     //initiliaze proxies
-    function initialize(string memory _name, address payable _owner, bytes32 _product, string memory _symbol) public initializer{
+    function initialize(bytes32 _name, address payable _owner, bytes32 _product, bytes32 _symbol) public initializer{
         Ownable.initialize(_owner);
         issuer = _owner;
-        name = _name;
-        symbol = _symbol;
+        name = _name.bytes32ToString();
+        symbol = _symbol.bytes32ToString();
+        tokenSymbol = _symbol;
         product = _product;
         decimals = 2;
     }
@@ -57,7 +59,7 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
         //ensure sender has enough tokens in balance before transferring or redeeming them
         require(ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==1 ||
                 ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==0);
-        if(ViaBond(issuer).transferFoward(symbol.stringToBytes32(), address(this), sender, receiver, tokens))
+        if(ViaBond(issuer).transferFoward(tokenSymbol, address(this), sender, receiver, tokens))
             return true;
         else
             return false;

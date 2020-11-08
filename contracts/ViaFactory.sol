@@ -13,6 +13,8 @@ interface ViaFactory{
 
     function getType(address viaAddress) external view returns(bytes32);
 
+    function getNameAndType(address viaAddress) external view returns(bytes32, bytes32);
+
     function getProduct(bytes32 symbol) external view returns(address);
 
     function getIssuer(bytes32 tokenType, bytes32 tokenName) external view returns(address);

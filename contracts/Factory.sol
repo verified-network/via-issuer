@@ -5,11 +5,8 @@ pragma solidity >=0.5.0 <0.7.0;
 
 import "./ViaFactory.sol";
 import "@openzeppelin/upgrades/contracts/upgradeability/ProxyFactory.sol";
-import "./utilities/StringUtils.sol";
 
 contract Factory is ViaFactory, ProxyFactory {
-
-    using stringutils for *;
 
     //data structure for token proxies
     struct via{
@@ -47,6 +44,10 @@ contract Factory is ViaFactory, ProxyFactory {
         return token[viaAddress].tokenType;
     }
 
+    function getNameAndType(address viaAddress) external view returns(bytes32, bytes32){
+        return (token[viaAddress].name, token[viaAddress].tokenType);
+    }
+
     //retrieve token product address for given identifier (symbol)
     function getProduct(bytes32 symbol) external view returns(address){
         return products[symbol];
@@ -61,7 +62,7 @@ contract Factory is ViaFactory, ProxyFactory {
     function createIssuer(address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token) external{
         address _owner = address(this);
 
-        bytes memory _payload = abi.encodeWithSignature("initialize(string,string,address,address,address)", tokenName.bytes32ToString(), tokenType.bytes32ToString(), _owner, _oracle, _token);
+        bytes memory _payload = abi.encodeWithSignature("initialize(bytes32,bytes32,address,address,address)", tokenName, tokenType, _owner, _oracle, _token);
 
         // Deploy proxy
         address _issuer = deployMinimal(_target, _payload);
@@ -84,7 +85,7 @@ contract Factory is ViaFactory, ProxyFactory {
         require(token[msg.sender].tokenType == "ViaBond");
         address _owner = msg.sender;
 
-        bytes memory _payload = abi.encodeWithSignature("initialize(string,address,bytes32,string)", tokenName.bytes32ToString(), _owner, tokenProduct, tokenSymbol.bytes32ToString());
+        bytes memory _payload = abi.encodeWithSignature("initialize(bytes32,address,bytes32,bytes32)", tokenName, _owner, tokenProduct, tokenSymbol);
 
         // Deploy proxy
         address _token = deployMinimal(_target, _payload);
