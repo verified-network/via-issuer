@@ -62594,10 +62594,115 @@
       },
       "address": "0xcC4781BbAFBD986329777408A4F34a6B2d6E5ef1",
       "transactionHash": "0xc4ae41e3a5ec1aa612ef0c22d74ac47f1f8c5f0a481bbd84f385fee4c0d4489b"
+    },
+    "1604844070221": {
+      "events": {
+        "0xd930c683bff79bc6dcf7f04c491a02fdcf42247450d6871964a2b12955108338": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "currency",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "value",
+              "type": "bytes16"
+            }
+          ],
+          "name": "ViaCashIssued",
+          "type": "event"
+        },
+        "0x100da893981e3214bb40af1da05d2128e84df93c3cbd22bd771223df87de1cfe": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "currency",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "value",
+              "type": "bytes16"
+            }
+          ],
+          "name": "ViaCashRedeemed",
+          "type": "event"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        },
+        "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "tokenOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "tokens",
+              "type": "uint256"
+            }
+          ],
+          "name": "Approval",
+          "type": "event"
+        },
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "tokens",
+              "type": "uint256"
+            }
+          ],
+          "name": "Transfer",
+          "type": "event"
+        }
+      },
+      "links": {
+        "stringutils": "0xf29Ab19194014e459D60ccD5001eD586b0Cac4e4"
+      },
+      "address": "0x9A8813E40cE5EabCCfF709f37Efb55Ad000a437E",
+      "transactionHash": "0xde7730ff4fc464e54587caa915e0ea6f65d3c794d058ca0e72b1afcdd2c6ac96"
     }
   },
   "schemaVersion": "3.2.5",
-  "updatedAt": "2020-11-08T13:56:31.344Z",
+  "updatedAt": "2020-11-08T14:57:05.441Z",
+  "networkType": "ethereum",
   "devdoc": {
     "methods": {
       "initialize(address)": {

@@ -8900,10 +8900,74 @@
       "links": {},
       "address": "0x9853Fb8E9D11968c60F808f3Ca2d754a7958950F",
       "transactionHash": "0x17f76d28a10dff3f035f2209e6578df15e5355c0dfd12cccf9d647e3278be35d"
+    },
+    "1604844070221": {
+      "events": {
+        "0xc86ce51250387b92cfaa914f7afcac92982a98daa3e1b3dd6be12f8be38af598": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "_address",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "tokenName",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "tokenType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "IssuerCreated",
+          "type": "event"
+        },
+        "0x59bcd02033e203f8af464062ce742d11a3358b7b8fd7e996b91d74bee929d7e5": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "_address",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "tokenName",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "tokenType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "TokenCreated",
+          "type": "event"
+        },
+        "0x00fffc2da0b561cae30d9826d37709e9421c4725faebc226cbbb7ef5fc5e7349": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "proxy",
+              "type": "address"
+            }
+          ],
+          "name": "ProxyCreated",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x39D24220365Ba9259445e02aD834fb61dAdebC22",
+      "transactionHash": "0x445ea5cac05e3ffce45ef72b301706dc4c315b47a879e8bcff9556afd487d07d"
     }
   },
   "schemaVersion": "3.2.5",
-  "updatedAt": "2020-11-08T13:06:20.939Z",
+  "updatedAt": "2020-11-08T14:57:04.010Z",
+  "networkType": "ethereum",
   "devdoc": {
     "methods": {}
   },

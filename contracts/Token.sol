@@ -16,9 +16,9 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
     using stringutils for *;
 
     //Via token attributes (eg, name : Via-USD, product : ViaBond, symbol : bond identifier)
-    string public name;
+    //string public name;
     bytes32 public product;
-    string public symbol;
+    //string public symbol;
     bytes32 public tokenSymbol;
     address payable issuer;
 
@@ -26,8 +26,8 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
     function initialize(bytes32 _name, address payable _owner, bytes32 _product, bytes32 _symbol) public initializer{
         Ownable.initialize(_owner);
         issuer = _owner;
-        name = _name.bytes32ToString();
-        symbol = _symbol.bytes32ToString();
+        //name = _name.bytes32ToString();
+        //symbol = _symbol.bytes32ToString();
         tokenSymbol = _symbol;
         product = _product;
         decimals = 2;

@@ -30,8 +30,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     address viaoracle;
 
     //name of Via token (eg, Via-USD)
-    string public name;
-    string public symbol;
+    //string public name;
+    //string public symbol;
     bytes32 public bondName;
     
     //token address
@@ -95,9 +95,9 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
         factory = ViaFactory(_owner);
         oracle = Oracle(_oracle);
         viaoracle = _oracle;
-        name = _name.bytes32ToString();
+        //name = _name.bytes32ToString();
         bondName = _name;
-        symbol = _type.bytes32ToString();
+        //symbol = _type.bytes32ToString();
         token = _token;
         decimals = 2;
     }

@@ -12538,10 +12538,64 @@
       },
       "address": "0x84D958ab67d7A105c6366d65f984974E4D1C2edf",
       "transactionHash": "0x8ead0a2b1d135fd755b4710a8faeaf4c5fa8b5aeb691b2492dfcbf28762ba6f3"
+    },
+    "1604844070221": {
+      "events": {
+        "0xc4dc360d0a9c0677a3379ae0a3d81e887f761e65fdf3d7e00859d1bcd3c47389": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "description",
+              "type": "string"
+            }
+          ],
+          "name": "LogNewProvableQuery",
+          "type": "event"
+        },
+        "0x6122fd11e571fc97247892b733e9287d1d0264feefed58c5f87f454f87a560b0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "caller",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "myid",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "tokenType",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "rateType",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "result",
+              "type": "string"
+            }
+          ],
+          "name": "LogResult",
+          "type": "event"
+        }
+      },
+      "links": {
+        "stringutils": "0xf29Ab19194014e459D60ccD5001eD586b0Cac4e4"
+      },
+      "address": "0x4070491a4ffcC01A218182FE098270562D2E32F7",
+      "transactionHash": "0xdc44ba97289350c8096feebc7b2c97f25a4a780c892c7204a882b1b0d9999c76"
     }
   },
   "schemaVersion": "3.2.5",
-  "updatedAt": "2020-11-08T13:06:21.282Z",
+  "updatedAt": "2020-11-08T14:57:05.739Z",
+  "networkType": "ethereum",
   "devdoc": {
     "methods": {
       "__callback(bytes32,string)": {
