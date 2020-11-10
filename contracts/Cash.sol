@@ -102,12 +102,13 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                 if(transferToken(sender, address(this), tokens)){
                     //adjust total supply
                     totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.fromUInt(tokens));
-                    //transfer collateral from sender to contract for cash tokens transferred 
+                    lock = false; 
                     return true;
                 }
-                else
+                else{
+                    lock = false;
                     return false;
-                lock = false;
+                }                
             }
             else
                 return false;

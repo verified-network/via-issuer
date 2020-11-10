@@ -99,7 +99,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
         oracle = Oracle(_oracle);
         viaoracle = _oracle;
         name = string(abi.encodePacked(_name));
-        symbol = string(abi.encodePacked(_token));
+        symbol = string(abi.encodePacked(_type));
         bondName = _name;
         token = _token;
         decimals = 2;
@@ -493,17 +493,16 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                             address viaAddress = factory.getIssuer("ViaCash", paidInCashToken);
                             if(viaAddress!=address(0x0)){
                                 //deduct paid out cash token from purchaser cash balance
-                                if(ViaCash(address(uint160(viaAddress))).deductFromBalance(paidInAmount, issuers[i]){
-                                    //add purchaser as counter party in issuer's record
-                                    if(issues[issuers[i]][bondsIssued[q]].counterParties.length==1)
-                                        issues[issuers[i]][bondsIssued[q]].counterParties[0] = payer;
-                                    else
-                                        issues[issuers[i]][bondsIssued[q]].counterParties[issues[issuers[i]][bondsIssued[q]].counterParties.length] = payer;
-                                    //reduce issuable value of bond by amount transferred to purchaser
-                                    issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount = ABDKMathQuad.add(issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount, paidInAmount); 
-                                    //add bond to purchaser's record
-                                    storeBond("purchase", payer, issuers[i], parValue, bondPrice, issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount, paidInAmount, paidInCashToken, now, bondsIssued[q]);
-                                }
+                                ViaCash(address(uint160(viaAddress))).deductFromBalance(paidInAmount, issuers[i]);
+                                //add purchaser as counter party in issuer's record
+                                if(issues[issuers[i]][bondsIssued[q]].counterParties.length==1)
+                                    issues[issuers[i]][bondsIssued[q]].counterParties[0] = payer;
+                                else
+                                    issues[issuers[i]][bondsIssued[q]].counterParties[issues[issuers[i]][bondsIssued[q]].counterParties.length] = payer;
+                                //reduce issuable value of bond by amount transferred to purchaser
+                                issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount = ABDKMathQuad.add(issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount, paidInAmount); 
+                                //add bond to purchaser's record
+                                storeBond("purchase", payer, issuers[i], parValue, bondPrice, issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount, paidInAmount, paidInCashToken, now, bondsIssued[q]);
                             }         
                         }
                         lock = false;
