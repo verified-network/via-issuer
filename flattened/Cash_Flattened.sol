@@ -1614,6 +1614,9 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
     event ViaCashIssued(bytes32 currency, bytes16 value);
     event ViaCashRedeemed(bytes32 currency, bytes16 value);
 
+    //mutex
+    bool lock=false;
+
     //initiliaze proxies
     function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token) public initializer{
         Ownable.initialize(_owner);
@@ -1652,15 +1655,17 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
         else if(factory.getType(receiver)=="ViaCash"){
             //only issue if cash tokens are paid in, since bond tokens can't be paid to issue bond token
             if(Cash(address(uint160(receiver))).issue(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName)){
+                require(!lock);
+                lock = true;
                 //transfer sent tokens and its collateral to this contract's balance because that is required for redemption
                 if(transferToken(sender, address(this), tokens)){
                     //adjust total supply
                     totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.fromUInt(tokens));
-                    //transfer collateral from sender to contract for cash tokens transferred 
                     return true;
                 }
                 else
                     return false;
+                lock = false;
             }
             else
                 return false;
@@ -1930,6 +1935,8 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
             else{
                 bytes16 proportionRedeemed = ABDKMathQuad.div(deposits[party]["ether"], value);
                 bytes16 balanceToRedeem = ABDKMathQuad.mul(amount,ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1), proportionRedeemed));
+                //deposit of ether with the user (party) becomes zero
+                deposits[party]["ether"] = 0;
                 //send redeemed ether to party which is all of the ether in deposit with this user (party)
                 //address(uint160(party)).transfer(ABDKMathQuad.toUInt(deposits[party]["ether"]));
                 (bool success, )=address(uint160(party)).call.value(ABDKMathQuad.toUInt(deposits[party]["ether"]))("");
@@ -1940,8 +1947,6 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                 totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.mul(amount, proportionRedeemed));
                 //generate event
                 emit ViaCashRedeemed(currency, deposits[party]["ether"]);
-                //deposit of ether with the user (party) becomes zero
-                deposits[party]["ether"] = 0;
                 redeem(balanceToRedeem, party, cashtokenName);
             }
         }

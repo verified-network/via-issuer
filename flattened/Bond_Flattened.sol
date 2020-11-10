@@ -2033,19 +2033,20 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             //first, add bond balance
             ViaToken(issuedBond).addBalance(issuedBond, parValue);
             //issue bond to payer if ether is paid in as collateral
-            ViaToken(issuedBond).requestTransfer(payer, ABDKMathQuad.toUInt(parValue));    
-            //keep track of issues
-            storeBond("issue", payer, payer, parValue, bondPrice, ABDKMathQuad.fromUInt(0), paidInAmount, paidInCashToken, issueTime, issuedBond);
-            bondsIssued.push(issuedBond);
-            //keep track of issuers
-            for(uint256 i=0; i<issuers.length; i++){
-                if(issuers[i]==payer){
-                    found = true;
-                    break;
-                }
+            if(ViaToken(issuedBond).requestTransfer(payer, ABDKMathQuad.toUInt(parValue)){    
+              //keep track of issues
+              storeBond("issue", payer, payer, parValue, bondPrice, ABDKMathQuad.fromUInt(0), paidInAmount, paidInCashToken, issueTime, issuedBond);
+              bondsIssued.push(issuedBond);
+              //keep track of issuers
+              for(uint256 i=0; i<issuers.length; i++){
+                  if(issuers[i]==payer){
+                      found = true;
+                      break;
+                  }
+              }
+              if(!found)
+                  issuers.push(payer);
             }
-            if(!found)
-                issuers.push(payer);
         }
         //paid in amount is Via cash
         else{
@@ -2055,21 +2056,23 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     if(ABDKMathQuad.cmp(ABDKMathQuad.sub(issues[issuers[i]][bondsIssued[q]].parValue, issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount), paidInAmount)==0 ||
                         ABDKMathQuad.cmp(ABDKMathQuad.sub(issues[issuers[i]][bondsIssued[q]].parValue, issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount), paidInAmount)==1){
                         //if there is enough issued bonds, transfer bond from issuer to payer
-                        ViaToken(bondsIssued[q]).requestTransfer(payer, ABDKMathQuad.toUInt(paidInAmount));            
-                        //add purchaser as counter party in issuer's record
-                        if(issues[issuers[i]][bondsIssued[q]].counterParties.length==1)
-                            issues[issuers[i]][bondsIssued[q]].counterParties[0] = payer;
-                        else
-                            issues[issuers[i]][bondsIssued[q]].counterParties[issues[issuers[i]][bondsIssued[q]].counterParties.length] = payer;
-                        //reduce issuable value of bond by amount transferred to purchaser
-                        issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount = ABDKMathQuad.add(issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount, paidInAmount); 
-                        //add bond to purchaser's record
-                        storeBond("purchase", payer, issuers[i], parValue, bondPrice, issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount, paidInAmount, paidInCashToken, now, bondsIssued[q]);
-                        //transfer cash paid in by purchaser to issuer from whom bond is transferred to purchaser
-                        address viaAddress = factory.getIssuer("ViaCash", paidInCashToken);
-                        if(viaAddress!=address(0x0)){
-                            //deduct paid out cash token from purchaser cash balance
-                            ViaCash(address(uint160(viaAddress))).deductFromBalance(paidInAmount, issuers[i]);
+                        if(ViaToken(bondsIssued[q]).requestTransfer(payer, ABDKMathQuad.toUInt(paidInAmount))){            
+                          //transfer cash paid in by purchaser to issuer from whom bond is transferred to purchaser
+                            address viaAddress = factory.getIssuer("ViaCash", paidInCashToken);
+                            if(viaAddress!=address(0x0)){
+                                //deduct paid out cash token from purchaser cash balance
+                                if(ViaCash(address(uint160(viaAddress))).deductFromBalance(paidInAmount, issuers[i]){
+                                    //add purchaser as counter party in issuer's record
+                                    if(issues[issuers[i]][bondsIssued[q]].counterParties.length==1)
+                                        issues[issuers[i]][bondsIssued[q]].counterParties[0] = payer;
+                                    else
+                                        issues[issuers[i]][bondsIssued[q]].counterParties[issues[issuers[i]][bondsIssued[q]].counterParties.length] = payer;
+                                    //reduce issuable value of bond by amount transferred to purchaser
+                                    issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount = ABDKMathQuad.add(issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount, paidInAmount); 
+                                    //add bond to purchaser's record
+                                    storeBond("purchase", payer, issuers[i], parValue, bondPrice, issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount, paidInAmount, paidInCashToken, now, bondsIssued[q]);
+                                }
+                            }
                         }
                     }
                 }
