@@ -89,6 +89,9 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     event ViaBondIssued(bytes32 currency, uint256 value, uint256 price, uint256 tenure);
     event ViaBondRedeemed(bytes32 currency, uint256 value, uint256 price, uint256 tenure);
 
+    //erc20 emit
+    event Transfer(address indexed from, address indexed to, uint tokens);
+
     //mutex
     bool lock=false;
 
@@ -511,6 +514,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             }    
         }
         //generate event
+        emit Transfer(address(this), payer, ABDKMathQuad.toUInt(paidInAmount));
         emit ViaBondIssued(bondName, ABDKMathQuad.toUInt(parValue), ABDKMathQuad.toUInt(paidInAmount), 1);
     }
 
