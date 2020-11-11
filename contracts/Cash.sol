@@ -185,7 +185,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
 
     //requesting issue of Via to buyer for amount of ether or some other via cash token paid in and stored in cashContract
     function issue(bytes16 amount, address buyer, bytes32 currency) public returns(bool){
-        require(factory.getType(msg.sender) == "ViaCash");
+        require(factory.getType(address(this)) == "ViaCash");
         //ensure that brought amount is not zero
         require(amount != 0);
         //find amount of via cash tokens to transfer after applying exchange rate
