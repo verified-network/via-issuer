@@ -14,3 +14,35 @@ flatten:
 	truffle-flattener contracts/oraclize/ViaOracle.sol > flattened/ViaOracle_Flattened.sol
 	# erc contracts
 	truffle-flattener contracts/erc/ERC20.sol > flattened/ERC20_Flattened.sol
+
+.PHONY: myhtril
+mythril: mythril-bond mythril-cash mythril-factory mythril-oracle
+
+mythril-bond:
+	myth -v 1 analyze --max-depth 1024 --solv 0.5.7 --phrack --enable-physics --parallel-solving --solver-timeout 2000000 --execution-timeout 200 ./flattened/Bond_Flattened.sol 2>&1 | tee mythril_bond_analysis.txt
+
+mythril-cash:
+	myth -v 1 analyze --max-depth 1024 --solv 0.5.7 --phrack --enable-physics --parallel-solving --solver-timeout 2000000 --execution-timeout 200 ./flattened/Cash_Flattened.sol 2>&1 | tee mythril_cash_analysis.txt
+
+mythril-factory:
+	myth -v 1 analyze --max-depth 1024 --solv 0.5.7 --phrack --enable-physics --parallel-solving --solver-timeout 2000000 --execution-timeout 200 ./flattened/Factory_Flattened.sol 2>&1 | tee mythril_factory_analysis.txt
+
+mythril-oracle:
+	myth -v 1 analyze --max-depth 1024 --solv 0.5.7 --phrack --enable-physics --parallel-solving --solver-timeout 2000000 --execution-timeout 200 ./flattened/ViaOracle_Flattened.sol 2>&1 | tee mythril_viaoracle_analysis.txt
+
+
+.PHONY: slither
+slither: slither-factory slither-bond slither-cash slither-oracle
+
+slither-factory:
+	slither --solc ~/.solc-select/usr/bin/solc-v0.5.7 ./flattened/Factory_Flattened.sol 2>&1 | tee slither_factory_analysis.txt
+
+slither-bond:
+	slither --solc ~/.solc-select/usr/bin/solc-v0.5.7 ./flattened/Bond_Flattened.sol 2>&1 | tee slither_bond_analysis.txt
+
+
+slither-cash:
+	slither --solc ~/.solc-select/usr/bin/solc-v0.5.7 ./flattened/Cash_Flattened.sol 2>&1 | tee slither_cash_analysis.txt
+
+slither-oracle:
+	slither --solc ~/.solc-select/usr/bin/solc-v0.5.7 ./flattened/ViaOracle_Flattened.sol 2>&1 | tee slither_viaoracle_analysis.txt
