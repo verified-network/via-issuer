@@ -22,8 +22,6 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
     bytes32 public tokenSymbol;
     address payable issuer;
 
-    //erc20 emit
-    event Transfer(address indexed from, address indexed to, uint tokens);
 
     //initiliaze proxies
     function initialize(bytes32 _name, address payable _owner, bytes32 _product, bytes32 _symbol) public initializer{
