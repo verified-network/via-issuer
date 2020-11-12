@@ -1954,14 +1954,16 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
             else{
                 bytes16 proportionRedeemed = ABDKMathQuad.div(deposits[party]["ether"], value);
                 bytes16 balanceToRedeem = ABDKMathQuad.mul(amount,ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1), proportionRedeemed));
-                //deposit of ether with the user (party) becomes zero
+                // get amount to send
+                bytes16 amtSend = deposits[party]["ether"];
+                // set deposit to 0 as security measure
                 deposits[party]["ether"] = 0;
-                // send redeemed ether to party which is all of the ether in deposit with this user (party)
-                address(uint160(party)).transfer(ABDKMathQuad.toUInt(deposits[party]["ether"]));
                 //reduces balances
                 balances[party] = ABDKMathQuad.sub(balances[party], ABDKMathQuad.mul(amount, proportionRedeemed));
                 //adjust total supply
                 totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.mul(amount, proportionRedeemed));
+                // send redeemed ether to party which is all of the ether in deposit with this user (party)
+                address(uint160(party)).transfer(ABDKMathQuad.toUInt(amtSend));
                 //generate event
                 emit ViaCashRedeemed(currency, deposits[party]["ether"]);                
                 redeem(balanceToRedeem, party, cashtokenName);
