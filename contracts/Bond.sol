@@ -116,7 +116,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     }
 
     //forwarding call from issued bond token if at all such a call arrives
-    function transferFoward(bytes32 _symbol, address _forwarder, address _sender, address _receiver, uint256 _tokens) external returns (bool){
+    function transferForward(bytes32 _symbol, address _forwarder, address _sender, address _receiver, uint256 _tokens) external returns (bool){
         require(factory.getProduct(_symbol)==_forwarder);
         bondSymbol = _symbol;
         forwarder = _forwarder;
@@ -144,10 +144,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 if(ABDKMathQuad.cmp(purchases[sender][issuedBond].purchasedIssueAmount, ABDKMathQuad.fromUInt(tokens))==0){
                     purchases[receiver][issuedBond] = issues[sender][issuedBond];
                     delete purchases[sender][issuedBond];
-                    if(ViaToken(issuedBond).transferToken(sender, receiver, tokens)){
-                        emit Transfer(sender, receiver, tokens);
+                    if(ViaToken(issuedBond).transferToken(sender, receiver, tokens))
                         return true;
-                    }
                 }
                 return false;
             }
@@ -162,7 +160,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     //requesting issue of Via bonds to payer (issuer) that can pay in ether, or 
     //requesting transfer of Via bonds to payer (buyer) that can pay in via cash tokens
     function issue(bytes16 amount, address payer, bytes32 currency, address cashContract) private returns(bool){
-        require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
+        //require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
         //ensure that brought amount is not zero
         require(amount != 0);
         //adds paid in amount to the paid in currency's cash balance

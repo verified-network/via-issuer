@@ -22,6 +22,7 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
     bytes32 public tokenSymbol;
     address payable issuer;
 
+
     //initiliaze proxies
     function initialize(bytes32 _name, address payable _owner, bytes32 _product, bytes32 _symbol) public initializer{
         Ownable.initialize(_owner);
@@ -59,7 +60,7 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
         //ensure sender has enough tokens in balance before transferring or redeeming them
         require(ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==1 ||
                 ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==0);
-        if(ViaBond(issuer).transferFoward(tokenSymbol, address(this), sender, receiver, tokens))
+        if(ViaBond(issuer).transferForward(tokenSymbol, address(this), sender, receiver, tokens))
             return true;
         else
             return false;
@@ -74,6 +75,7 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
             balances[sender] = ABDKMathQuad.sub(balances[sender], ABDKMathQuad.fromUInt(tokens));
             //allowed[sender][msg.sender] = ABDKMathQuad.sub(allowed[sender][msg.sender], ABDKMathQuad.fromUInt(tokens));
             balances[receiver] = ABDKMathQuad.add(balances[receiver], ABDKMathQuad.fromUInt(tokens));
+            emit Transfer(sender, receiver, tokens);
             return true;
         }
         return false;
@@ -82,6 +84,7 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
 
     function requestTransfer(address receiver, uint tokens) external returns (bool){
         transfer(receiver, tokens);
+        emit Transfer(address(this), receiver, tokens);
     }    
 
 }
