@@ -1,4 +1,4 @@
-// File: contracts/oraclize/Oracle.sol
+// File: contracts/interfaces/Oracle.sol
 
 //(c) Kallol Borah, 2020
 // Via oracle interface definition

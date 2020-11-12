@@ -1343,7 +1343,7 @@ contract usingProvable {
 }
 // </provableAPI>
 
-// File: contracts/oraclize/Oracle.sol
+// File: contracts/interfaces/Oracle.sol
 
 //(c) Kallol Borah, 2020
 // Via oracle interface definition
@@ -1427,7 +1427,7 @@ library stringutils { // Only relevant functions
 
 }
 
-// File: contracts/ViaFactory.sol
+// File: contracts/interfaces/ViaFactory.sol
 
 // (c) Kallol Borah, 2020
 // Interface definition of the Via cash and bond factory.
@@ -1454,7 +1454,7 @@ interface ViaFactory{
 
 }
 
-// File: contracts/ViaCash.sol
+// File: contracts/interfaces/ViaCash.sol
 
 // (c) Kallol Borah, 2020
 // Interface of the Via cash token.
@@ -1466,13 +1466,13 @@ interface ViaCash{
 
     function convert(bytes32 txId, bytes16 result, bytes32 rtype) external;
 
-    function addToBalance(bytes16 tokens, address sender) external returns (bool);
+    function requestAddToBalance(bytes16 tokens, address sender) external returns (bool);
 
-    function deductFromBalance(bytes16 tokens, address receiver) external returns (bytes16);
+    function requestDeductFromBalance(bytes16 tokens, address receiver) external returns (bytes16);
 
 }
 
-// File: contracts/ViaBond.sol
+// File: contracts/interfaces/ViaBond.sol
 
 // (c) Kallol Borah, 2020
 // Interface definition of the Via bond token.
@@ -1483,7 +1483,7 @@ interface ViaBond{
 
     function convert(bytes32 txId, bytes16 result, bytes32 rtype) external;
 
-    function transferFoward(bytes32 _symbol, address _forwarder, address _sender, address _receiver, uint256 _tokens) external returns (bool);
+    function transferForward(bytes32 _symbol, address _forwarder, address _sender, address _receiver, uint256 _tokens) external returns (bool);
 
     function requestIssue(bytes16 amount, address payer, bytes32 currency, address cashContract) external returns(bool);
 
