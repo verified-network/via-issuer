@@ -1,4 +1,4 @@
-// File: contracts/ViaFactory.sol
+// File: contracts/interfaces/ViaFactory.sol
 
 // (c) Kallol Borah, 2020
 // Interface definition of the Via cash and bond factory.

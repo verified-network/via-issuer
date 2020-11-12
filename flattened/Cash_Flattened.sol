@@ -1232,7 +1232,7 @@ contract ERC20{
 
 }
 
-// File: contracts/oraclize/Oracle.sol
+// File: contracts/interfaces/Oracle.sol
 
 //(c) Kallol Borah, 2020
 // Via oracle interface definition
@@ -1248,7 +1248,7 @@ interface Oracle{
 
 }
 
-// File: contracts/ViaFactory.sol
+// File: contracts/interfaces/ViaFactory.sol
 
 // (c) Kallol Borah, 2020
 // Interface definition of the Via cash and bond factory.
@@ -1275,7 +1275,7 @@ interface ViaFactory{
 
 }
 
-// File: contracts/ViaCash.sol
+// File: contracts/interfaces/ViaCash.sol
 
 // (c) Kallol Borah, 2020
 // Interface of the Via cash token.
@@ -1287,13 +1287,13 @@ interface ViaCash{
 
     function convert(bytes32 txId, bytes16 result, bytes32 rtype) external;
 
-    function addToBalance(bytes16 tokens, address sender) external returns (bool);
+    function requestAddToBalance(bytes16 tokens, address sender) external returns (bool);
 
-    function deductFromBalance(bytes16 tokens, address receiver) external returns (bytes16);
+    function requestDeductFromBalance(bytes16 tokens, address receiver) external returns (bytes16);
 
 }
 
-// File: contracts/ViaBond.sol
+// File: contracts/interfaces/ViaBond.sol
 
 // (c) Kallol Borah, 2020
 // Interface definition of the Via bond token.
@@ -1304,7 +1304,7 @@ interface ViaBond{
 
     function convert(bytes32 txId, bytes16 result, bytes32 rtype) external;
 
-    function transferFoward(bytes32 _symbol, address _forwarder, address _sender, address _receiver, uint256 _tokens) external returns (bool);
+    function transferForward(bytes32 _symbol, address _forwarder, address _sender, address _receiver, uint256 _tokens) external returns (bool);
 
     function requestIssue(bytes16 amount, address payer, bytes32 currency, address cashContract) external returns(bool);
 
@@ -1614,6 +1614,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
     event ViaCashIssued(bytes32 currency, bytes16 value);
     event ViaCashRedeemed(bytes32 currency, bytes16 value);
 
+
     //mutex
     bool lock=false;
 
@@ -1654,7 +1655,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
         //else request issue of cash tokens requested from receiver
         else if(factory.getType(receiver)=="ViaCash"){
             //only issue if cash tokens are paid in, since bond tokens can't be paid to issue bond token
-            if(Cash(address(uint160(receiver))).issue(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName)){
+            if(Cash(address(uint160(receiver))).requestIssue(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName)){
                 require(!lock);
                 lock = true;
                 //transfer sent tokens and its collateral to this contract's balance because that is required for redemption
@@ -1683,8 +1684,10 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
             //else, tokens are being sent to another user's account
             //sending contract should be allowed by token owner to make this transfer
             //allowed[sender][msg.sender] = ABDKMathQuad.sub(allowed[sender][msg.sender], ABDKMathQuad.fromUInt(tokens));
-            if(transferToken(sender, receiver, tokens))
+            if(transferToken(sender, receiver, tokens)){
+                emit Transfer(sender, receiver, tokens);
                 return true;
+            }
             else
                 return false;
         }
@@ -1704,17 +1707,20 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
             if(ttype == "ViaCash" && tname == cashtokenName){
                 deposits[receiver][cashtokenName] = ABDKMathQuad.add(deposits[receiver][cashtokenName], ABDKMathQuad.fromUInt(tokens));
                 deposits[sender][cashtokenName] = ABDKMathQuad.sub(deposits[sender][cashtokenName], ABDKMathQuad.fromUInt(tokens));
-                emit Transfer(sender, receiver, tokens);
                 return true;
             }
         }
         return false;
     }
 
-    
-    //add to token balance of this contract from token balance of sender
-    function addToBalance(bytes16 tokens, address sender) external returns (bool){
+    //accessor for addToBalance function
+    function requestAddToBalance(bytes16 tokens, address sender) external returns (bool){
         require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
+        return(addToBalance(tokens, sender));
+    }
+
+    //add to token balance of this contract from token balance of sender
+    function addToBalance(bytes16 tokens, address sender) private returns (bool){
         //sender should have more tokens than being transferred
         if(ABDKMathQuad.cmp(tokens, balances[sender])==-1 || ABDKMathQuad.cmp(tokens, balances[sender])==0){
             balances[sender] = ABDKMathQuad.sub(balances[sender], tokens);
@@ -1725,26 +1731,38 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
             return false;
     }
 
-    //deduct token balance from this contract and add token balance to receiver
-    function deductFromBalance(bytes16 tokens, address receiver) external returns (bytes16){
+    //accessor for deductFromBalance function
+    function requestDeductFromBalance(bytes16 tokens, address receiver) external returns (bytes16){
         require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
+        return(deductFromBalance(tokens, receiver));
+    }
+
+    //deduct token balance from this contract and add token balance to receiver
+    function deductFromBalance(bytes16 tokens, address receiver) private returns (bytes16){
         //this cash token issuer should have more tokens than being deducted
         if(ABDKMathQuad.cmp(tokens, balances[address(this)])==-1 || ABDKMathQuad.cmp(tokens, balances[address(this)])==0){
             balances[address(this)] = ABDKMathQuad.sub(balances[address(this)], tokens);
             balances[receiver] = ABDKMathQuad.add(balances[receiver], tokens);
+            emit Transfer(address(this), receiver, ABDKMathQuad.toUInt(tokens)); 
             return ABDKMathQuad.fromUInt(0);
         }
         else{
             bytes16 balance = ABDKMathQuad.sub(tokens, balances[address(this)]);
             balances[receiver] = ABDKMathQuad.add(balances[receiver], balances[address(this)]);
+            emit Transfer(address(this), receiver, ABDKMathQuad.toUInt(balances[address(this)]));
             balances[address(this)] = 0;            
             return balance;
         }
     }
 
-    //requesting issue of Via to buyer for amount of ether or some other via cash token paid in and stored in cashContract
-    function issue(bytes16 amount, address buyer, bytes32 currency) public returns(bool){
+    //accessor for issue function
+    function requestIssue(bytes16 amount, address buyer, bytes32 currency) public returns(bool){
         require(factory.getType(msg.sender) == "ViaCash");
+        return(issue(amount, buyer, currency));
+    }
+
+    //requesting issue of Via to buyer for amount of ether or some other via cash token paid in and stored in cashContract
+    function issue(bytes16 amount, address buyer, bytes32 currency) private returns(bool){
         //ensure that brought amount is not zero
         require(amount != 0);
         //find amount of via cash tokens to transfer after applying exchange rate
@@ -1789,7 +1807,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
             //if no more currencies to redeem and amount to redeem is not zero, then redemption fails
             if(currency_in_deposit=="" && deposits[seller]["ether"]>0)
                 currency_in_deposit = "ether";
-            else{
+            else if(currency_in_deposit==""){
                 //if seller has no deposits against paid in tokens, the tokens could have been transferred to this user from a redemption of tokens
                 //which were transferred to this user from another user
                 for(uint256 q=0; q<factory.getTokenCount(); q++){
@@ -1909,6 +1927,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
             totalSupply_ = ABDKMathQuad.add(totalSupply_, via);
         }
         //generate event
+        emit Transfer(address(this), party, ABDKMathQuad.toUInt(via));
         emit ViaCashIssued(cashtokenName, via);
     }
 
@@ -1958,7 +1977,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                 address viaAddress = factory.getToken(q);
                 (bytes32 tname, bytes32 ttype) = factory.getNameAndType(viaAddress);
                 if(tname == currency && ttype == "ViaCash"){
-                    if(ABDKMathQuad.cmp(Cash(address(uint160(viaAddress))).deductFromBalance(value, party),0)==1){
+                    if(ABDKMathQuad.cmp(Cash(address(uint160(viaAddress))).requestDeductFromBalance(value, party),0)==1){
                         deposits[party][currency] = ABDKMathQuad.sub(deposits[party][currency], value);
                         //reduces balances
                         balances[party] = ABDKMathQuad.sub(balances[party], amount);

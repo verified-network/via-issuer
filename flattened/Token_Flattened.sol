@@ -1232,7 +1232,7 @@ contract ERC20{
 
 }
 
-// File: contracts/ViaBond.sol
+// File: contracts/interfaces/ViaBond.sol
 
 // (c) Kallol Borah, 2020
 // Interface definition of the Via bond token.
@@ -1243,13 +1243,13 @@ interface ViaBond{
 
     function convert(bytes32 txId, bytes16 result, bytes32 rtype) external;
 
-    function transferFoward(bytes32 _symbol, address _forwarder, address _sender, address _receiver, uint256 _tokens) external returns (bool);
+    function transferForward(bytes32 _symbol, address _forwarder, address _sender, address _receiver, uint256 _tokens) external returns (bool);
 
     function requestIssue(bytes16 amount, address payer, bytes32 currency, address cashContract) external returns(bool);
 
 }
 
-// File: contracts/ViaToken.sol
+// File: contracts/interfaces/ViaToken.sol
 
 // (c) Kallol Borah, 2020
 // Interface definition of the token issued by Bond issuer
@@ -1543,6 +1543,7 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
     bytes32 public tokenSymbol;
     address payable issuer;
 
+
     //initiliaze proxies
     function initialize(bytes32 _name, address payable _owner, bytes32 _product, bytes32 _symbol) public initializer{
         Ownable.initialize(_owner);
@@ -1580,7 +1581,7 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
         //ensure sender has enough tokens in balance before transferring or redeeming them
         require(ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==1 ||
                 ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==0);
-        if(ViaBond(issuer).transferFoward(tokenSymbol, address(this), sender, receiver, tokens))
+        if(ViaBond(issuer).transferForward(tokenSymbol, address(this), sender, receiver, tokens))
             return true;
         else
             return false;
@@ -1595,6 +1596,7 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
             balances[sender] = ABDKMathQuad.sub(balances[sender], ABDKMathQuad.fromUInt(tokens));
             //allowed[sender][msg.sender] = ABDKMathQuad.sub(allowed[sender][msg.sender], ABDKMathQuad.fromUInt(tokens));
             balances[receiver] = ABDKMathQuad.add(balances[receiver], ABDKMathQuad.fromUInt(tokens));
+            emit Transfer(sender, receiver, tokens);
             return true;
         }
         return false;
@@ -1602,7 +1604,9 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
 
 
     function requestTransfer(address receiver, uint tokens) external returns (bool){
+        require(issuer==msg.sender);
         transfer(receiver, tokens);
+        emit Transfer(address(this), receiver, tokens);
     }    
 
 }
