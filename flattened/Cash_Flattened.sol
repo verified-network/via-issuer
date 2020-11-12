@@ -1940,14 +1940,12 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
         if(currency=="ether"){
             if(ABDKMathQuad.cmp(deposits[party]["ether"], value)==1 || ABDKMathQuad.cmp(deposits[party]["ether"], value)==0){
                 deposits[party]["ether"] = ABDKMathQuad.sub(deposits[party]["ether"], value);
-                //send redeemed ether to party
-                //address(uint160(party)).transfer(ABDKMathQuad.toUInt(value));
-                (bool success, )=address(uint160(party)).call.value(ABDKMathQuad.toUInt(value))("");
-                require(success, "Transfer failed");
                 //reduces balances
                 balances[party] = ABDKMathQuad.sub(balances[party], amount);
                 //adjust total supply
                 totalSupply_ = ABDKMathQuad.sub(totalSupply_, amount);
+                //send redeemed ether to party
+                address(uint160(party)).transfer(ABDKMathQuad.toUInt(value));
                 //generate event
                 emit ViaCashRedeemed(currency, value);
             }
@@ -1958,10 +1956,8 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                 bytes16 balanceToRedeem = ABDKMathQuad.mul(amount,ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1), proportionRedeemed));
                 //deposit of ether with the user (party) becomes zero
                 deposits[party]["ether"] = 0;
-                //send redeemed ether to party which is all of the ether in deposit with this user (party)
-                //address(uint160(party)).transfer(ABDKMathQuad.toUInt(deposits[party]["ether"]));
-                (bool success, )=address(uint160(party)).call.value(ABDKMathQuad.toUInt(deposits[party]["ether"]))("");
-                require(success, "Transfer failed");
+                // send redeemed ether to party which is all of the ether in deposit with this user (party)
+                address(uint160(party)).transfer(ABDKMathQuad.toUInt(deposits[party]["ether"]));
                 //reduces balances
                 balances[party] = ABDKMathQuad.sub(balances[party], ABDKMathQuad.mul(amount, proportionRedeemed));
                 //adjust total supply
