@@ -8,8 +8,8 @@ interface ViaCash{
 
     function convert(bytes32 txId, bytes16 result, bytes32 rtype) external;
 
-    function addToBalance(bytes16 tokens, address sender) external returns (bool);
+    function requestAddToBalance(bytes16 tokens, address sender) external returns (bool);
 
-    function deductFromBalance(bytes16 tokens, address receiver) external returns (bytes16);
+    function requestDeductFromBalance(bytes16 tokens, address receiver) external returns (bytes16);
 
 }

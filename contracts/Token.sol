@@ -4,8 +4,8 @@
 pragma solidity >=0.5.0 <0.7.0;
 
 import "./erc/ERC20.sol";
-import "./ViaBond.sol";
-import "./ViaToken.sol";
+import "./interfaces/ViaBond.sol";
+import "./interfaces/ViaToken.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "./abdk-libraries-solidity/ABDKMathQuad.sol";
@@ -83,6 +83,7 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
 
 
     function requestTransfer(address receiver, uint tokens) external returns (bool){
+        require(issuer==msg.sender);
         transfer(receiver, tokens);
         emit Transfer(address(this), receiver, tokens);
     }    

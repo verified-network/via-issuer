@@ -4,14 +4,14 @@
 pragma solidity >=0.5.0 <0.7.0;
 
 import "./erc/ERC20.sol";
-import "./oraclize/Oracle.sol";
+import "./interfaces/Oracle.sol";
 import "./abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
-import "./ViaFactory.sol";
-import "./ViaCash.sol";
-import "./ViaBond.sol";
-import "./ViaToken.sol";
+import "./interfaces/ViaFactory.sol";
+import "./interfaces/ViaCash.sol";
+import "./interfaces/ViaBond.sol";
+import "./interfaces/ViaToken.sol";
 import "./utilities/StringUtils.sol";
 
 contract Bond is ViaBond, ERC20, Initializable, Ownable {
@@ -154,18 +154,18 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     }
 
     function requestIssue(bytes16 amount, address payer, bytes32 currency, address cashContract) external returns(bool){
-        issue(amount, payer, currency, cashContract);
+        require(factory.getType(msg.sender) == "ViaCash");
+        return(issue(amount, payer, currency, cashContract));
     }
 
     //requesting issue of Via bonds to payer (issuer) that can pay in ether, or 
     //requesting transfer of Via bonds to payer (buyer) that can pay in via cash tokens
     function issue(bytes16 amount, address payer, bytes32 currency, address cashContract) private returns(bool){
-        //require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
         //ensure that brought amount is not zero
         require(amount != 0);
         //adds paid in amount to the paid in currency's cash balance
         if(currency!="ether")
-            if(!ViaCash(address(uint160(cashContract))).addToBalance(amount, payer))
+            if(!ViaCash(address(uint160(cashContract))).requestAddToBalance(amount, payer))
                 return false;
         //call Via Oracle to fetch data for bond pricing
         if(currency=="ether"){
@@ -355,7 +355,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                                 //send paid in amount to bond purchaser
                                 viaAddress = factory.getIssuer("ViaCash", tokenName);
                                 if(viaAddress!=address(0x0)){
-                                    bytes16 balanceToRedeem = ViaCash(address(uint160(viaAddress))).deductFromBalance(redemptionAmount, cp);
+                                    bytes16 balanceToRedeem = ViaCash(address(uint160(viaAddress))).requestDeductFromBalance(redemptionAmount, cp);
                                     //adjust total supply of this via bond
                                     ViaToken(bondsIssued[q]).reduceSupply(redemptionAmount);     
                                     //reduce counter party's balance of bond held
@@ -491,7 +491,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                             address viaAddress = factory.getIssuer("ViaCash", paidInCashToken);
                             if(viaAddress!=address(0x0)){
                                 //deduct paid out cash token from purchaser cash balance
-                                ViaCash(address(uint160(viaAddress))).deductFromBalance(paidInAmount, issuers[i]);
+                                ViaCash(address(uint160(viaAddress))).requestDeductFromBalance(paidInAmount, issuers[i]);
                                 //add purchaser as counter party in issuer's record
                                 if(issues[issuers[i]][bondsIssued[q]].counterParties.length==1)
                                     issues[issuers[i]][bondsIssued[q]].counterParties[0] = payer;

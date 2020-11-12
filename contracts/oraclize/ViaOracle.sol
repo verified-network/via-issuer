@@ -4,11 +4,11 @@
 pragma solidity >=0.5.0 <0.7.0;
 
 import "./provableAPI.sol";
-import "./Oracle.sol";
+import "../interfaces/Oracle.sol";
 import "../utilities/StringUtils.sol";
-import "../ViaFactory.sol";
-import "../ViaCash.sol";
-import "../ViaBond.sol";
+import "../interfaces/ViaFactory.sol";
+import "../interfaces/ViaCash.sol";
+import "../interfaces/ViaBond.sol";
 import "../abdk-libraries-solidity/ABDKMathQuad.sol";
 
 contract ViaOracle is Oracle, usingProvable {

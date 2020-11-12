@@ -3,7 +3,7 @@
 
 pragma solidity >=0.5.0 <0.7.0;
 
-import "./ViaFactory.sol";
+import "./interfaces/ViaFactory.sol";
 import "@openzeppelin/upgrades/contracts/upgradeability/ProxyFactory.sol";
 
 contract Factory is ViaFactory, ProxyFactory {
