@@ -9,7 +9,7 @@ flatten:
 	# utilities contracts
 	truffle-flattener contracts/utilities/StringUtils.sol > flattened/StringUtils_Flattened.sol
 	# oraclize contracts
-	truffle-flattener contracts/oraclize/Oracle.sol > flattened/Oracle_Flattened.sol
+	truffle-flattener contracts/interfaces/Oracle.sol > flattened/Oracle_Flattened.sol
 	truffle-flattener contracts/oraclize/provableAPI.sol > flattened/ProvableAPI_Flattened.sol
 	truffle-flattener contracts/oraclize/ViaOracle.sol > flattened/ViaOracle_Flattened.sol
 	# erc contracts
