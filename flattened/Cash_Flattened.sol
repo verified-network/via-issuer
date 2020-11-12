@@ -1661,11 +1661,13 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                 if(transferToken(sender, address(this), tokens)){
                     //adjust total supply
                     totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.fromUInt(tokens));
+                    lock = false; 
                     return true;
                 }
-                else
+                else{
+                    lock = false;
                     return false;
-                lock = false;
+                }                
             }
             else
                 return false;
@@ -1946,7 +1948,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                 //adjust total supply
                 totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.mul(amount, proportionRedeemed));
                 //generate event
-                emit ViaCashRedeemed(currency, deposits[party]["ether"]);
+                emit ViaCashRedeemed(currency, deposits[party]["ether"]);                
                 redeem(balanceToRedeem, party, cashtokenName);
             }
         }
