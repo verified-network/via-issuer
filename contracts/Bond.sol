@@ -276,9 +276,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                                 //reduce payer's balance of bond held
                                 ViaToken(bondsIssued[q]).reduceBalance(payer, amount);
                                 //send redeemed ether to payer
-                                //address(uint160(payer)).transfer(ABDKMathQuad.toUInt(redemptionAmount));
-                                (bool success, )=address(uint160(payer)).call.value(ABDKMathQuad.toUInt(redemptionAmount))("");
-                                require(success, "Transfer failed");
+                                address(uint160(payer)).transfer(ABDKMathQuad.toUInt(redemptionAmount));
                                 //generate event
                                 emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(redemptionAmount), ABDKMathQuad.toUInt(purchases[payer][bondsIssued[q]].purchasedIssueAmount), subscribedDays);
                                 status = true;
@@ -305,9 +303,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                         //reduce payer's balance of bond held
                         ViaToken(bondsIssued[q]).reduceBalance(payer, amount);
                         //send redeemed ether to payer
-                        //address(uint160(payer)).transfer(ABDKMathQuad.toUInt(uncumberedAmount));
-                        (bool success, )=address(uint160(payer)).call.value(ABDKMathQuad.toUInt(uncumberedAmount))("");
-                        require(success, "Transfer failed");
+                        address(uint160(payer)).transfer(ABDKMathQuad.toUInt(uncumberedAmount));
                         //generate event
                         emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(uncumberedAmount), ABDKMathQuad.toUInt(amount), issuedDays);
                         status = true;
@@ -390,14 +386,10 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     //returned redeemed proportion of collateral to payer (issuer)
                     bytes16 etherToRedeem = ABDKMathQuad.mul(issues[payer][bondsIssued[q]].collateralAmount, ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1), proportionToRedeem));
                     //send redeemed ether to payer
-                    //address(uint160(payer)).transfer(ABDKMathQuad.toUInt(etherToRedeem));   
-                    (bool success, )=address(uint160(payer)).call.value(ABDKMathQuad.toUInt(etherToRedeem))("");
-                    require(success, "Transfer failed");                                
+                    address(uint160(payer)).transfer(ABDKMathQuad.toUInt(etherToRedeem));   
                     //if any balance amount remains after redemptions, return the balance to the issuer
                     if(amount>0){
-                        //address(uint160(payer)).transfer(ABDKMathQuad.toUInt(amount));
-                        (bool trsfr, )=address(uint160(payer)).call.value(ABDKMathQuad.toUInt(amount))("");
-                        require(trsfr, "Transfer failed"); 
+                        address(uint160(payer)).transfer(ABDKMathQuad.toUInt(amount));
                     }
                     lock = false;
                 }
