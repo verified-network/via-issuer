@@ -55,8 +55,6 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
     event ViaCashIssued(bytes32 currency, bytes16 value);
     event ViaCashRedeemed(bytes32 currency, bytes16 value);
 
-    //erc20 emit
-    event Transfer(address indexed from, address indexed to, uint tokens);
 
     //mutex
     bool lock=false;
