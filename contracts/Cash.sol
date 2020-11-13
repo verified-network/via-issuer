@@ -54,7 +54,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
     //events to capture and report to Via oracle
     event ViaCashIssued(bytes32 currency, bytes16 value);
     event ViaCashRedeemed(bytes32 currency, bytes16 value);
-
+    event LogCallback(bytes32 EthXid, bytes16 EthXvalue, bytes32 txId, bytes16 ViaXvalue);
 
     //mutex
     bool lock=false;
@@ -312,6 +312,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                 //and viaX (ie via exchange) should be non-zero if cash token to be issued is not Via-USD. We store 1 for ViaXvalue if Via-USD has to be issued
                 if(ABDKMathQuad.cmp(conversionQ[txId].EthXvalue, ABDKMathQuad.fromUInt(0))!=0 && ABDKMathQuad.cmp(conversionQ[txId].ViaXvalue, ABDKMathQuad.fromUInt(0))!=0){
                     bytes16 via = convertToVia(conversionQ[txId].amount, conversionQ[txId].paid_in_currency,conversionQ[txId].EthXvalue,conversionQ[txId].ViaXvalue);
+                    emit LogCallback(conversionQ[txId].EthXid, conversionQ[txId].EthXvalue, txId, conversionQ[txId].ViaXvalue);
                     finallyIssue(via, conversionQ[txId].party, conversionQ[txId].paid_in_currency, conversionQ[txId].amount);
                 }
             }

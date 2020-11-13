@@ -15,8 +15,8 @@ contract ERC20{
     address public issuer;
 
     //allowing 2-floating points for Via tokens
-    uint8 public decimals;
-
+    uint8 public decimals=2;
+    
     //variables
     bytes16 totalSupply_;
 
