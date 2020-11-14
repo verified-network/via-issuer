@@ -1,0 +1,24 @@
+os: linux
+dist: xenial
+language: node_js
+sudo: required
+services:
+- docker
+node_js:
+- 12
+install:
+- npm install -g truffle
+- npm install -g ethereum-bridge
+- npm install -g ganache-cli
+- echo "$MNEMONIC_SEED" > .secret
+before_script:
+- docker run --detach --publish 8545:8545 trufflesuite/ganache-cli:latest --mnemonic "$MNEMONIC_SEED"
+- sleep 5
+- ethereum-bridge --enable-stats --loglevel debug -H localhost:8545 -a 9 --non-interactive > /dev/null 2>&1 &
+script:
+- npm install
+- truffle test --stacktrace --debug --show-events
+env:
+  global:
+  - secure: eiJPiR8vgv05aYmXE0Ge5Z/t2oWKgMV+JcQrjbwdSfwLZv0SzjBYuphoaWQlUqvJv/osiXIZHZ8pLHcyOkq7wNeJm9DcXvVSyowO2V2nyf5E/Ib2Qfcza/6E+BrgNGKYInVgqx/P4BFLkqU925gJLipy5DssBnd8tE3X+vTF9oFl9EptaN5rUDin9yIFTVOE2H+QgFifAx9Mv9F50ISFn9isS877NPsz3ybr9LRGKrA+61Ouah2iaMK9oi6pM/mZbfwQEuRwmRZWZyjvlizxDCdKSVRS5HljmLnNLqXncb7ooxZOB0s2o800jzmq6CdsdckbIxyXC8PcRK6NB/01BbWtHC/i9gQa/OCL/CWUGCuCuVNgqNVsxW9EET3A6hSoQ7go/8vng3ISfksTo0Gf4d8DlCSXJP206fZCEpcRRGVUC7elZShNEDAYB0J8haXma78UWuFykg33f1fanRomFwM9r4yA3yEwywau82nA6N32DyPEZLrwmf39HxCj4cmEqDJrwDm5X0Z81jK0CEKymjyxXb8f/YmMxoNOII1OkCZTZHVaddYdU5OJWvN75xMKDBEXDgclg+9vx9qa9S6zHgLXewUVhdYzxv0kxPZYWo5G/xPZhE1v0/diZ+mZDCgpuI21CYV3c82cvTymifK7SVTvGo0IIHBDlvcJ1MrMS7U=
+  - secure: UzqjXyFp1e/QB1Hl62YAGH11d44FTbxOn8OZw4MOil7gH4kLBmsc1MZNYyJ/WNuTOYJ2w5Dgf8Zm95dmdh7QvCc5239onxfVP+PWoVrRzK1Qd/PXFjNLRoCGsby9Bt32WnUgy4MwBODBFqKWzSvb8FQoV3j7T+qhhDX904XObYpum5vdo2T4BaTC4c1GluEcS6/lhEDYADUz4F4gOkOgcBnOWQs2R9M23OyROvkmFE61ICqz5dK2UUFiiqpApuzrVHOVOY/uBv8JuPTfUIize1UOyLSCrCRVnUWbDy/x5uEryes9YFQwRhQFhVRKDLt7H65nvJ0o0JHP/iKLBgLpzQmqBypC7uL2q1iUmgGOTL5URNj9zXk/OWT4roL6nwqLNZk04/lkPJPp5O8Mdd77St2WpFJKu7nSs3ynlm27i6UAbFoDV63cWiWMJy/WUrt0cJW+MY1is61lxGR3pjpdpopfNdtjR6SCSz0ntX/6GnpvdScB/JM8xOdKD3vgbZazVAGrMe7bz2w+NfyWLSyMOyGJvVHTthJNsxqfsiYVmEm43Jh4rkE4MZ1Ehm87QzTUNathCzszncP6t9P0DoH6Lk3jwXMFNYsLGvutkyQzgNNOOrdT7W3jkm5JVexhquSvnBmIPqKa/L3tefEBd80uirtu5Vgs+IJEkcyVn8opa/U=
