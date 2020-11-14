@@ -1,6 +1,10 @@
+os: linux
+dist: xenial
 language: node_js
 sudo: required
 node_js:
   - 12
 install:
   - npm install -g truffle
+script:
+  - echo 1 
