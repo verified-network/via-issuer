@@ -3,11 +3,17 @@ dist: xenial
 language: node_js
 sudo: required
 node_js:
-  - 12
+- 12
 install:
-  - npm install -g truffle
-  - npm install -g ethereum-bridge
-  - npm install -g ganache-cli
+- npm install -g truffle
+- npm install -g ethereum-bridge
+- npm install -g ganache-cli
+# setup the truffle secret
+- echo "$MNEMONIC_SEED" > .secret
 script:
-  - npm install
-  - truffle build
+- npm install
+- truffle build
+env:
+  global:
+  - secure: wNZBWdBoZMt7mhsczO4ksxfHiare86xuYGx2TwuwwpHwmbxEzEW6mKgd79TEudbwtAqx8Is8N9gx4F0rGB7xyfQXUs2xi2mrfSlHFOw8cNSe0y9z9v1XEaLRo2sVIeeNRTTaeRx8WMK2W+zmZPYHgzXTUpqb6xedrrB5tjzwb8dGEq+Ux6APE94X2PDkQH8gQw+FXGiCOr/HuRaW57JZ0GfIYFDbI6g86xhbTGXvOF4Ru1iBjyFeqGIlqlBWIG1DjcEcXhB3MHxu47D8guym3HQFGkWBVliitA95c4MjByVYxARWqJ2ln/j3ygr/l4mAPIjBMty0bdxufa5+dAhiV6KcNTdh39XiyPdEtWrrMdkro7xQ+MFuX+sOwRBHCfIT15EIX8Tz7FmlAt11nKAxp4VVkyozrHzJawruAVwJ3jPwwHp2ZCEGRk7aoPAFyOMZ/t7UZ76ZRz3Rt8nSMwIevvT6hiEOy/fHtD1SXmFwTc5X+AfwsZDN8REtFHoXCyc35ajjaifcUDrUIMqSmIRRL+dVb2/uRxzC7yk7PxFNfnhUJwZJ8FsQC6HXsxOfHGlUEk8d30L8W2BnS+q+slmOfg2i1S5Ug7IK+epSLKxoTSLtHLGwW1iFQSIPTTgFsaJhDcovb/l2ohxYwwcpDT/0oIW1CEvtwm2NSUtVBQ6TnqQ=
+  - secure: uAexlvKHpNuOgx+/7ZrpIxggw9+MdMYyjr4dziaJ9wUcLIJHOmqYlyhC5jrwUnYK91k6nL797+1n9yfIr5izYNqHiaj4NKQuLQ6ZuBVw8lETrY4pNvmYyS1pXo9ivKNgGolzD24rFDzgIcoWhODT0inOIwHFQ8omdLcnJ+HN3Be6hdO1Kb4VGV6QRBy8wJJIE10UDtTOmETq4Sixft8VdLmJGCs5HZq7RsjXEn71e0ETnNaFTposr5NH2QJodOv7uJAMJnWfwTLHSknkL6RzV/sJWB4yRkTBuJga/l9Uyxzs5YJi0pNH5kHENXwhdtfCE1Kiu8bVGz5Dn9Ns1gLR2MJYKEBtv9YROkmsUejDedo+Zj7mCaHRF+jCquO5gFRf3nUihrj0dLJ5Q9P3HHkiCgLTDvnajsGUFWK8ZtM8C2ur7R8LwvXaeOc4XXsgYelwEUjAhLZMZib00reu/9IyorhpOAcUp/VXmIFaLVKfryCRC+S6PHrik4MHov+iBhzZmGGd+is7jiZmyCCKW/6Lo7LHgSHADarVfW1/0IkqPyHJfW3WU82sBMuRw5CVbGnsALU0rJ2NAd1zwZfkNemuSZ+mmYznbRcV8x34JSy8toQBi50RnnOp3PA5zt779d+Ye7Qi6JVatVRYng+3VDrLZAgJV/rNN+YRiLDiLZxYRwQ=
