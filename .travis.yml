@@ -2,6 +2,8 @@ os: linux
 dist: xenial
 language: node_js
 sudo: required
+services:
+- docker
 node_js:
 - 12
 install:
@@ -10,7 +12,10 @@ install:
 - npm install -g ganache-cli
 # setup the truffle secret
 - echo "$MNEMONIC_SEED" > .secret
+# setup docker compose env
+- echo "MNEMONIC=$MNEMONIC_SEED" > .env
 script:
+- docker-compose -f testenv-compose up -d
 - npm install
 - truffle build
 env:
