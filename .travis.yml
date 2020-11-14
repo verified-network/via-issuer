@@ -15,7 +15,6 @@ install:
 before_script:
 - docker run --detach --publish 8545:8545 trufflesuite/ganache-cli:latest --mnemonic "$MNEMONIC_SEED"
 script:
-- docker-compose -f testenv-compose up -d
 - npm install
 - truffle build
 env:
