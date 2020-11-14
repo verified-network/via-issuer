@@ -10,3 +10,4 @@ install:
   - npm install -g ganache-cli
 script:
   - npm install
+  - truffle build
