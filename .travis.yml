@@ -12,8 +12,8 @@ install:
 - npm install -g ganache-cli
 # setup the truffle secret
 - echo "$MNEMONIC_SEED" > .secret
-# setup docker compose env
-- echo "MNEMONIC=$MNEMONIC_SEED" > .env
+before_script:
+- docker run --detach --publish 8545:8545 trufflesuite/ganache-cli:latest --mnemonic "$MNEMONIC_SEED"
 script:
 - docker-compose -f testenv-compose up -d
 - npm install
