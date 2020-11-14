@@ -15,7 +15,7 @@ install:
 before_script:
 - docker run --detach --publish 8545:8545 trufflesuite/ganache-cli:latest --mnemonic "$MNEMONIC_SEED"
 - sleep 5
-- ethereum-bridge --enable-stats --loglevel debug -H localhost:8545 -a 9 2>&1 /dev/null
+- ethereum-bridge --enable-stats --loglevel debug -H localhost:8545 -a 9 --non-interactive 2>&1 /dev/null
 script:
 - npm install
 - truffle test --stacktrace --debug --show-events
