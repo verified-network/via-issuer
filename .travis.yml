@@ -6,5 +6,7 @@ node_js:
   - 12
 install:
   - npm install -g truffle
+  - npm install -g ethereum-bridge
+  - npm install -g ganache-cli
 script:
   - npm install
