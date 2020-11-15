@@ -88,23 +88,23 @@ contract ViaOracle is Oracle, usingProvable {
             emit LogNewProvableQuery("Provable query was NOT sent, please add some ETH to cover for the query fee!");
         } else {
             if(_ratetype == "er" || _ratetype == "ver"){
-                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/er/",_currency,").rate")),CUSTOM_GASLIMIT);  
-                //bytes32 queryId = provable_query("URL", "json(https://api.pro.coinbase.com/products/ETH-EUR/ticker).price",CUSTOM_GASLIMIT);
+                //bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/er/",_currency,").rate")),CUSTOM_GASLIMIT);  
+                bytes32 queryId = provable_query("URL", "json(https://via-oracle.azurewebsites.net/rates/er/Via_USD_to_Via_EUR).rate",CUSTOM_GASLIMIT);
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
-                emit LogNewProvableQuery(string(abi.encodePacked("Provable query with id ",queryId," was sent for Via exchange rates for ",_currency)));
+                emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via exchange rates for ",_currency)));
                 return queryId;
             }
             else if(_ratetype == "ir"){
                 bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/ir/",_currency,").rate")),CUSTOM_GASLIMIT);
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
-                emit LogNewProvableQuery(string(abi.encodePacked("Provable query with id ",queryId," was sent for Via interest rates for ",_currency)));
+                emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via interest rates for ",_currency)));
                 return queryId;
                 
             }
             else if(_ratetype == "ethusd"){
                 bytes32 queryId = provable_query("URL", "json(https://api.pro.coinbase.com/products/ETH-USD/ticker).price",CUSTOM_GASLIMIT);
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
-                emit LogNewProvableQuery(string(abi.encodePacked("Provable query with id ",queryId," was sent for ETH-USD, standing by for the answer...")));
+                emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for ETH-USD, standing by for the answer...")));
                 return queryId;
             }
         }        

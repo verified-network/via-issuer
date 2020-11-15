@@ -307,12 +307,12 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
         //check if cash needs to be issued or redeemed
         if(conversionQ[txId].operation=="issue"){
             if(rtype == "ethusd" || rtype == "ver"){
+                emit LogCallback(conversionQ[txId].EthXid, conversionQ[txId].EthXvalue, txId, conversionQ[txId].ViaXvalue);
                 //for issuing to happen when ether is paid in,
                 //value of ethX (ie ether exchange rate to USD) has to be non-zero 
                 //and viaX (ie via exchange) should be non-zero if cash token to be issued is not Via-USD. We store 1 for ViaXvalue if Via-USD has to be issued
                 if(ABDKMathQuad.cmp(conversionQ[txId].EthXvalue, ABDKMathQuad.fromUInt(0))!=0 && ABDKMathQuad.cmp(conversionQ[txId].ViaXvalue, ABDKMathQuad.fromUInt(0))!=0){
                     bytes16 via = convertToVia(conversionQ[txId].amount, conversionQ[txId].paid_in_currency,conversionQ[txId].EthXvalue,conversionQ[txId].ViaXvalue);
-                    emit LogCallback(conversionQ[txId].EthXid, conversionQ[txId].EthXvalue, txId, conversionQ[txId].ViaXvalue);
                     finallyIssue(via, conversionQ[txId].party, conversionQ[txId].paid_in_currency, conversionQ[txId].amount);
                 }
             }
