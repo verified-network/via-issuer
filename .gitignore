@@ -12,3 +12,4 @@ mythril_bond_analysis.txt
 mythril_cash_analysis.txt
 
 build/
+node_modules

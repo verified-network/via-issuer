@@ -8,6 +8,9 @@ const ABDKMathQuad = artifacts.require('ABDKMathQuad');
 const ViaOracle = artifacts.require('ViaOracle');
 const Token = artifacts.require('Token');
 
+//let Web3 = require('web3');
+//const eventProvider = new Web3.providers.WebsocketProvider('ws://127.0.0.1:8545');
+//web3.setProvider(eventProvider);
 web3.setProvider("http://127.0.0.1:8545");
 
 contract("CashContractSize", function(accounts) {
@@ -23,7 +26,7 @@ contract("CashContractSize", function(accounts) {
       });  
     });
   });
-
+/*
 contract("IssuingViaUSD", async (accounts) => {
     it("should send ether to Via-USD cash contract and then get some Via-USD cash tokens", async () => {
         var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -67,7 +70,7 @@ contract("IssuingViaUSD", async (accounts) => {
       });
     }
 });
-
+*/
 contract("IssuingViaEUR", async (accounts) => {
   it("should send ether to Via-EUR cash contract and then get some Via-EUR cash tokens", async () => {
       var abdkMathQuad = await ABDKMathQuad.deployed();

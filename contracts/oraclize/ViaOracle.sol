@@ -88,7 +88,8 @@ contract ViaOracle is Oracle, usingProvable {
             emit LogNewProvableQuery("Provable query was NOT sent, please add some ETH to cover for the query fee!");
         } else {
             if(_ratetype == "er" || _ratetype == "ver"){
-                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/er/",_currency,").rate")),CUSTOM_GASLIMIT);  
+                //bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/er/",_currency,").rate")),CUSTOM_GASLIMIT);  
+                bytes32 queryId = provable_query("URL", "json(https://api.pro.coinbase.com/products/ETH-EUR/ticker).price",CUSTOM_GASLIMIT);
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
                 emit LogNewProvableQuery("Provable query was sent for Via exchange rates...");
                 return queryId;
