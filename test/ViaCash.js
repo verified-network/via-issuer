@@ -83,7 +83,7 @@ contract("IssuingViaEUR", async (accounts) => {
       
       await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via-EUR"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
       
-      var viaeurCashAddress = await factory.tokens(0);
+      var viaeurCashAddress = await factory.tokens(1);
       var viaeurCashName = await web3.utils.hexToUtf8(await factory.getName(viaeurCashAddress));
       var viaeurCashType = await web3.utils.hexToUtf8(await factory.getType(viaeurCashAddress));
       var viaeurCash = await Cash.at(viaeurCashAddress);
