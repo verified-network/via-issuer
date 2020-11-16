@@ -57,19 +57,18 @@ contract("IssuingViaUSD", async (accounts) => {
         console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
         
         let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-        await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
-
-        console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
-        console.log("Account Via-USD cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
-        
+        callbackToViaOracle.then(function(){
+          await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
+        }).then(function(){
+          console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
+          console.log("Account Via-USD cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
+        })
+                
     });
 
     const getFirstEvent = (_event) => {
-      it('returns first event', (done)=>{
-        return new Promise((resolve, reject) => {
-          _event.once('data', resolve).once('error', reject);
-          done();
-        });
+      return new Promise((resolve, reject) => {
+        _event.once('data', resolve).once('error', reject)
       });
     }
 });
@@ -104,21 +103,22 @@ contract("IssuingViaEUR", async (accounts) => {
       console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
       
       let firstCallbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-      await truffleAssert.createTransactionResult(oracle, firstCallbackToViaOracle.transactionHash);
-      let secondCallbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-      await truffleAssert.createTransactionResult(oracle, secondCallbackToViaOracle.transactionHash);
+      firstCallbackToViaOracle.then(function(){
+        await truffleAssert.createTransactionResult(oracle, firstCallbackToViaOracle.transactionHash);
+        let secondCallbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+        secondCallbackToViaOracle.then(function(){
+          await truffleAssert.createTransactionResult(oracle, secondCallbackToViaOracle.transactionHash);
+        }).then(function(){
+          console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
+          console.log("Account Via-EUR cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
+        })
+      })
 
-      console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
-      console.log("Account Via-EUR cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
-      
   });
 
   const getFirstEvent = (_event) => {
-    it('returns first event', (done)=>{
-      return new Promise((resolve, reject) => {
-        _event.once('data', resolve).once('error', reject);
-        done();
-      });
+    return new Promise((resolve, reject) => {
+      _event.once('data', resolve).once('error', reject)
     });
   }
 
@@ -254,7 +254,7 @@ contract("ViaEURRedemption", async (accounts) => {
       
       await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via-EUR"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
       
-      var viaeurCashAddress = await factory.tokens(0);
+      var viaeurCashAddress = await factory.tokens(1);
       var viaeurCashName = await web3.utils.hexToUtf8(await factory.getName(viaeurCashAddress));
       var viaeurCashType = await web3.utils.hexToUtf8(await factory.getType(viaeurCashAddress));
       var viaeurCash = await Cash.at(viaeurCashAddress);

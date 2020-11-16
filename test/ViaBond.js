@@ -23,7 +23,7 @@ contract("BondContractSize", function(accounts) {
       });  
     });
   });
-/*
+
 contract("IssuingViaUSDBond", async (accounts) => {
     it("should send ether to Via-USD bond contract and then get some Via-USD bond tokens to sender (issuer)", async () => {
         var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -36,7 +36,7 @@ contract("IssuingViaUSDBond", async (accounts) => {
         
         await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
         
-        var viausdBondAddress = await factory.tokens(0);
+        var viausdBondAddress = await factory.tokens(3);
         var viausdBondName = await web3.utils.hexToUtf8(await factory.getName(viausdBondAddress));
         var viausdBondType = await web3.utils.hexToUtf8(await factory.getType(viausdBondAddress));
         var viausdBond = await Bond.at(viausdBondAddress);
@@ -67,7 +67,7 @@ contract("IssuingViaUSDBond", async (accounts) => {
       });
     }
 });
-
+/*
 contract("TransferViaUSDBond", async (accounts) => {
   it("should transfer Via-USD bond to another account", async () => {
       var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -80,7 +80,7 @@ contract("TransferViaUSDBond", async (accounts) => {
       
       await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
       
-      var viausdBondAddress = await factory.tokens(0);
+      var viausdBondAddress = await factory.tokens(3);
       var viausdBondName = await web3.utils.hexToUtf8(await factory.getName(viausdBondAddress));
       var viausdBondType = await web3.utils.hexToUtf8(await factory.getType(viausdBondAddress));
       var viausdBond = await Bond.at(viausdBondAddress);
@@ -134,7 +134,7 @@ contract("ViaEURBondIssue", async (accounts) => {
     
     await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
     
-    var viaeurBondAddress = await factory.tokens(0);
+    var viaeurBondAddress = await factory.tokens(4);
     var viaeurBondName = await web3.utils.hexToUtf8(await factory.getName(viaeurBondAddress));
     var viaeurBondType = await web3.utils.hexToUtf8(await factory.getType(viaeurBondAddress));
     var viaeurBond = await Bond.at(viaeurBondAddress);
@@ -182,12 +182,12 @@ contract("BondPurchaseWithCashTokensOfDifferentCurrency", async (accounts) => {
     await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
     await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
     
-    var viaeurBondAddress = await factory.tokens(0);
+    var viaeurBondAddress = await factory.tokens(4);
     var viaeurBondName = await web3.utils.hexToUtf8(await factory.getName(viaeurBondAddress));
     var viaeurBondType = await web3.utils.hexToUtf8(await factory.getType(viaeurBondAddress));
     var viaeurBond = await Bond.at(viaeurBondAddress);
 
-    var viausdCashAddress = await factory.tokens(1);
+    var viausdCashAddress = await factory.tokens(0);
     var viausdCashName = await web3.utils.hexToUtf8(await factory.getName(viausdCashAddress));
     var viausdCashType = await web3.utils.hexToUtf8(await factory.getType(viausdCashAddress));
     var viausdCash = await Cash.at(viausdCashAddress);
@@ -259,12 +259,12 @@ contract("BondPurchaseWithCashTokensOfSameCurrency", async (accounts) => {
     await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
     await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
     
-    var viaeurBondAddress = await factory.tokens(0);
+    var viaeurBondAddress = await factory.tokens(4);
     var viaeurBondName = await web3.utils.hexToUtf8(await factory.getName(viaeurBondAddress));
     var viaeurBondType = await web3.utils.hexToUtf8(await factory.getType(viaeurBondAddress));
     var viaeurBond = await Bond.at(viaeurBondAddress);
 
-    var viaeurCashAddress = await factory.tokens(1);
+    var viaeurCashAddress = await factory.tokens(0);
     var viaeurCashName = await web3.utils.hexToUtf8(await factory.getName(viaeurCashAddress));
     var viaeurCashType = await web3.utils.hexToUtf8(await factory.getType(viaeurCashAddress));
     var viaeurCash = await Cash.at(viaeurCashAddress);
@@ -332,7 +332,7 @@ contract("BondRedemptionByIssuerByReturningBonds", async (accounts) => {
     
     await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
     
-    var viausdBondAddress = await factory.tokens(0);
+    var viausdBondAddress = await factory.tokens(3);
     var viausdBondName = await web3.utils.hexToUtf8(await factory.getName(viausdBondAddress));
     var viausdBondType = await web3.utils.hexToUtf8(await factory.getType(viausdBondAddress));
     var viausdBond = await Bond.at(viausdBondAddress);
@@ -388,12 +388,12 @@ contract("BondRedemptionByIssuerByPayingCash", async (accounts) => {
     await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
     await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
     
-    var viaeurBondAddress = await factory.tokens(0);
+    var viaeurBondAddress = await factory.tokens(4);
     var viaeurBondName = await web3.utils.hexToUtf8(await factory.getName(viaeurBondAddress));
     var viaeurBondType = await web3.utils.hexToUtf8(await factory.getType(viaeurBondAddress));
     var viaeurBond = await Bond.at(viaeurBondAddress);
 
-    var viausdCashAddress = await factory.tokens(1);
+    var viausdCashAddress = await factory.tokens(0);
     var viausdCashName = await web3.utils.hexToUtf8(await factory.getName(viausdCashAddress));
     var viausdCashType = await web3.utils.hexToUtf8(await factory.getType(viausdCashAddress));
     var viausdCash = await Cash.at(viausdCashAddress);
@@ -482,12 +482,12 @@ contract("BondRedemptionByPurchasersWithIssuingCollateral", async (accounts) => 
     await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
     await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
     
-    var viaeurBondAddress = await factory.tokens(0);
+    var viaeurBondAddress = await factory.tokens(4);
     var viaeurBondName = await web3.utils.hexToUtf8(await factory.getName(viaeurBondAddress));
     var viaeurBondType = await web3.utils.hexToUtf8(await factory.getType(viaeurBondAddress));
     var viaeurBond = await Bond.at(viaeurBondAddress);
 
-    var viausdCashAddress = await factory.tokens(1);
+    var viausdCashAddress = await factory.tokens(0);
     var viausdCashName = await web3.utils.hexToUtf8(await factory.getName(viausdCashAddress));
     var viausdCashType = await web3.utils.hexToUtf8(await factory.getType(viausdCashAddress));
     var viausdCash = await Cash.at(viausdCashAddress);
