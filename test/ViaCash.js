@@ -65,8 +65,10 @@ contract("IssuingViaUSD", async (accounts) => {
     });
 
     const getFirstEvent = (_event) => {
-      return new Promise((resolve, reject) => {
-        _event.once('data', resolve).once('error', reject);
+      it('returns first event', (done)=>{
+        return new Promise((resolve, reject) => {
+          _event.once('data', resolve).once('error', reject)
+        });
         done();
       });
     }
@@ -112,11 +114,14 @@ contract("IssuingViaEUR", async (accounts) => {
   });
 
   const getFirstEvent = (_event) => {
-    return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject);
+    it('returns first event', (done)=>{
+      return new Promise((resolve, reject) => {
+        _event.once('data', resolve).once('error', reject)
+      });
       done();
     });
   }
+  
 });
 /*
 contract("ViaUSDExchange", async (accounts) => {
