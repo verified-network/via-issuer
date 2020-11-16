@@ -1,5 +1,6 @@
 //(c) Kallol Borah, 2020
 // Via oracle client
+// SPDX-License-Identifier: MIT
 
 pragma solidity >=0.5.0 <0.7.0;
 
@@ -102,7 +103,7 @@ contract ViaOracle is Oracle, usingProvable {
                 
             }
             else if(_ratetype == "ethusd"){
-                bytes32 queryId = provable_query("URL", "json(git add *).price",CUSTOM_GASLIMIT);
+                bytes32 queryId = provable_query("URL", "json(https://api.pro.coinbase.com/products/ETH-USD/ticker).price",CUSTOM_GASLIMIT);
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
                 emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for ETH-USD, standing by for the answer...")));
                 return queryId;
