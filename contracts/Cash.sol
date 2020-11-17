@@ -81,7 +81,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
         //only to pay in ether
         require(msg.data.length==0);
         // contract must not be paused
-        require(paused == true);
+        require(paused == false);
         //issue via cash tokens
         issue(ABDKMathQuad.fromUInt(msg.value), msg.sender, "ether");
     }
@@ -89,7 +89,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
     //overriding this function of ERC20 standard for transfer of via cash tokens to other users or to this contract for redemption
     function transferFrom(address sender, address receiver, uint256 tokens) public returns (bool){
         // contract must not be paused
-        require(paused == true);
+        require(paused == false);
         //ensure sender has enough tokens in balance before transferring or redeeming them
         require(ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==1 ||
                 ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==0);
