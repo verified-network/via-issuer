@@ -10,6 +10,7 @@ import "../utilities/StringUtils.sol";
 import "../interfaces/ViaFactory.sol";
 //import "../interfaces/ViaCash.sol";
 import "../Cash.sol";
+import "../Bond.sol";
 import "../interfaces/ViaBond.sol";
 import "../abdk-libraries-solidity/ABDKMathQuad.sol";
 
@@ -68,13 +69,13 @@ contract ViaOracle is Oracle, usingProvable {
             Cash(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "Bond"){
-            ViaBond(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+            Bond(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "EthCash"){
             Cash(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "EthBond"){
-            ViaBond(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+            Bond(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
 
         delete pendingQueries[_myid]; 

@@ -23,7 +23,7 @@ contract("BondContractSize", function(accounts) {
       });  
     });
   });
-/*
+
 contract("IssuingViaUSDBond", async (accounts) => {
     it("should send ether to Via-USD bond contract and then get some Via-USD bond tokens to sender (issuer)", async () => {
         var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -53,8 +53,8 @@ contract("IssuingViaUSDBond", async (accounts) => {
         console.log("Via-USD bond token contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
         console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
         
-        let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-        await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
+        //let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+        //await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
 
         console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
         console.log("Account Via-USD bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[0]))));
@@ -96,8 +96,8 @@ contract("TransferViaUSDBond", async (accounts) => {
       console.log("Via-USD bond token contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
       console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
       
-      let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-      await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
+      //let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+      //await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
 
       console.log("Sender Via-USD bond token balance after sending ether and before transferring Via-USD bond:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[0]))));
       console.log("Receiver address:", accounts[1]);
@@ -150,8 +150,8 @@ contract("ViaEURBondIssue", async (accounts) => {
     console.log("Via-EUR bond token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
-    let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
+    //let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
 
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
         
@@ -203,8 +203,8 @@ contract("BondPurchaseWithCashTokensOfDifferentCurrency", async (accounts) => {
     console.log("Via-EUR bond token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
-    let callbackOracleForBondIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackOracleForBondIssue.transactionHash);
+    //let callbackOracleForBondIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondIssue.transactionHash);
 
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
 
@@ -219,16 +219,16 @@ contract("BondPurchaseWithCashTokensOfDifferentCurrency", async (accounts) => {
     console.log("Via-USD cash token contract ether balance after sending ether:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[1]));  
     
-    let callbackOracleForCashIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackOracleForCashIssue.transactionHash);
+    //let callbackOracleForCashIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackOracleForCashIssue.transactionHash);
 
     console.log("Account Via-USD cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
     
     await viausdCash.transferFrom(accounts[1], viaeurBondAddress, 100);
     console.log("Purchaser Account Via-USD cash token balance after sending Via-USD for Via-EUR bond purchase:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
     
-    let callbackOracleForBondPurchase = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackOracleForBondPurchase.transactionHash);
+    //let callbackOracleForBondPurchase = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondPurchase.transactionHash);
 
     console.log("Purchaser Account Via-EUR bond token balance after purchase with Via-USD cash :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[1]))));
         
@@ -280,8 +280,8 @@ contract("BondPurchaseWithCashTokensOfSameCurrency", async (accounts) => {
     console.log("Via-EUR bond token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
-    let callbackOracleForBondIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackOracleForBondIssue.transactionHash);
+    //let callbackOracleForBondIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondIssue.transactionHash);
 
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
 
@@ -296,16 +296,16 @@ contract("BondPurchaseWithCashTokensOfSameCurrency", async (accounts) => {
     console.log("Via-EUR cash token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurCashAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[1]));  
     
-    let callbackOracleForCashIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackOracleForCashIssue.transactionHash);
+    //let callbackOracleForCashIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackOracleForCashIssue.transactionHash);
 
     console.log("Account Via-EUR cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[1]))));
     
     await viaeurCash.transferFrom(accounts[1], viaeurBondAddress, 100);
     console.log("Purchaser Account Via-EUR cash token balance after sending Via-EUR for Via-EUR bond purchase:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[1]))));
     
-    let callbackOracleForBondPurchase = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackOracleForBondPurchase.transactionHash);
+    //let callbackOracleForBondPurchase = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondPurchase.transactionHash);
 
     console.log("Purchaser Account Via-EUR bond token balance after purchase with Via-EUR cash :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[1]))));
         
@@ -348,14 +348,14 @@ contract("BondRedemptionByIssuerByReturningBonds", async (accounts) => {
     console.log("Via-USD bond token contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
-    let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
+    //let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
 
     console.log("Account Via-USD bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[0]))));
     
     await viausdBond.transferFrom(accounts[0], viausdBondAddress, 100);
-    let callbackForRedemption = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackForRedemption.transactionHash);
+    //let callbackForRedemption = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackForRedemption.transactionHash);
 
     console.log("Via-USD bond token contract ether balance after redeeming Via-USD bonds:", await web3.eth.getBalance(viausdBondAddress));
     console.log("Account ether balance after redeeming Via-USD bonds:", await web3.eth.getBalance(accounts[0]));
@@ -409,8 +409,8 @@ contract("BondRedemptionByIssuerByPayingCash", async (accounts) => {
     console.log("Via-EUR bond token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
-    let callbackOracleForBondIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackOracleForBondIssue.transactionHash);
+    //let callbackOracleForBondIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondIssue.transactionHash);
 
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
 
@@ -425,16 +425,16 @@ contract("BondRedemptionByIssuerByPayingCash", async (accounts) => {
     console.log("Via-USD cash token contract ether balance after sending ether:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[1]));  
     
-    let callbackOracleForCashIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackOracleForCashIssue.transactionHash);
+    //let callbackOracleForCashIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackOracleForCashIssue.transactionHash);
 
     console.log("Account Via-USD cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
     
     await viausdCash.transferFrom(accounts[1], viaeurBondAddress, 100);
     console.log("Account Via-USD cash token balance after sending Via-USD for Via-EUR bond purchase:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
     
-    let callbackOracleForBondPurchase = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackOracleForBondPurchase.transactionHash);
+    //let callbackOracleForBondPurchase = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondPurchase.transactionHash);
 
     console.log("Account Via-EUR bond token balance after purchase with Via-USD cash :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[1]))));
     
@@ -442,16 +442,16 @@ contract("BondRedemptionByIssuerByPayingCash", async (accounts) => {
     console.log("Via-EUR cash token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurCashAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
-    let callbackOracleForEURCashIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackOracleForEURCashIssue.transactionHash);
+    //let callbackOracleForEURCashIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackOracleForEURCashIssue.transactionHash);
 
     console.log("Issuer Account Via-EUR cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
     
     await viaeurCash.transferFrom(accounts[0], viaeurBondAddress, 1e18);
     console.log("Issuer Account Via-EUR cash token balance after sending Via-EUR for Via-EUR bond redemption:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
     
-    let callbackOracleForBondRedemption = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackOracleForBondRedemption.transactionHash);
+    //let callbackOracleForBondRedemption = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondRedemption.transactionHash);
 
     console.log("Purchaser Account Via-EUR bond token balance after redemption with Via-EUR cash :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[1]))));
     console.log("Issuer Account ether balance after redeeming Via-EUR bonds with Via-EUR cash:", await web3.eth.getBalance(accounts[0]));
@@ -503,8 +503,8 @@ contract("BondRedemptionByPurchasersWithIssuingCollateral", async (accounts) => 
     console.log("Via-EUR bond token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
-    let callbackOracleForBondIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackOracleForBondIssue.transactionHash);
+    //let callbackOracleForBondIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondIssue.transactionHash);
 
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
 
@@ -519,22 +519,22 @@ contract("BondRedemptionByPurchasersWithIssuingCollateral", async (accounts) => 
     console.log("Via-USD cash token contract ether balance after sending ether:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[1]));  
     
-    let callbackOracleForCashIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackOracleForCashIssue.transactionHash);
+    //let callbackOracleForCashIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackOracleForCashIssue.transactionHash);
 
     console.log("Account Via-USD cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
     
     await viausdCash.transferFrom(accounts[1], viaeurBondAddress, 100);
     console.log("Account Via-USD cash token balance after sending Via-USD for Via-EUR bond purchase:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
     
-    let callbackOracleForBondPurchase = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackOracleForBondPurchase.transactionHash);
+    //let callbackOracleForBondPurchase = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondPurchase.transactionHash);
 
     console.log("Account Via-EUR bond token balance after purchase with Via-USD cash :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[1]))));
   
     await viaeurBond.transferFrom(accounts[1], viaeurBondAddress, 100);
-    let callbackForRedemption = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackForRedemption.transactionHash);
+    //let callbackForRedemption = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+    //await truffleAssert.createTransactionResult(oracle, callbackForRedemption.transactionHash);
 
     console.log("Account Via-USD cash token balance after redeeming Via-EUR bonds:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
   });
@@ -546,4 +546,3 @@ contract("BondRedemptionByPurchasersWithIssuingCollateral", async (accounts) => 
   }
 
 });
-*/
