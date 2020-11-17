@@ -12,8 +12,9 @@ import "./abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "./utilities/StringUtils.sol";
+import "./utilities/Pausable.sol";
 
-contract Cash is ViaCash, ERC20, Initializable, Ownable {
+contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
 
     using stringutils for *;
 
@@ -32,6 +33,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
     string public name;
     string public symbol;
     bytes32 public cashtokenName;
+
 
     //mapping of buyers (address) to currency (bytes32) to deposit (bytes16) amounts they make against which via cash tokens are issued
     mapping(address => mapping(bytes32 => bytes16)) public deposits;
@@ -58,9 +60,10 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
 
     //mutex
     bool lock=false;
+    address private deployer;
 
     //initiliaze proxies
-    function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token) public initializer{
+    function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token, address _deployer) public initializer{
         Ownable.initialize(_owner);
         factory = ViaFactory(_owner);
         oracle = Oracle(_oracle);
@@ -68,6 +71,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
         name = string(abi.encodePacked(_name));
         symbol = string(abi.encodePacked(_type));
         cashtokenName = _name;
+        deployer = _deployer;
     }
 
     //handling pay in of ether for issue of via cash tokens
@@ -76,12 +80,16 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
         require(msg.value !=0);
         //only to pay in ether
         require(msg.data.length==0);
+        // contract must not be paused
+        require(paused == true);
         //issue via cash tokens
         issue(ABDKMathQuad.fromUInt(msg.value), msg.sender, "ether");
     }
 
     //overriding this function of ERC20 standard for transfer of via cash tokens to other users or to this contract for redemption
     function transferFrom(address sender, address receiver, uint256 tokens) public returns (bool){
+        // contract must not be paused
+        require(paused == true);
         //ensure sender has enough tokens in balance before transferring or redeeming them
         require(ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==1 ||
                 ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==0);
@@ -483,4 +491,13 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
         }
     }
     
+    // overriding these functions
+    function pause() public {
+        require(msg.sender == owner() || msg.sender == deployer);
+        paused = true;
+    }
+    function unpause() public {
+        require(msg.sender == owner() || msg.sender == deployer);
+        paused = false;
+    }
 }
