@@ -56,13 +56,11 @@ contract("IssuingViaUSD", async (accounts) => {
         console.log("Via-USD cash token contract ether balance after sending ether:", await web3.eth.getBalance(viausdCashAddress));
         console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
         
-        let callbackToViaOracle = getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-        callbackToViaOracle.then(function(){
-          truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
-        }).then(function(){
-          console.log("Via oracle ether balance after query:", web3.eth.getBalance(oracle.address));
-          console.log("Account Via-USD cash token balance after sending ether:", web3.utils.hexToNumberString(web3.utils.toHex(viausdCash.balanceOf(accounts[0]))));
-        })
+        let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+        await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
+          
+        console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
+        console.log("Account Via-USD cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
                 
     });
 
