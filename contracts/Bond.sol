@@ -563,14 +563,13 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
         }
     }
 
-    // overriding these functions
     function pause() public {
         require(msg.sender == owner() || msg.sender == deployer);
-        paused = true;
+        _pause();
     }
     function unpause() public {
         require(msg.sender == owner() || msg.sender == deployer);
-        paused = false;
+        _unpause();
     }
 
 }
