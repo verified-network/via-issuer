@@ -8,7 +8,8 @@ import "./provableAPI.sol";
 import "../interfaces/Oracle.sol";
 import "../utilities/StringUtils.sol";
 import "../interfaces/ViaFactory.sol";
-import "../interfaces/ViaCash.sol";
+//import "../interfaces/ViaCash.sol";
+import "../Cash.sol";
 import "../interfaces/ViaBond.sol";
 import "../abdk-libraries-solidity/ABDKMathQuad.sol";
 
@@ -64,13 +65,13 @@ contract ViaOracle is Oracle, usingProvable {
         emit LogResult(pendingQueries[_myid].caller, _myid, pendingQueries[_myid].tokenType, pendingQueries[_myid].rateType, _result);
         
         if(pendingQueries[_myid].tokenType == "Cash"){
-            ViaCash(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+            Cash(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "Bond"){
             ViaBond(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "EthCash"){
-            ViaCash(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+            Cash(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "EthBond"){
             ViaBond(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
