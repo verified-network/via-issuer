@@ -11,7 +11,7 @@ import "../interfaces/ViaFactory.sol";
 //import "../interfaces/ViaCash.sol";
 import "../Cash.sol";
 import "../Bond.sol";
-import "../interfaces/ViaBond.sol";
+//import "../interfaces/ViaBond.sol";
 import "../abdk-libraries-solidity/ABDKMathQuad.sol";
 
 contract ViaOracle is Oracle, usingProvable {
