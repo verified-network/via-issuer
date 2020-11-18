@@ -453,7 +453,7 @@ contract("BondRedemptionByIssuerByPayingCash", async (accounts) => {
 
     console.log("Issuer Account Via-EUR cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
     
-    await viaeurCash.transferFrom(accounts[0], viaeurBondAddress, 1e18);
+    await viaeurCash.transferFrom({from:accounts[0], to:viaeurBondAddress, value:1e18});
     console.log("Issuer Account Via-EUR cash token balance after sending Via-EUR for Via-EUR bond redemption:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
     
     //let callbackOracleForBondRedemption = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));

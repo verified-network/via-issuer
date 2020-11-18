@@ -224,8 +224,8 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                 bytes32 EthXid = "11";
                 bytes32 ViaXid = "22";
                 conversionQ[ViaXid] = conversion(buyer, "issue", currency, cashtokenName, EthXid, amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(0));
-                convert("11",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
-                convert("11",ABDKMathQuad.fromUInt("1.2".stringToUint()),"ver");                
+                convert("22",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
+                convert("22",ABDKMathQuad.fromUInt("1.2".stringToUint()),"ver");                
             }
         }
         //if ether is not paid in and instead, some other Via cash token is paid in
@@ -289,7 +289,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                     bytes32 EthXid = "11";
                     bytes32 ViaXid = "22";
                     conversionQ[ViaXid] = conversion(seller, "redeem", token, currency_in_deposit, EthXid, amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(0));
-                    convert("11",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
+                    convert("22",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
                     convert("22",ABDKMathQuad.fromUInt("1.2".stringToUint()),"ver");
                 }
             }
