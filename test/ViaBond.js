@@ -399,6 +399,11 @@ contract("BondRedemptionByIssuerByPayingCash", async (accounts) => {
     var viausdCashType = await web3.utils.hexToUtf8(await factory.getType(viausdCashAddress));
     var viausdCash = await Cash.at(viausdCashAddress);
 
+    var viaeurCashAddress = await factory.tokens(1);
+    var viaeurCashName = await web3.utils.hexToUtf8(await factory.getName(viaeurCashAddress));
+    var viaeurCashType = await web3.utils.hexToUtf8(await factory.getType(viaeurCashAddress));
+    var viaeurCash = await Cash.at(viaeurCashAddress);
+
     console.log(viaeurBondName, viaeurBondType, "token address:", viaeurBondAddress);
     console.log(viaeurBondName, viaeurBondType, "token contract ether balance before sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account address:", accounts[0]);
