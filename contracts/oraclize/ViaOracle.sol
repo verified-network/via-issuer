@@ -29,6 +29,7 @@ contract ViaOracle is Oracle, usingProvable {
         address payable caller;
         bytes32 tokenType;
         bytes32 rateType;
+        bytes32 callbackId;
     }
 
     uint constant CUSTOM_GASLIMIT = 500000;
@@ -63,19 +64,23 @@ contract ViaOracle is Oracle, usingProvable {
         //to do : lines below throw error
         require(msg.sender == provable_cbAddress());
 
-        emit LogResult(pendingQueries[_myid].caller, _myid, pendingQueries[_myid].tokenType, pendingQueries[_myid].rateType, _result);
+        bytes32 callbackId = _myid;
+        if(pendingQueries[_myid].callbackId!="")
+            callbackId = pendingQueries[_myid].callbackId;
+
+        emit LogResult(pendingQueries[_myid].caller, callbackId, pendingQueries[_myid].tokenType, pendingQueries[_myid].rateType, _result);
         
         if(pendingQueries[_myid].tokenType == "Cash"){
-            Cash(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+            Cash(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "Bond"){
-            Bond(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+            Bond(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "EthCash"){
-            Cash(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+            Cash(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "EthBond"){
-            Bond(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+            Bond(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
 
         delete pendingQueries[_myid]; 
@@ -93,23 +98,28 @@ contract ViaOracle is Oracle, usingProvable {
             if(_ratetype == "er" || _ratetype == "ver"){
                 //bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/er/",_currency,").rate")),CUSTOM_GASLIMIT);  
                 bytes32 queryId = provable_query("URL", "json(https://via-oracle.azurewebsites.net/rates/er/Via_USD_to_Via_EUR).rate",CUSTOM_GASLIMIT);
-                pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
+                pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype,"");
                 emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via exchange rates for ",_currency)));
                 return queryId;
             }
             else if(_ratetype == "ir"){
                 bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/ir/",_currency,").rate")),CUSTOM_GASLIMIT);
-                pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
+                pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype,"");
                 emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via interest rates for ",_currency)));
                 return queryId;
-                
             }
             else if(_ratetype == "ethusd"){
                 bytes32 queryId = provable_query("URL", "json(https://api.pro.coinbase.com/products/ETH-USD/ticker).price",CUSTOM_GASLIMIT);
-                pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
+                pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype,"");
                 emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for ETH-USD, standing by for the answer...")));
                 return queryId;
             }
         }        
     }
+
+    function setCallbackId(bytes32 _queryId, bytes32 _callbackId) external {
+        require(pendingQueries[_queryId].caller==msg.sender);
+        pendingQueries[_queryId].callbackId = _callbackId;
+    }
+
 }
