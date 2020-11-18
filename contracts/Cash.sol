@@ -60,18 +60,16 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
 
     //mutex
     bool lock=false;
-    address private deployer;
 
     //initiliaze proxies
-    function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token, address _deployer) public initializer{
+    function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token) public initializer{
         Ownable.initialize(_owner);
-        factory = ViaFactory(_owner);
+        factory = ViaFactory(msg.sender);
         oracle = Oracle(_oracle);
         viaoracle = _oracle;
         name = string(abi.encodePacked(_name));
         symbol = string(abi.encodePacked(_type));
         cashtokenName = _name;
-        deployer = _deployer;
     }
 
     //handling pay in of ether for issue of via cash tokens
@@ -492,11 +490,11 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
     }
     
     function pause() public {
-        require(msg.sender == owner() || msg.sender == deployer);
+        require(msg.sender == owner() || msg.sender == address(factory));
         _pause();
     }
     function unpause() public {
-        require(msg.sender == owner() || msg.sender == deployer);
+        require(msg.sender == owner() || msg.sender == address(factory));
         _unpause();
     }
 }
