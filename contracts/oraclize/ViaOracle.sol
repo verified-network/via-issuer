@@ -34,7 +34,7 @@ contract ViaOracle is Oracle, usingProvable {
 
     event LogNewProvableQuery(string description);
     event LogResult(address payable caller, bytes32 myid, bytes32 tokenType, bytes32 rateType, string result);
-
+    
     constructor()
         public
         payable
@@ -87,14 +87,15 @@ contract ViaOracle is Oracle, usingProvable {
         if (provable_getPrice("URL", CUSTOM_GASLIMIT) > address(this).balance) {
             emit LogNewProvableQuery("Provable query was NOT sent, please add some ETH to cover for the query fee!");
         } else {
+            string memory currency = _currency.bytes32ToString();
             if(_ratetype == "er" || _ratetype == "ver"){
-                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/er/",_currency,").rate")),CUSTOM_GASLIMIT);  
+                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/er/",currency,").rate")),CUSTOM_GASLIMIT);  
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
                 emit LogNewProvableQuery("Provable query was sent for Via exchange rates...");
                 return queryId;
             }
             else if(_ratetype == "ir"){
-                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/ir/",_currency,").rate")),CUSTOM_GASLIMIT);
+                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/ir/",currency,").rate")),CUSTOM_GASLIMIT);
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
                 emit LogNewProvableQuery("Provable query was sent for Via interest rates...");
                 return queryId;
