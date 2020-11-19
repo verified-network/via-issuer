@@ -8,8 +8,8 @@ import "./provableAPI.sol";
 import "../interfaces/Oracle.sol";
 import "../utilities/StringUtils.sol";
 import "../interfaces/ViaFactory.sol";
-//import "../interfaces/ViaCash.sol";
-import "../Cash.sol";
+import "../interfaces/ViaCash.sol";
+//import "../Cash.sol";
 import "../Bond.sol";
 //import "../interfaces/ViaBond.sol";
 import "../abdk-libraries-solidity/ABDKMathQuad.sol";
@@ -71,13 +71,13 @@ contract ViaOracle is Oracle, usingProvable {
         emit LogResult(pendingQueries[_myid].caller, callbackId, pendingQueries[_myid].tokenType, pendingQueries[_myid].rateType, _result);
         
         if(pendingQueries[_myid].tokenType == "Cash"){
-            Cash(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+            ViaCash(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "Bond"){
             Bond(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "EthCash"){
-            Cash(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+            ViaCash(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "EthBond"){
             Bond(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
@@ -95,9 +95,10 @@ contract ViaOracle is Oracle, usingProvable {
         if (provable_getPrice("URL", CUSTOM_GASLIMIT) > address(this).balance) {
             emit LogNewProvableQuery("Provable query was NOT sent, please add some ETH to cover for the query fee!");
         } else {
+            string memory currency = _currency.bytes32ToString();
             if(_ratetype == "er" || _ratetype == "ver"){
-                //bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/er/",_currency,").rate")),CUSTOM_GASLIMIT);  
-                bytes32 queryId = provable_query("URL", "json(https://via-oracle.azurewebsites.net/rates/er/Via_USD_to_Via_EUR).rate",CUSTOM_GASLIMIT);
+                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/er/",currency,").rate")),CUSTOM_GASLIMIT);  
+                //bytes32 queryId = provable_query("URL", "json(https://via-oracle.azurewebsites.net/rates/er/Via_USD_to_Via_EUR).rate",CUSTOM_GASLIMIT);
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype,"");
                 emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via exchange rates for ",_currency)));
                 return queryId;
