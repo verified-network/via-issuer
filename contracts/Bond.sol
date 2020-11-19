@@ -174,6 +174,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             if(bondName!="Via_USD"){
                 //bytes32 EthXid = oracle.request("eth","ethusd","EthBond", address(this));
                 //bytes32 ViaXid = oracle.request(string(abi.encodePacked("Via_USD_to_", bondName)).stringToBytes32(),"ver","EthBond", address(this));
+                //oracle.setCallbackId(EthXid,ViaXid);
                 bytes32 EthXid = "11";
                 bytes32 ViaXid = "22";
                 conversion memory c = conversionQ[ViaXid];
@@ -186,7 +187,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.bond_currency = bondName;
                 c.ViaXvalue =ABDKMathQuad.fromUInt(0);
                 convert("22","1.2","ver");
-                convert("11","451.25","ethusd");
+                convert("22","451.25","ethusd");
             }
             //if ether is paid into a Via-USD bond contract, issuing the bond token will only require the ether to Via-USD exchange rate. 
             else{
@@ -229,7 +230,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.ViaRateId = ViaRateId; 
                 c.ViaRateValue = ABDKMathQuad.fromUInt(0);
                 convert("33","7.6","er");
-                convert("44","1.5","ir");
+                convert("33","1.5","ir");
             }
             //if the via cash token paid in is the same denomination of this bond, we need to first find out if the pay in is for a purchase of bonds or repayment of an earlier issue
             else{
