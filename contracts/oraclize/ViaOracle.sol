@@ -34,7 +34,6 @@ contract ViaOracle is Oracle, usingProvable {
 
     event LogNewProvableQuery(string description);
     event LogResult(address payable caller, bytes32 myid, bytes32 tokenType, bytes32 rateType, string result);
-    event Currency(string currency);
     
     constructor()
         public
@@ -89,7 +88,6 @@ contract ViaOracle is Oracle, usingProvable {
             emit LogNewProvableQuery("Provable query was NOT sent, please add some ETH to cover for the query fee!");
         } else {
             string memory currency = _currency.bytes32ToString();
-            emit Currency(currency);
             if(_ratetype == "er" || _ratetype == "ver"){
                 bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/er/",currency,").rate")),CUSTOM_GASLIMIT);  
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
