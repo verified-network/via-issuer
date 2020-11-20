@@ -284,8 +284,6 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
             }*/
             //if currency that this cash token can be redeemed in is ether
             if(currency_in_deposit=="ether"){
-                balances[seller] = ABDKMathQuad.sub(balances[seller], amount);
-                balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
                 //if the cash token to redeem is a Via USD, all we need is the exchange rate of ether to the USD
                 if(token=="Via_USD"){
                     //bytes32 EthXid = oracle.request("eth","ethusd","Cash", address(this)); 
@@ -362,6 +360,8 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                 //and viaX (ie via exchange) should be non-zero if cash token to be redeemed is not Via-USD. We store 1 for ViaXvalue if Via-USD has to be redeemed
                 if(ABDKMathQuad.cmp(conversionQ[txId].EthXvalue, ABDKMathQuad.fromUInt(0))!=0 && ABDKMathQuad.cmp(conversionQ[txId].ViaXvalue, ABDKMathQuad.fromUInt(0))!=0){
                     bytes16 value = convertFromVia(conversionQ[txId].amount, conversionQ[txId].payout_currency,conversionQ[txId].EthXvalue,conversionQ[txId].ViaXvalue);
+                    balances[conversionQ[txId].party] = ABDKMathQuad.sub(balances[conversionQ[txId].party], conversionQ[txId].amount);
+                    balances[conversionQ[txId].counterparty] = ABDKMathQuad.add(balances[conversionQ[txId].counterparty], conversionQ[txId].amount);
                     finallyRedeem(value, conversionQ[txId].payout_currency, conversionQ[txId].party, conversionQ[txId].amount, conversionQ[txId].operation, conversionQ[txId].counterparty);
                 }
             }
@@ -370,6 +370,8 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                 //the viaX (ie via exchange rate) between the cash token to redeem and the cash token in deposit should be non-zero
                 if(ABDKMathQuad.cmp(conversionQ[txId].ViaXvalue, ABDKMathQuad.fromUInt(0))!=0){
                     bytes16 value = convertFromVia(conversionQ[txId].amount, conversionQ[txId].payout_currency,conversionQ[txId].EthXvalue,conversionQ[txId].ViaXvalue);
+                    balances[conversionQ[txId].party] = ABDKMathQuad.sub(balances[conversionQ[txId].party], conversionQ[txId].amount);
+                    balances[conversionQ[txId].counterparty] = ABDKMathQuad.add(balances[conversionQ[txId].counterparty], conversionQ[txId].amount);
                     finallyRedeem(value, conversionQ[txId].payout_currency, conversionQ[txId].party, conversionQ[txId].amount, conversionQ[txId].operation, conversionQ[txId].counterparty);
                 }
             }
