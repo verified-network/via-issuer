@@ -253,7 +253,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
     function redeem(bytes16 amount, address seller, bytes32 token, bytes32 operation, address receiver) private returns(bool){
         //if amount is not zero, there is some left to redeem
         if(amount != 0){
-            bytes32 currency_in_deposit;
+            bytes32 currency_in_deposit="";
             //find currency that seller had deposited earlier
             for(uint256 q=0; q<factory.getTokenCount(); q++){
                 address viaAddress = factory.getToken(q);
@@ -284,6 +284,8 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
             }*/
             //if currency that this cash token can be redeemed in is ether
             if(currency_in_deposit=="ether"){
+                balances[seller] = ABDKMathQuad.sub(balances[seller], amount);
+                balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
                 //if the cash token to redeem is a Via USD, all we need is the exchange rate of ether to the USD
                 if(token=="Via_USD"){
                     //bytes32 EthXid = oracle.request("eth","ethusd","Cash", address(this)); 
@@ -420,7 +422,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                     //generate event
                     emit ViaCashRedeemed(currency, value);
                 }
-                else{
+                else if(operation=="transfer"){
                     //transfer balances
                     balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
                     //transfer deposits
@@ -446,7 +448,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                     //generate event
                     emit ViaCashRedeemed(currency, deposits[party]["ether"]);
                 }
-                else{
+                else if(operation=="transfer"){
                     //transfer balances
                     balances[receiver] = ABDKMathQuad.add(balances[receiver], ABDKMathQuad.mul(amount, proportionRedeemed));
                     //transfer deposits
@@ -473,7 +475,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                             //generate event
                             emit ViaCashRedeemed(currency, value);
                         }
-                        else{
+                        else if(operation=="transfer"){
                             //transfer balances
                             balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
                             //transfer deposits
@@ -499,7 +501,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                             //generate event
                             emit ViaCashRedeemed(currency, deposits[party][currency]);
                         }
-                        else{
+                        else if(operation=="transfer"){
                             //transfer balances
                             balances[receiver] = ABDKMathQuad.add(balances[receiver], ABDKMathQuad.mul(amount, proportionRedeemed));
                             //transfer deposits

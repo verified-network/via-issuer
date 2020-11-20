@@ -316,14 +316,14 @@ contract("ViaUSDRedemptionAfterTransfer", async (accounts) => {
     console.log("Receiver Via-USD cash token balance before receiving Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
     console.log();
     
-    await viausdCash.transferFrom(accounts[0], accounts[1], 10);
+    await viausdCash.transferFrom(accounts[0], accounts[1], 100);
 
     console.log("Sender ether balance after sending Via-USD:", await web3.eth.getBalance(accounts[0]));
     console.log("Sender Via-USD cash token balance after sending Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
     console.log("Receiver ether balance after Via-USD is sent by sender:", await web3.eth.getBalance(accounts[1]));
     console.log("Receiver Via-USD cash token balance after receiving Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
   
-    await viausdCash.transferFrom(accounts[1], viausdCashAddress, 10);
+    await viausdCash.transferFrom(accounts[1], viausdCashAddress, 50);
     //let callbackForRedemption = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
     //await truffleAssert.createTransactionResult(oracle, callbackForRedemption.transactionHash);
 
@@ -370,7 +370,7 @@ contract("TransferViaUSD", async (accounts) => {
     console.log("Receiver Via-USD cash token balance before receiving Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
     console.log();
     
-    await viausdCash.transferFrom(accounts[0], accounts[1], 10);
+    await viausdCash.transferFrom(accounts[0], accounts[1], 100);
 
     console.log("Sender ether balance after sending Via-USD:", await web3.eth.getBalance(accounts[0]));
     console.log("Sender Via-USD cash token balance after sending Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
