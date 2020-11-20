@@ -98,10 +98,10 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
         else if(factory.getType(receiver)=="ViaCash"){
             //only issue if cash tokens are paid in, since bond tokens can't be paid to issue bond token
             if(Cash(address(uint160(receiver))).requestIssue(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName)){
-                /*require(!lock);
+                require(!lock);
                 lock = true;
                 //transfer sent tokens and its collateral to this contract's balance because that is required for redemption
-                if(transferToken(sender, address(this), tokens)){
+                /*if(transferToken(sender, address(this), tokens)){
                     //adjust total supply
                     totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.fromUInt(tokens));
                     lock = false; 
@@ -111,6 +111,10 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                     lock = false;
                     return false;
                 }*/
+                balances[sender] = ABDKMathQuad.sub(balances[sender], ABDKMathQuad.fromUInt(tokens));
+                //adjust total supply
+                totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.fromUInt(tokens));
+                lock = false; 
                 return true;                
             }
             else
