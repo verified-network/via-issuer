@@ -305,10 +305,13 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                                 //generate event
                                 emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(redemptionAmount), ABDKMathQuad.toUInt(purchases[payer][bondsIssued[q]].purchasedIssueAmount), subscribedDays);
                                 status = true;
+                                delete(purchases[payer][bondsIssued[q]]);
+                                delete(issues[payer][bondsIssued[q]].counterParties[p]);
+                                lock = false;
+                                break;
                             }
-                            delete(purchases[payer][bondsIssued[q]]);
-                            delete(issues[payer][bondsIssued[q]].counterParties[p]);    
-                            lock = false;                        
+                            else    
+                                lock = false;                        
                         }
                     }
                 }
@@ -316,23 +319,23 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             //find if the bond was issued to payer (issuer) earlier
             for(uint256 q=0; q<bondsIssued.length; q++){
                 if(ABDKMathQuad.cmp(ABDKMathQuad.sub(issues[payer][bondsIssued[q]].parValue, issues[payer][bondsIssued[q]].purchasedIssueAmount), amount)==0){
+                    require(!lock);
+                    lock = true;
                     //calculate redemption amount based on how much collateral is not encumbered
                     uint256 issuedDays = (issues[payer][bondsIssued[q]].timeSubscribed - now)/ 60 / 60 / 24;
                     bytes16 uncumberedAmount = ABDKMathQuad.sub(issues[payer][bondsIssued[q]].parValue, issues[payer][bondsIssued[q]].purchasedIssueAmount);
                     //if collateral is ether, transfer ether from issuer to issuer (redeemer) of bond
                     if(issues[payer][bondsIssued[q]].collateralCurrency=="ether"){
-                        //require(!lock);
-                        //lock = true;
                         //adjust total supply of this via bond
                         ViaToken(bondsIssued[q]).reduceSupply(amount);
                         //reduce payer's balance of bond held
                         ViaToken(bondsIssued[q]).reduceBalance(payer, amount);
                         //send redeemed ether to payer
                         address(uint160(payer)).transfer(ABDKMathQuad.toUInt(uncumberedAmount));
-                        //lock = false;
                         //generate event
                         emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(uncumberedAmount), ABDKMathQuad.toUInt(amount), issuedDays);
                         status = true;
+                        lock = false;
                     }
                     if(status && ABDKMathQuad.cmp(issues[payer][bondsIssued[q]].collateralAmount, amount)==0){
                         //if bond is redeemed in full by issuer, then remove issue from list of issues
@@ -344,7 +347,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                             purchases[issues[payer][bondsIssued[q]].counterParties[p]][bondsIssued[q]].collateralAmount = 
                             ABDKMathQuad.sub(purchases[issues[payer][bondsIssued[q]].counterParties[p]][bondsIssued[q]].collateralAmount, uncumberedAmount);
                         }
-                    }                    
+                    }   
+                    break;                 
                 }
             }
             return status;
@@ -357,8 +361,6 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             //find the bond that was issued by payer (issuer) earlier
             for(uint256 q=0; q<bondsIssued.length; q++){
                 if(ABDKMathQuad.cmp(amount, issues[payer][bondsIssued[q]].purchasedIssueAmount)==1){
-                    //require(!lock);
-                    //lock = true;
                     for(uint256 p=0; p<issues[payer][bondsIssued[q]].counterParties.length; p++){
                         status = false;
                         address cp = issues[payer][bondsIssued[q]].counterParties[p];
@@ -371,6 +373,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                                                         purchases[cp][bondsIssued[q]].price), 
                                                         ABDKMathQuad.div(ABDKMathQuad.fromUInt(subscribedDays),ABDKMathQuad.fromUInt(365))), 
                                                         purchases[cp][bondsIssued[q]].purchasedIssueAmount);
+                            require(!lock);
+                            lock = true;
                             //if amount available for redemption is more or equal to redemption amount for the purchaser
                             if(amount >= redemptionAmount){
                                 //send paid in amount to bond purchaser
@@ -397,7 +401,10 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                                         emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(balanceToRedeem), ABDKMathQuad.toUInt(purchases[cp][bondsIssued[q]].purchasedIssueAmount), subscribedDays);
                                     }
                                 }
-                            }  
+                                lock = false;
+                            }
+                            else
+                                lock = false;  
                         }
                         if(status)
                             //if a purchaser is redeemed, then delete its record from list of purchases
@@ -406,17 +413,19 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                             //if all bond purchasers are redeemed, then delete the issuer record
                             delete(issues[payer][bondsIssued[q]]);
                     }
-                    //find proportion to redeem
-                    bytes16 proportionToRedeem = ABDKMathQuad.div(totalToRedeem, issues[payer][bondsIssued[q]].purchasedIssueAmount);
-                    //returned redeemed proportion of collateral to payer (issuer)
-                    bytes16 etherToRedeem = ABDKMathQuad.mul(issues[payer][bondsIssued[q]].collateralAmount, ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1), proportionToRedeem));
-                    //send redeemed ether to payer
-                    address(uint160(payer)).transfer(ABDKMathQuad.toUInt(etherToRedeem));   
-                    //if any balance amount remains after redemptions, return the balance to the issuer
-                    if(amount>0){
-                        address(uint160(payer)).transfer(ABDKMathQuad.toUInt(amount));
+                    if(status){
+                        //find proportion to redeem
+                        bytes16 proportionToRedeem = ABDKMathQuad.div(totalToRedeem, issues[payer][bondsIssued[q]].purchasedIssueAmount);
+                        //returned redeemed proportion of collateral to payer (issuer)
+                        bytes16 etherToRedeem = ABDKMathQuad.mul(issues[payer][bondsIssued[q]].collateralAmount, ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1), proportionToRedeem));
+                        //send redeemed ether to payer
+                        address(uint160(payer)).transfer(ABDKMathQuad.toUInt(etherToRedeem));   
+                        //if any balance amount remains after redemptions, return the balance to the issuer
+                        if(amount>0){
+                            address(uint160(payer)).transfer(ABDKMathQuad.toUInt(amount));
+                        }
                     }
-                    //lock = false;
+                    break;
                 }
             }
             return status;
