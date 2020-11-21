@@ -4,9 +4,11 @@
 pragma solidity >=0.5.0 <0.7.0;
 
 import "./interfaces/ViaFactory.sol";
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/upgrades/contracts/upgradeability/ProxyFactory.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 
-contract Factory is ViaFactory, ProxyFactory {
+contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
 
     //data structure for token proxies
     struct via{
@@ -27,6 +29,10 @@ contract Factory is ViaFactory, ProxyFactory {
 
     event IssuerCreated(address indexed _address, bytes32 tokenName, bytes32 tokenType);
     event TokenCreated(address indexed _address, bytes32 tokenName, bytes32 tokenType);
+
+    function initialize() public initializer{
+        Ownable.initialize(msg.sender);
+    }
 
     function getTokenCount() external view returns(uint tokenCount) {
         return tokens.length;

@@ -8,13 +8,14 @@ import "./provableAPI.sol";
 import "../interfaces/Oracle.sol";
 import "../utilities/StringUtils.sol";
 import "../interfaces/ViaFactory.sol";
-//import "../interfaces/ViaCash.sol";
-import "../Cash.sol";
+import "../interfaces/ViaCash.sol";
+//import "../Cash.sol";
 import "../Bond.sol";
 //import "../interfaces/ViaBond.sol";
 import "../abdk-libraries-solidity/ABDKMathQuad.sol";
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
 
-contract ViaOracle is Oracle, usingProvable {
+contract ViaOracle is Oracle, usingProvable, Initializable {
 
     using stringutils for *;
 
@@ -49,7 +50,7 @@ contract ViaOracle is Oracle, usingProvable {
         provable_setCustomGasPrice(4000000000); // i.e. 4 GWei
     }
 
-    function initialize(address _factory) external {
+    function initialize(address _factory) external initializer{
         require(address(factory)==address(0x0));
         factory = ViaFactory(_factory);
     }                              
@@ -71,13 +72,13 @@ contract ViaOracle is Oracle, usingProvable {
         emit LogResult(pendingQueries[_myid].caller, callbackId, pendingQueries[_myid].tokenType, pendingQueries[_myid].rateType, _result);
         
         if(pendingQueries[_myid].tokenType == "Cash"){
-            Cash(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+            ViaCash(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "Bond"){
             Bond(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "EthCash"){
-            Cash(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+            ViaCash(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
         }
         else if(pendingQueries[_myid].tokenType == "EthBond"){
             Bond(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);

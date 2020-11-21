@@ -32,19 +32,19 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     //name of Via token (eg, Via-USD)
     string public name;
     string public symbol;
-    bytes32 public bondName;
     
     //token address
     address private token;
 
-    //symbol of bond sent by Token for transfer
+    //name and symbol of bond sent by Token for transfer
     bytes32 bondSymbol;
+    bytes32 public bondName;
 
     //forwarding token address
     address private forwarder;
 
     //a Via bond has some value, corresponds to a fiat currency
-    //can have many purchasers and a issuer that have agreed to a zero coupon rate which is the start price of the bond
+    //can have many purchasers and a issuer that have agreed to a zero coupon rate which determines the start price of the bond
     //and a tenure in unix timestamps of seconds counted from 1970-01-01. Via bonds are of one year tenure.
     struct bond{
         address[] counterParties;
@@ -90,7 +90,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     event ViaBondRedeemed(bytes32 currency, uint256 value, uint256 price, uint256 tenure);
 
     //mutex
-    bool lock=false;
+    bool lock;
 
     //initiliaze proxies
     function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token) public initializer {
@@ -102,6 +102,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
         symbol = string(abi.encodePacked(_type));
         bondName = _name;
         token = _token;
+        lock = false;
         decimals = 2;
     }
 

@@ -5,7 +5,7 @@ pragma solidity >=0.5.0 <0.7.0;
 
 import "../abdk-libraries-solidity/ABDKMathQuad.sol";
 
-contract ERC20{
+contract ERC20 {
 
     using ABDKMathQuad for uint256;
     using ABDKMathQuad for int256;
@@ -15,7 +15,7 @@ contract ERC20{
     address public issuer;
 
     //allowing 2-floating points for Via tokens
-    uint8 public decimals=2;
+    uint8 public decimals;
     
     //variables
     bytes16 totalSupply_;
