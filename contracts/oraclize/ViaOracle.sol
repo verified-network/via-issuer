@@ -9,9 +9,8 @@ import "../interfaces/Oracle.sol";
 import "../utilities/StringUtils.sol";
 import "../interfaces/ViaFactory.sol";
 import "../interfaces/ViaCash.sol";
-//import "../Cash.sol";
-import "../Bond.sol";
-//import "../interfaces/ViaBond.sol";
+import "../interfaces/ViaBond.sol";
+import "../interfaces/ViaCash.sol";
 import "../abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 
@@ -66,25 +65,26 @@ contract ViaOracle is Oracle, usingProvable, Initializable {
         require(msg.sender == provable_cbAddress());
 
         bytes32 callbackId = _myid;
-        if(pendingQueries[_myid].callbackId!="")
-            callbackId = pendingQueries[_myid].callbackId;
+        params memory mpramas = pendingQueries[_myid];
+        delete pendingQueries[_myid];
 
-        emit LogResult(pendingQueries[_myid].caller, callbackId, pendingQueries[_myid].tokenType, pendingQueries[_myid].rateType, _result);
+        if(mpramas.callbackId!="")
+            callbackId = mpramas.callbackId;
+
+        emit LogResult(mpramas.caller, callbackId, mpramas.tokenType, mpramas.rateType, _result);
         
-        if(pendingQueries[_myid].tokenType == "Cash"){
-            ViaCash(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+        if(mpramas.tokenType == "Cash"){
+            ViaCash(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
         }
-        else if(pendingQueries[_myid].tokenType == "Bond"){
-            Bond(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+        else if(mpramas.tokenType == "Bond"){
+            ViaBond(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
         }
-        else if(pendingQueries[_myid].tokenType == "EthCash"){
-            ViaCash(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+        else if(mpramas.tokenType == "EthCash"){
+            ViaCash(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
         }
-        else if(pendingQueries[_myid].tokenType == "EthBond"){
-            Bond(pendingQueries[_myid].caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
+        else if(mpramas.tokenType == "EthBond"){
+            ViaBond(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
         }
-
-        delete pendingQueries[_myid]; 
     }
 
     function request(bytes32 _currency, bytes32 _ratetype, bytes32 _tokenType, address payable _tokenContract)
