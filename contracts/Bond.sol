@@ -143,10 +143,18 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             address issuedBond = factory.getProduct(bondSymbol);
             if(issuedBond!=address(0x0)){
                 if(ABDKMathQuad.cmp(purchases[sender][issuedBond].purchasedIssueAmount, ABDKMathQuad.fromUInt(tokens))==0){
-                    purchases[receiver][issuedBond] = issues[sender][issuedBond];
-                    delete purchases[sender][issuedBond];
-                    if(ViaToken(issuedBond).transferToken(sender, receiver, tokens))
+                    require(!lock);
+                    lock = true;
+                    if(ViaToken(issuedBond).transferToken(sender, receiver, tokens)){
+                        purchases[receiver][issuedBond] = issues[sender][issuedBond];
+                        delete purchases[sender][issuedBond];
+                        lock = false;
                         return true;
+                    }
+                    else{
+                        lock = false;
+                        return false;
+                    }
                 }
                 return false;
             }
@@ -284,8 +292,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                             uint256 subscribedDays = (purchases[payer][bondsIssued[q]].timeSubscribed - now)/ 60 / 60 / 24;
                             bytes16 redemptionAmount = ABDKMathQuad.mul(ABDKMathQuad.mul(ABDKMathQuad.div(purchases[payer][bondsIssued[q]].parValue, purchases[payer][bondsIssued[q]].price), 
                                                         ABDKMathQuad.div(ABDKMathQuad.fromUInt(subscribedDays),ABDKMathQuad.fromUInt(365))), purchases[payer][bondsIssued[q]].purchasedIssueAmount);
-                            //require(!lock);
-                            //lock = true;
+                            require(!lock);
+                            lock = true;
                             //if collateral is ether, transfer ether from issuer to purchaser (redeemer) of bond
                             if(purchases[payer][bondsIssued[q]].collateralCurrency=="ether"){
                                 //adjust total supply of this via bond
@@ -300,7 +308,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                             }
                             delete(purchases[payer][bondsIssued[q]]);
                             delete(issues[payer][bondsIssued[q]].counterParties[p]);    
-                            //lock = false;                        
+                            lock = false;                        
                         }
                     }
                 }
@@ -462,9 +470,11 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     function finallyIssue(address payer, bytes16 parValue, bytes16 bondPrice, bytes16 paidInAmount, bytes32 paidInCashToken) private {
         bool found = false;
         if(paidInCashToken=="ether"){
+            require(!lock);
+            lock = true;
             uint256 issueTime = now;
             //issue bond which initializes a token with the attributes of the bond
-            address issuedBond = factory.createToken(token, bondName, bondSymbol, string(abi.encodePacked(address(this),issueTime)).stringToBytes32());
+            address issuedBond = factory.createToken(token, bondName, "ViaBond", string(abi.encodePacked(address(this),issueTime)).stringToBytes32());
             //adjust issued bonds to total supply first
             ViaToken(issuedBond).addTotalSupply(parValue);
             //first, add bond balance
@@ -483,7 +493,10 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 }
                 if(!found)
                     issuers.push(payer);
+                lock = false;
             }
+            else
+                lock = false;
         }
         //paid in amount is Via cash
         else{
@@ -510,8 +523,11 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                                 issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount = ABDKMathQuad.add(issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount, paidInAmount); 
                                 //add bond to purchaser's record
                                 storeBond("purchase", payer, issuers[i], parValue, bondPrice, issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount, paidInAmount, paidInCashToken, now, bondsIssued[q]);
+                                lock = false;
+                                break;
                             }
-                            lock = false;         
+                            else
+                                lock = false;         
                         }
                         else
                             lock = false;
