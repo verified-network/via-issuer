@@ -100,17 +100,6 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
             if(Cash(address(uint160(receiver))).requestIssue(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName)){
                 require(!lock);
                 lock = true;
-                //transfer sent tokens and its collateral to this contract's balance because that is required for redemption
-                /*if(transferToken(sender, address(this), tokens)){
-                    //adjust total supply
-                    totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.fromUInt(tokens));
-                    lock = false; 
-                    return true;
-                }
-                else{
-                    lock = false;
-                    return false;
-                }*/
                 balances[sender] = ABDKMathQuad.sub(balances[sender], ABDKMathQuad.fromUInt(tokens));
                 //adjust total supply
                 totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.fromUInt(tokens));
@@ -140,27 +129,6 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                 return false;
         }
     }
-
-    //transfer tokens between one user to another user account, or
-    //transfer tokens between one user account to this contract for future redemption
-    /*function transferToken(address sender, address receiver, uint256 tokens) private returns (bool){
-        require(ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==1 ||
-                ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==0);
-        
-        balances[sender] = ABDKMathQuad.sub(balances[sender], ABDKMathQuad.fromUInt(tokens));
-        balances[receiver] = ABDKMathQuad.add(balances[receiver], ABDKMathQuad.fromUInt(tokens));
-        //transfer paid in deposit from sender as well
-        for(uint256 q=0; q<factory.getTokenCount(); q++){
-            address viaAddress = factory.getToken(q);
-            (bytes32 tname, bytes32 ttype) = factory.getNameAndType(viaAddress);            
-            if(ttype == "ViaCash" && tname == cashtokenName){
-                deposits[receiver][cashtokenName] = ABDKMathQuad.add(deposits[receiver][cashtokenName], ABDKMathQuad.fromUInt(tokens));
-                deposits[sender][cashtokenName] = ABDKMathQuad.sub(deposits[sender][cashtokenName], ABDKMathQuad.fromUInt(tokens));
-                return true;
-            }
-        }
-        return false;
-    }*/
 
     //accessor for addToBalance function
     function requestAddToBalance(bytes16 tokens, address sender) external returns (bool){
@@ -266,22 +234,6 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
             //if no more currencies to redeem and amount to redeem is not zero, then redemption fails
             if(currency_in_deposit=="" && deposits[seller]["ether"]>0)
                 currency_in_deposit = "ether";
-            /*else if(currency_in_deposit==""){
-                //if seller has no deposits against paid in tokens, the tokens could have been transferred to this user from a redemption of tokens
-                //which were transferred to this user from another user
-                for(uint256 q=0; q<factory.getTokenCount(); q++){
-                    address viaAddress = factory.getToken(q);
-                    (bytes32 tname, bytes32 ttype) = factory.getNameAndType(viaAddress);
-                    if(ttype == "ViaCash" && deposits[address(this)][tname]>0){
-                        currency_in_deposit = tname;
-                        break;
-                    }
-                }
-                if(currency_in_deposit=="" && deposits[address(this)]["ether"]>0)
-                    currency_in_deposit = "ether";
-                else
-                    return false;
-            }*/
             //if currency that this cash token can be redeemed in is ether
             if(currency_in_deposit=="ether"){
                 //if the cash token to redeem is a Via USD, all we need is the exchange rate of ether to the USD
@@ -383,20 +335,13 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
         else{
             deposits[party][currency] = ABDKMathQuad.add(deposits[party][currency], amount);
         }
-        //if(currency=="ether"){
-            //add via to this contract's balance first (ie issue them first)
-            balances[address(this)] = ABDKMathQuad.add(balances[address(this)], via);
-            //transfer amount to buyer 
-            transfer(party, ABDKMathQuad.toUInt(via));
-            //adjust total supply
-            totalSupply_ = ABDKMathQuad.add(totalSupply_, via);
-        //}
-        //else{
-        //    balances[party] = ABDKMathQuad.add(balances[party], via);
-            //adjust total supply
-        //    totalSupply_ = ABDKMathQuad.add(totalSupply_, via);
-        //}
-        //generate event
+        //add via to this contract's balance first (ie issue them first)
+        balances[address(this)] = ABDKMathQuad.add(balances[address(this)], via);
+        //transfer amount to buyer 
+        transfer(party, ABDKMathQuad.toUInt(via));
+        //adjust total supply
+        totalSupply_ = ABDKMathQuad.add(totalSupply_, via);
+       //generate event
         emit Transfer(address(this), party, ABDKMathQuad.toUInt(via));
         emit ViaCashIssued(cashtokenName, via);
     }
