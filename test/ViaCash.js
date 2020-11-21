@@ -70,7 +70,7 @@ contract("IssuingViaUSD", async (accounts) => {
       });
     }
 });
-
+/*
 contract("IssuingViaEUR", async (accounts) => {
   it("should send ether to Via-EUR cash contract and then get some Via-EUR cash tokens", async () => {
       var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -277,6 +277,13 @@ contract("ViaEURRedemption", async (accounts) => {
       console.log("Account ether balance after sending Via-EUR:", await web3.eth.getBalance(accounts[0]));
       console.log("Account Via-EUR cash token balance after sending Via-EUR:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
   });
+
+  const getFirstEvent = (_event) => {
+    return new Promise((resolve, reject) => {
+      _event.once('data', resolve).once('error', reject)
+    });
+  }
+  
 });
 
 contract("ViaUSDRedemptionAfterTransfer", async (accounts) => {
@@ -331,6 +338,13 @@ contract("ViaUSDRedemptionAfterTransfer", async (accounts) => {
     console.log("Account ether balance after redeeming Via-USD:", await web3.eth.getBalance(accounts[1]));
     console.log("Account Via-USD cash token balance after redeeming Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
   });
+
+  const getFirstEvent = (_event) => {
+    return new Promise((resolve, reject) => {
+      _event.once('data', resolve).once('error', reject)
+    });
+  }
+
 });
 
 contract("TransferViaUSD", async (accounts) => {
@@ -470,4 +484,4 @@ contract("ViaUSDRedemptionAfterEURExchangeTransferAndRedemption", async (account
     });
   }
 
-});
+});*/

@@ -12,4 +12,6 @@ interface ViaCash{
 
     function requestDeductFromBalance(bytes16 tokens, address receiver) external returns (bytes16);
 
+    function transferFrom(address sender, address receiver, uint256 tokens) external returns (bool);
+
 }

@@ -20,7 +20,7 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
     bytes32 public product;
     string public symbol;
     bytes32 public tokenSymbol;
-    address payable issuer;
+    //address payable issuer;
 
 
     //initiliaze proxies

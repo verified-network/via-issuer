@@ -84,7 +84,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
     }
 
     //overriding this function of ERC20 standard for transfer of via cash tokens to other users or to this contract for redemption
-    function transferFrom(address sender, address receiver, uint256 tokens) public returns (bool){
+    function transferFrom(address sender, address receiver, uint256 tokens) external returns (bool){
         //ensure sender has enough tokens in balance before transferring or redeeming them
         require(ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))!=-1);// || 
                 //ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==0);

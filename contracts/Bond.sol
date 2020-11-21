@@ -166,7 +166,10 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
         require(amount != 0);
         //adds paid in amount to the paid in currency's cash balance
         if(currency!="ether")
-            if(!ViaCash(address(uint160(cashContract))).requestAddToBalance(amount, payer))
+            if(factory.getType(cashContract)=="ViaCash")
+                if(!ViaCash(address(uint160(cashContract))).requestAddToBalance(amount, payer))
+                    return false;
+            else
                 return false;
         //call Via Oracle to fetch data for bond pricing
         if(currency=="ether"){
@@ -240,7 +243,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     if(ABDKMathQuad.cmp(issues[payer][bondsIssued[q]].parValue, amount)==0 &&
                         issues[payer][bondsIssued[q]].counterParties[0]!=payer){
                         //if the paying in is for repayment of a bond already issued, then
-                        //transfer the paid in amount to the bond holder, release the collateral back to the issuer and extinguish the bond
+                        //transfer the paid in amount to the bond holders, release the collateral back to the issuer and extinguish the bond
                         found = true;
                         if(!redeem(amount, payer, currency, "ViaCash"))
                             return false;
@@ -489,15 +492,15 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     //check if there are enough issued bonds to be purchased
                     if(ABDKMathQuad.cmp(ABDKMathQuad.sub(issues[issuers[i]][bondsIssued[q]].parValue, issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount), paidInAmount)==0 ||
                         ABDKMathQuad.cmp(ABDKMathQuad.sub(issues[issuers[i]][bondsIssued[q]].parValue, issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount), paidInAmount)==1){
-                        //require(!lock);
-                        //lock = true;
+                        require(!lock);
+                        lock = true;
                         //if there is enough issued bonds, transfer bond from issuer to payer
                         if(ViaToken(bondsIssued[q]).requestTransfer(payer, ABDKMathQuad.toUInt(paidInAmount))){
                             //transfer cash paid in by purchaser to issuer from whom bond is transferred to purchaser
                             address viaAddress = factory.getIssuer("ViaCash", paidInCashToken);
                             if(viaAddress!=address(0x0)){
                                 //deduct paid out cash token from purchaser cash balance
-                                ViaCash(address(uint160(viaAddress))).requestDeductFromBalance(paidInAmount, issuers[i]);
+                                ViaCash(address(uint160(viaAddress))).transferFrom(payer, issuers[i], ABDKMathQuad.toUInt(paidInAmount));
                                 //add purchaser as counter party in issuer's record
                                 if(issues[issuers[i]][bondsIssued[q]].counterParties.length==1)
                                     issues[issuers[i]][bondsIssued[q]].counterParties[0] = payer;
@@ -507,9 +510,11 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                                 issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount = ABDKMathQuad.add(issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount, paidInAmount); 
                                 //add bond to purchaser's record
                                 storeBond("purchase", payer, issuers[i], parValue, bondPrice, issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount, paidInAmount, paidInCashToken, now, bondsIssued[q]);
-                            }         
+                            }
+                            lock = false;         
                         }
-                        //lock = false;
+                        else
+                            lock = false;
                     }
                 }
             }    
