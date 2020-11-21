@@ -1356,6 +1356,8 @@ interface Oracle{
         external
         payable
         returns (bytes32);
+    
+    function setCallbackId(bytes32 _queryId, bytes32 _callbackId) external;
 
 }
 
@@ -1469,6 +1471,8 @@ interface ViaCash{
     function requestAddToBalance(bytes16 tokens, address sender) external returns (bool);
 
     function requestDeductFromBalance(bytes16 tokens, address receiver) external returns (bytes16);
+
+    function transferFrom(address sender, address receiver, uint256 tokens) external returns (bool);
 
 }
 
@@ -2649,10 +2653,76 @@ library ABDKMathQuad {
   }
 }
 
+// File: @openzeppelin/upgrades/contracts/Initializable.sol
+
+pragma solidity >=0.4.24 <0.7.0;
+
+
+/**
+ * @title Initializable
+ *
+ * @dev Helper contract to support initializer functions. To use it, replace
+ * the constructor with a function that has the `initializer` modifier.
+ * WARNING: Unlike constructors, initializer functions must be manually
+ * invoked. This applies both to deploying an Initializable contract, as well
+ * as extending an Initializable contract via inheritance.
+ * WARNING: When used with inheritance, manual care must be taken to not invoke
+ * a parent initializer twice, or ensure that all initializers are idempotent,
+ * because this is not dealt with automatically as with constructors.
+ */
+contract Initializable {
+
+  /**
+   * @dev Indicates that the contract has been initialized.
+   */
+  bool private initialized;
+
+  /**
+   * @dev Indicates that the contract is in the process of being initialized.
+   */
+  bool private initializing;
+
+  /**
+   * @dev Modifier to use in the initializer function of a contract.
+   */
+  modifier initializer() {
+    require(initializing || isConstructor() || !initialized, "Contract instance has already been initialized");
+
+    bool isTopLevelCall = !initializing;
+    if (isTopLevelCall) {
+      initializing = true;
+      initialized = true;
+    }
+
+    _;
+
+    if (isTopLevelCall) {
+      initializing = false;
+    }
+  }
+
+  /// @dev Returns true if and only if the function is running in the constructor
+  function isConstructor() private view returns (bool) {
+    // extcodesize checks the size of the code stored in an address, and
+    // address returns the current address. Since the code is still not
+    // deployed when running a constructor, any checks on its code size will
+    // yield zero, making it an effective way to detect if a contract is
+    // under construction or not.
+    address self = address(this);
+    uint256 cs;
+    assembly { cs := extcodesize(self) }
+    return cs == 0;
+  }
+
+  // Reserved storage space to allow for layout changes in the future.
+  uint256[50] private ______gap;
+}
+
 // File: contracts/oraclize/ViaOracle.sol
 
 //(c) Kallol Borah, 2020
 // Via oracle client
+// SPDX-License-Identifier: MIT
 
 pragma solidity >=0.5.0 <0.7.0;
 
@@ -2663,7 +2733,9 @@ pragma solidity >=0.5.0 <0.7.0;
 
 
 
-contract ViaOracle is Oracle, usingProvable {
+
+
+contract ViaOracle is Oracle, usingProvable, Initializable {
 
     using stringutils for *;
 
@@ -2678,6 +2750,7 @@ contract ViaOracle is Oracle, usingProvable {
         address payable caller;
         bytes32 tokenType;
         bytes32 rateType;
+        bytes32 callbackId;
     }
 
     uint constant CUSTOM_GASLIMIT = 500000;
@@ -2697,7 +2770,7 @@ contract ViaOracle is Oracle, usingProvable {
         provable_setCustomGasPrice(4000000000); // i.e. 4 GWei
     }
 
-    function initialize(address _factory) external {
+    function initialize(address _factory) external initializer{
         require(address(factory)==address(0x0));
         factory = ViaFactory(_factory);
     }                              
@@ -2712,22 +2785,27 @@ contract ViaOracle is Oracle, usingProvable {
         //to do : lines below throw error
         require(msg.sender == provable_cbAddress());
 
-        emit LogResult(pendingQueries[_myid].caller, _myid, pendingQueries[_myid].tokenType, pendingQueries[_myid].rateType, _result);
-        
-        if(pendingQueries[_myid].tokenType == "Cash"){
-            ViaCash(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
-        }
-        else if(pendingQueries[_myid].tokenType == "Bond"){
-            ViaBond(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
-        }
-        else if(pendingQueries[_myid].tokenType == "EthCash"){
-            ViaCash(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
-        }
-        else if(pendingQueries[_myid].tokenType == "EthBond"){
-            ViaBond(pendingQueries[_myid].caller).convert(_myid, ABDKMathQuad.fromUInt(_result.stringToUint()), pendingQueries[_myid].rateType);
-        }
+        bytes32 callbackId = _myid;
+        params memory mpramas = pendingQueries[_myid];
+        delete pendingQueries[_myid];
 
-        delete pendingQueries[_myid]; 
+        if(mpramas.callbackId!="")
+            callbackId = mpramas.callbackId;
+
+        emit LogResult(mpramas.caller, callbackId, mpramas.tokenType, mpramas.rateType, _result);
+        
+        if(mpramas.tokenType == "Cash"){
+            ViaCash(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
+        }
+        else if(mpramas.tokenType == "Bond"){
+            ViaBond(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
+        }
+        else if(mpramas.tokenType == "EthCash"){
+            ViaCash(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
+        }
+        else if(mpramas.tokenType == "EthBond"){
+            ViaBond(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
+        }
     }
 
     function request(bytes32 _currency, bytes32 _ratetype, bytes32 _tokenType, address payable _tokenContract)
@@ -2739,25 +2817,32 @@ contract ViaOracle is Oracle, usingProvable {
         if (provable_getPrice("URL", CUSTOM_GASLIMIT) > address(this).balance) {
             emit LogNewProvableQuery("Provable query was NOT sent, please add some ETH to cover for the query fee!");
         } else {
+            string memory currency = _currency.bytes32ToString();
             if(_ratetype == "er" || _ratetype == "ver"){
-                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/er/",_currency,").rate")),CUSTOM_GASLIMIT);  
-                pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
-                emit LogNewProvableQuery("Provable query was sent for Via exchange rates...");
+                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/er/",currency,").rate")),CUSTOM_GASLIMIT);  
+                //bytes32 queryId = provable_query("URL", "json(https://via-oracle.azurewebsites.net/rates/er/Via_USD_to_Via_EUR).rate",CUSTOM_GASLIMIT);
+                pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype,"");
+                emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via exchange rates for ",_currency)));
                 return queryId;
             }
             else if(_ratetype == "ir"){
                 bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/ir/",_currency,").rate")),CUSTOM_GASLIMIT);
-                pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
-                emit LogNewProvableQuery("Provable query was sent for Via interest rates...");
+                pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype,"");
+                emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via interest rates for ",_currency)));
                 return queryId;
-                
             }
             else if(_ratetype == "ethusd"){
                 bytes32 queryId = provable_query("URL", "json(https://api.pro.coinbase.com/products/ETH-USD/ticker).price",CUSTOM_GASLIMIT);
-                pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype);
-                emit LogNewProvableQuery("Provable query was sent for ETH-USD, standing by for the answer...");
+                pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype,"");
+                emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for ETH-USD, standing by for the answer...")));
                 return queryId;
             }
         }        
     }
+
+    function setCallbackId(bytes32 _queryId, bytes32 _callbackId) external {
+        require(pendingQueries[_queryId].caller==msg.sender);
+        pendingQueries[_queryId].callbackId = _callbackId;
+    }
+
 }

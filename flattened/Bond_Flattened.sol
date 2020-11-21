@@ -1166,18 +1166,18 @@ library ABDKMathQuad {
 pragma solidity >=0.5.0 <0.7.0;
 
 
-contract ERC20{
+contract ERC20 {
 
     using ABDKMathQuad for uint256;
     using ABDKMathQuad for int256;
     using ABDKMathQuad for bytes16;
 
     //address of the issuer of the Via, set once, never reset again
-    address public issuer;
+    address payable issuer;
 
     //allowing 2-floating points for Via tokens
     uint8 public decimals;
-
+    
     //variables
     bytes16 totalSupply_;
 
@@ -1218,7 +1218,7 @@ contract ERC20{
         return ABDKMathQuad.toUInt(allowed[tokenOwner][spender]);
     }
 
-    function transferFrom(address owner, address buyer, uint tokens) public returns (bool){
+    function transferFrom(address owner, address buyer, uint tokens) external returns (bool){
         require(ABDKMathQuad.cmp(ABDKMathQuad.fromUInt(tokens), balances[owner])==-1 ||
                 ABDKMathQuad.cmp(ABDKMathQuad.fromUInt(tokens), balances[owner])==0);
         //require(ABDKMathQuad.cmp(ABDKMathQuad.fromUInt(tokens), balances[owner])==0);
@@ -1245,6 +1245,8 @@ interface Oracle{
         external
         payable
         returns (bytes32);
+    
+    function setCallbackId(bytes32 _queryId, bytes32 _callbackId) external;
 
 }
 
@@ -1469,6 +1471,8 @@ interface ViaCash{
 
     function requestDeductFromBalance(bytes16 tokens, address receiver) external returns (bytes16);
 
+    function transferFrom(address sender, address receiver, uint256 tokens) external returns (bool);
+
 }
 
 // File: contracts/interfaces/ViaBond.sol
@@ -1614,19 +1618,19 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     //name of Via token (eg, Via-USD)
     string public name;
     string public symbol;
-    bytes32 public bondName;
     
     //token address
     address private token;
 
-    //symbol of bond sent by Token for transfer
+    //name and symbol of bond sent by Token for transfer
     bytes32 bondSymbol;
+    bytes32 public bondName;
 
     //forwarding token address
     address private forwarder;
 
     //a Via bond has some value, corresponds to a fiat currency
-    //can have many purchasers and a issuer that have agreed to a zero coupon rate which is the start price of the bond
+    //can have many purchasers and a issuer that have agreed to a zero coupon rate which determines the start price of the bond
     //and a tenure in unix timestamps of seconds counted from 1970-01-01. Via bonds are of one year tenure.
     struct bond{
         address[] counterParties;
@@ -1672,7 +1676,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     event ViaBondRedeemed(bytes32 currency, uint256 value, uint256 price, uint256 tenure);
 
     //mutex
-    bool lock=false;
+    bool lock;
 
     //initiliaze proxies
     function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token) public initializer {
@@ -1684,6 +1688,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
         symbol = string(abi.encodePacked(_type));
         bondName = _name;
         token = _token;
+        lock = false;
         decimals = 2;
     }
 
@@ -1724,10 +1729,18 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             address issuedBond = factory.getProduct(bondSymbol);
             if(issuedBond!=address(0x0)){
                 if(ABDKMathQuad.cmp(purchases[sender][issuedBond].purchasedIssueAmount, ABDKMathQuad.fromUInt(tokens))==0){
-                    purchases[receiver][issuedBond] = issues[sender][issuedBond];
-                    delete purchases[sender][issuedBond];
-                    if(ViaToken(issuedBond).transferToken(sender, receiver, tokens))
+                    require(!lock);
+                    lock = true;
+                    if(ViaToken(issuedBond).transferToken(sender, receiver, tokens)){
+                        purchases[receiver][issuedBond] = issues[sender][issuedBond];
+                        delete purchases[sender][issuedBond];
+                        lock = false;
                         return true;
+                    }
+                    else{
+                        lock = false;
+                        return false;
+                    }
                 }
                 return false;
             }
@@ -1747,15 +1760,21 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
         require(amount != 0);
         //adds paid in amount to the paid in currency's cash balance
         if(currency!="ether")
-            if(!ViaCash(address(uint160(cashContract))).requestAddToBalance(amount, payer))
+            if(factory.getType(cashContract)=="ViaCash")
+                if(!ViaCash(address(uint160(cashContract))).requestAddToBalance(amount, payer))
+                    return false;
+            else
                 return false;
         //call Via Oracle to fetch data for bond pricing
         if(currency=="ether"){
             //if ether is paid into a non Via-USD bond contract, the bond contract will issue bond tokens of an equivalent face value.
             //To derive the bond's face value, the exchange rate of ether to Via-USD and then to the currency paid in is applied.
             if(bondName!="Via_USD"){
-                bytes32 EthXid = oracle.request("eth","ethusd","EthBond", address(this));
-                bytes32 ViaXid = oracle.request(string(abi.encodePacked("Via_USD_to_", bondName)).stringToBytes32(),"ver","EthBond", address(this));
+                //bytes32 EthXid = oracle.request("eth","ethusd","EthBond", address(this));
+                //bytes32 ViaXid = oracle.request(string(abi.encodePacked("Via_USD_to_", bondName)).stringToBytes32(),"ver","EthBond", address(this));
+                //oracle.setCallbackId(EthXid,ViaXid);
+                bytes32 EthXid = "11";
+                bytes32 ViaXid = "22";
                 conversion memory c = conversionQ[ViaXid];
                 c.operation = "issue";
                 c.party = payer;
@@ -1765,10 +1784,13 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.EthXvalue = ABDKMathQuad.fromUInt(0);
                 c.bond_currency = bondName;
                 c.ViaXvalue =ABDKMathQuad.fromUInt(0);
+                convert("22","1.2","ver");
+                convert("22","451.25","ethusd");
             }
             //if ether is paid into a Via-USD bond contract, issuing the bond token will only require the ether to Via-USD exchange rate. 
             else{
-                bytes32 EthXid = oracle.request("eth","ethusd","EthBond", address(this));
+                //bytes32 EthXid = oracle.request("eth","ethusd","EthBond", address(this));
+                bytes32 EthXid = "11";
                 conversion memory c = conversionQ[EthXid];
                 c.operation = "issue";
                 c.party = payer;
@@ -1778,6 +1800,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.EthXvalue = ABDKMathQuad.fromUInt(0);
                 c.bond_currency = bondName;
                 c.ViaXvalue =ABDKMathQuad.fromUInt(1);
+                convert("11","451.25","ethusd");
             }
         }
         //if a via cash token is paid into this bond contract
@@ -1785,14 +1808,16 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             //if the via cash token paid in is different from the denomination of this bond, 
             //tokens of this bond need to be transferred from an issuers' account after pricing the bond with applicable coupon rates
             if(currency!=bondName){
-                bytes32 ViaXid = oracle.request(string(abi.encodePacked(currency, "_to_", bondName)).stringToBytes32(),"er","Bond", address(this));                
-                bytes32 ViaRateId;
-                if(currency!="Via_USD"){
-                    ViaRateId = oracle.request(string(abi.encodePacked("Via_USD_to_", currency)).stringToBytes32(), "ir","Bond",address(this));
-                }
-                else{
-                    ViaRateId = oracle.request("USD", "ir","Bond",address(this));
-                }
+                //bytes32 ViaXid = oracle.request(string(abi.encodePacked(currency, "_to_", bondName)).stringToBytes32(),"er","Bond", address(this));                
+                //bytes32 ViaRateId;
+                //if(currency!="Via_USD"){
+                //    ViaRateId = oracle.request(string(abi.encodePacked("Via_USD_to_", currency)).stringToBytes32(), "ir","Bond",address(this));
+                //}
+                //else{
+                //    ViaRateId = oracle.request("USD", "ir","Bond",address(this));
+                //}
+                bytes32 ViaXid = "33";
+                bytes32 ViaRateId = "44";
                 conversion memory c = conversionQ[ViaXid];
                 c.operation = "issue";
                 c.party = payer;
@@ -1802,6 +1827,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.ViaXvalue =ABDKMathQuad.fromUInt(0);
                 c.ViaRateId = ViaRateId; 
                 c.ViaRateValue = ABDKMathQuad.fromUInt(0);
+                convert("33","7.6","er");
+                convert("33","1.5","ir");
             }
             //if the via cash token paid in is the same denomination of this bond, we need to first find out if the pay in is for a purchase of bonds or repayment of an earlier issue
             else{
@@ -1810,7 +1837,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     if(ABDKMathQuad.cmp(issues[payer][bondsIssued[q]].parValue, amount)==0 &&
                         issues[payer][bondsIssued[q]].counterParties[0]!=payer){
                         //if the paying in is for repayment of a bond already issued, then
-                        //transfer the paid in amount to the bond holder, release the collateral back to the issuer and extinguish the bond
+                        //transfer the paid in amount to the bond holders, release the collateral back to the issuer and extinguish the bond
                         found = true;
                         if(!redeem(amount, payer, currency, "ViaCash"))
                             return false;
@@ -1819,7 +1846,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 //if the paying in is not for repayment of a bond already issued, then
                 //tokens of this bond need to be transferred from an issuer's account after pricing the bond with the domestic (paid in currency) coupon rates
                 if(!found){
-                    bytes32 ViaRateId = oracle.request(currency, "ir","Bond",address(this));
+                    //bytes32 ViaRateId = oracle.request(currency, "ir","Bond",address(this));
+                    bytes32 ViaRateId = "44";
                     conversion memory c = conversionQ[ViaRateId];
                     c.operation = "issue";
                     c.party = payer;
@@ -1829,6 +1857,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     c.ViaXvalue =ABDKMathQuad.fromUInt(1);
                     c.ViaRateId = ViaRateId; 
                     c.ViaRateValue = ABDKMathQuad.fromUInt(0);
+                    convert("44","1.5","ir");
                 }                
             }
         }
@@ -1845,12 +1874,12 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 if(ABDKMathQuad.cmp(purchases[payer][bondsIssued[q]].purchasedIssueAmount, amount)==0){
                     for(uint256 p=0; p<issues[purchases[payer][bondsIssued[q]].counterParties[0]][bondsIssued[q]].counterParties.length; p++){
                         if(payer==issues[purchases[payer][bondsIssued[q]].counterParties[0]][bondsIssued[q]].counterParties[p]){
-                            require(!lock);
-                            lock = true;
                             //calculate redemption amount based on duration of holding by bond subscriber
                             uint256 subscribedDays = (purchases[payer][bondsIssued[q]].timeSubscribed - now)/ 60 / 60 / 24;
                             bytes16 redemptionAmount = ABDKMathQuad.mul(ABDKMathQuad.mul(ABDKMathQuad.div(purchases[payer][bondsIssued[q]].parValue, purchases[payer][bondsIssued[q]].price), 
                                                         ABDKMathQuad.div(ABDKMathQuad.fromUInt(subscribedDays),ABDKMathQuad.fromUInt(365))), purchases[payer][bondsIssued[q]].purchasedIssueAmount);
+                            require(!lock);
+                            lock = true;
                             //if collateral is ether, transfer ether from issuer to purchaser (redeemer) of bond
                             if(purchases[payer][bondsIssued[q]].collateralCurrency=="ether"){
                                 //adjust total supply of this via bond
@@ -1862,10 +1891,13 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                                 //generate event
                                 emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(redemptionAmount), ABDKMathQuad.toUInt(purchases[payer][bondsIssued[q]].purchasedIssueAmount), subscribedDays);
                                 status = true;
+                                delete(purchases[payer][bondsIssued[q]]);
+                                delete(issues[payer][bondsIssued[q]].counterParties[p]);
+                                lock = false;
+                                break;
                             }
-                            delete(purchases[payer][bondsIssued[q]]);
-                            delete(issues[payer][bondsIssued[q]].counterParties[p]);
-                            lock = false;
+                            else    
+                                lock = false;                        
                         }
                     }
                 }
@@ -1889,6 +1921,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                         //generate event
                         emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(uncumberedAmount), ABDKMathQuad.toUInt(amount), issuedDays);
                         status = true;
+                        lock = false;
                     }
                     if(status && ABDKMathQuad.cmp(issues[payer][bondsIssued[q]].collateralAmount, amount)==0){
                         //if bond is redeemed in full by issuer, then remove issue from list of issues
@@ -1900,8 +1933,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                             purchases[issues[payer][bondsIssued[q]].counterParties[p]][bondsIssued[q]].collateralAmount = 
                             ABDKMathQuad.sub(purchases[issues[payer][bondsIssued[q]].counterParties[p]][bondsIssued[q]].collateralAmount, uncumberedAmount);
                         }
-                    }
-                    lock = false;
+                    }   
+                    break;                 
                 }
             }
             return status;
@@ -1914,8 +1947,6 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             //find the bond that was issued by payer (issuer) earlier
             for(uint256 q=0; q<bondsIssued.length; q++){
                 if(ABDKMathQuad.cmp(amount, issues[payer][bondsIssued[q]].purchasedIssueAmount)==1){
-                    require(!lock);
-                    lock = true;
                     for(uint256 p=0; p<issues[payer][bondsIssued[q]].counterParties.length; p++){
                         status = false;
                         address cp = issues[payer][bondsIssued[q]].counterParties[p];
@@ -1928,6 +1959,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                                                         purchases[cp][bondsIssued[q]].price), 
                                                         ABDKMathQuad.div(ABDKMathQuad.fromUInt(subscribedDays),ABDKMathQuad.fromUInt(365))), 
                                                         purchases[cp][bondsIssued[q]].purchasedIssueAmount);
+                            require(!lock);
+                            lock = true;
                             //if amount available for redemption is more or equal to redemption amount for the purchaser
                             if(amount >= redemptionAmount){
                                 //send paid in amount to bond purchaser
@@ -1954,7 +1987,10 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                                         emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(balanceToRedeem), ABDKMathQuad.toUInt(purchases[cp][bondsIssued[q]].purchasedIssueAmount), subscribedDays);
                                     }
                                 }
-                            }  
+                                lock = false;
+                            }
+                            else
+                                lock = false;  
                         }
                         if(status)
                             //if a purchaser is redeemed, then delete its record from list of purchases
@@ -1963,17 +1999,19 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                             //if all bond purchasers are redeemed, then delete the issuer record
                             delete(issues[payer][bondsIssued[q]]);
                     }
-                    //find proportion to redeem
-                    bytes16 proportionToRedeem = ABDKMathQuad.div(totalToRedeem, issues[payer][bondsIssued[q]].purchasedIssueAmount);
-                    //returned redeemed proportion of collateral to payer (issuer)
-                    bytes16 etherToRedeem = ABDKMathQuad.mul(issues[payer][bondsIssued[q]].collateralAmount, ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1), proportionToRedeem));
-                    //send redeemed ether to payer
-                    address(uint160(payer)).transfer(ABDKMathQuad.toUInt(etherToRedeem));   
-                    //if any balance amount remains after redemptions, return the balance to the issuer
-                    if(amount>0){
-                        address(uint160(payer)).transfer(ABDKMathQuad.toUInt(amount));
+                    if(status){
+                        //find proportion to redeem
+                        bytes16 proportionToRedeem = ABDKMathQuad.div(totalToRedeem, issues[payer][bondsIssued[q]].purchasedIssueAmount);
+                        //returned redeemed proportion of collateral to payer (issuer)
+                        bytes16 etherToRedeem = ABDKMathQuad.mul(issues[payer][bondsIssued[q]].collateralAmount, ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1), proportionToRedeem));
+                        //send redeemed ether to payer
+                        address(uint160(payer)).transfer(ABDKMathQuad.toUInt(etherToRedeem));   
+                        //if any balance amount remains after redemptions, return the balance to the issuer
+                        if(amount>0){
+                            address(uint160(payer)).transfer(ABDKMathQuad.toUInt(amount));
+                        }
                     }
-                    lock = false;
+                    break;
                 }
             }
             return status;
@@ -1981,8 +2019,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     }
 
     //function called back from Oraclize
-    function convert(bytes32 txId, bytes16 result, bytes32 rtype) external {
-        require(viaoracle == msg.sender);
+    function convert(bytes32 txId, bytes16 result, bytes32 rtype) public {
+        //require(viaoracle == msg.sender);
         //check type of result returned
         if(rtype =="ethusd"){
             conversionQ[txId].EthXvalue = result;
@@ -2027,9 +2065,11 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     function finallyIssue(address payer, bytes16 parValue, bytes16 bondPrice, bytes16 paidInAmount, bytes32 paidInCashToken) private {
         bool found = false;
         if(paidInCashToken=="ether"){
+            require(!lock);
+            lock = true;
             uint256 issueTime = now;
             //issue bond which initializes a token with the attributes of the bond
-            address issuedBond = factory.createToken(token, bondName, bondSymbol, string(abi.encodePacked(address(this),issueTime)).stringToBytes32());
+            address issuedBond = factory.createToken(token, bondName, "ViaBond", string(abi.encodePacked(address(this),issueTime)).stringToBytes32());
             //adjust issued bonds to total supply first
             ViaToken(issuedBond).addTotalSupply(parValue);
             //first, add bond balance
@@ -2048,7 +2088,10 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 }
                 if(!found)
                     issuers.push(payer);
+                lock = false;
             }
+            else
+                lock = false;
         }
         //paid in amount is Via cash
         else{
@@ -2065,7 +2108,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                             address viaAddress = factory.getIssuer("ViaCash", paidInCashToken);
                             if(viaAddress!=address(0x0)){
                                 //deduct paid out cash token from purchaser cash balance
-                                ViaCash(address(uint160(viaAddress))).requestDeductFromBalance(paidInAmount, issuers[i]);
+                                ViaCash(address(uint160(viaAddress))).transferFrom(payer, issuers[i], ABDKMathQuad.toUInt(paidInAmount));
                                 //add purchaser as counter party in issuer's record
                                 if(issues[issuers[i]][bondsIssued[q]].counterParties.length==1)
                                     issues[issuers[i]][bondsIssued[q]].counterParties[0] = payer;
@@ -2075,9 +2118,14 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                                 issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount = ABDKMathQuad.add(issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount, paidInAmount); 
                                 //add bond to purchaser's record
                                 storeBond("purchase", payer, issuers[i], parValue, bondPrice, issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount, paidInAmount, paidInCashToken, now, bondsIssued[q]);
-                            }         
+                                lock = false;
+                                break;
+                            }
+                            else
+                                lock = false;         
                         }
-                        lock = false;
+                        else
+                            lock = false;
                     }
                 }
             }    
