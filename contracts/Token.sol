@@ -7,6 +7,7 @@ pragma solidity >=0.5.0 <0.7.0;
 import "./erc/ERC20.sol";
 import "./interfaces/ViaBond.sol";
 import "./interfaces/ViaToken.sol";
+import "./interfaces/ViaFactory.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "./abdk-libraries-solidity/ABDKMathQuad.sol";
@@ -21,12 +22,13 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
     bytes32 public product;
     string public symbol;
     bytes32 public tokenSymbol;
-    //address payable issuer;
 
+    ViaFactory private factory;
 
     //initiliaze proxies
-    function initialize(bytes32 _name, address payable _owner, bytes32 _product, bytes32 _symbol) public initializer{
+    function initialize(address _factory, bytes32 _name, address payable _owner, bytes32 _product, bytes32 _symbol) public initializer{
         Ownable.initialize(_owner);
+        factory = ViaFactory(_factory);
         issuer = _owner;
         name = string(abi.encodePacked(_name));
         symbol = string(abi.encodePacked(_symbol));
@@ -82,11 +84,18 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
         return false;
     }   
 
-
     function requestTransfer(address receiver, uint tokens) external returns (bool){
         require(issuer==msg.sender);
         transfer(receiver, tokens);
         emit Transfer(address(this), receiver, tokens);
-    }    
+    }  
+
+    function requestIssue(bytes16 amount, address payer, bytes32 currency, address cashContract) external returns(bool){
+        require(factory.getType(msg.sender) == "ViaCash");
+        if(ViaBond(issuer).requestIssue(amount, payer, currency, cashContract))
+            return true;
+        else
+            return false;
+    }  
 
 }

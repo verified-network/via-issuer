@@ -8,6 +8,7 @@ import "./interfaces/Oracle.sol";
 import "./interfaces/ViaFactory.sol";
 import "./interfaces/ViaCash.sol";
 import "./interfaces/ViaBond.sol";
+import "./interfaces/ViaToken.sol";
 import "./abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
@@ -116,6 +117,13 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
         //else if cash tokens are paid into bond issuers, then request for issue of bonds
         else if(factory.getType(receiver)=="ViaBond"){
             if(ViaBond(address(uint160(receiver))).requestIssue(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName, address(this)))
+                    return true;
+                else
+                    return false;
+        }
+        //else check if cash tokens are paid into any specific bond token for purchase
+        else if(factory.getType(receiver)=="ViaBondToken"){
+            if(ViaToken(address(uint160(receiver))).requestIssue(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName, address(this)))
                     return true;
                 else
                     return false;

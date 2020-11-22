@@ -17,4 +17,6 @@ interface ViaToken{
 
     function requestTransfer(address receiver, uint tokens) external returns (bool);
 
+    function requestIssue(bytes16 amount, address payer, bytes32 currency, address cashContract) external returns(bool);
+
 }

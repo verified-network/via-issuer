@@ -92,10 +92,12 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         require(token[msg.sender].tokenType == "ViaBond");
         address _owner = msg.sender;
 
-        bytes memory _payload = abi.encodeWithSignature("initialize(bytes32,address,bytes32,bytes32)", tokenName, _owner, tokenProduct, tokenSymbol);
+        bytes memory _payload = abi.encodeWithSignature("initialize(address,bytes32,address,bytes32,bytes32)", address(this), tokenName, _owner, tokenProduct, tokenSymbol);
 
         // Deploy proxy
         address _token = deployMinimal(_target, _payload);
+        token[_token] = via("ViaBondToken", tokenName);
+        tokens.push(_token);
         products[tokenSymbol] = _token;       
         emit TokenCreated(_token, tokenName, tokenProduct);
         return _token;
