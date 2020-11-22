@@ -81,7 +81,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     mapping(bytes32 => conversion) private conversionQ;
 
     //events to capture and report to Via oracle
-    event ViaBondIssued(bytes32 currency, uint256 value, uint256 price, uint256 tenure);
+    event ViaBondIssued(address token, bytes32 currency, uint256 value, uint256 price, uint256 tenure);
     event ViaBondRedeemed(bytes32 currency, uint256 value, uint256 price, uint256 tenure);
 
     //mutex
@@ -457,11 +457,12 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     //issue bond tokens if ether is paid in, or transfer bond tokens if via cash tokens are paid in
     function finallyIssue(address payer, bytes16 parValue, bytes16 bondPrice, bytes16 paidInAmount, bytes32 paidInCashToken) private {
         bool found = false;
+        address issuedBond;
         if(paidInCashToken=="ether"){
             //issue bond tokens with paid in ether
             uint256 issueTime = now;
             //issue bond which initializes a token with the attributes of the bond
-            address issuedBond = factory.createToken(token, bondName, "ViaBond", string(abi.encodePacked(address(this),issueTime)).stringToBytes32());
+            issuedBond = factory.createToken(token, bondName, "ViaBond", string(abi.encodePacked(address(this),issueTime)).stringToBytes32());
             //adjust issued bonds to total supply first
             ViaToken(issuedBond).addTotalSupply(parValue);
             //first, add bond balance
@@ -493,6 +494,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                         lock = true;
                         //if there is enough issued bonds, transfer bond from issuer to payer
                         if(ViaToken(bondsIssued[q]).transferToken(issuers[i], payer, ABDKMathQuad.toUInt(paidInAmount))){
+                            issuedBond = bondsIssued[q];
                             //transfer cash paid in by purchaser to issuer from whom bond is transferred to purchaser
                             address viaAddress = factory.getIssuer("ViaCash", paidInCashToken);
                             if(viaAddress!=address(0x0)){
@@ -520,7 +522,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             }    
         }
         //generate event
-        emit ViaBondIssued(bondName, ABDKMathQuad.toUInt(parValue), ABDKMathQuad.toUInt(paidInAmount), 1);
+        emit ViaBondIssued(issuedBond, bondName, ABDKMathQuad.toUInt(parValue), ABDKMathQuad.toUInt(paidInAmount), 1);
     }
 
     //convert given currency and amount to via cash token
