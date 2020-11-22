@@ -144,18 +144,13 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             address issuedBond = factory.getProduct(bondSymbol);
             if(issuedBond!=address(0x0)){
                 if(ABDKMathQuad.cmp(purchases[sender][issuedBond].purchasedIssueAmount, ABDKMathQuad.fromUInt(tokens))==0){
-                    require(!lock);
-                    lock = true;
                     if(ViaToken(issuedBond).transferToken(sender, receiver, tokens)){
                         purchases[receiver][issuedBond] = issues[sender][issuedBond];
                         delete purchases[sender][issuedBond];
-                        lock = false;
                         return true;
                     }
-                    else{
-                        lock = false;
+                    else
                         return false;
-                    }
                 }
                 return false;
             }
@@ -480,8 +475,6 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     function finallyIssue(address payer, bytes16 parValue, bytes16 bondPrice, bytes16 paidInAmount, bytes32 paidInCashToken) private {
         bool found = false;
         if(paidInCashToken=="ether"){
-            require(!lock);
-            lock = true;
             uint256 issueTime = now;
             //issue bond which initializes a token with the attributes of the bond
             address issuedBond = factory.createToken(token, bondName, "ViaBond", string(abi.encodePacked(address(this),issueTime)).stringToBytes32());
@@ -503,10 +496,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 }
                 if(!found)
                     issuers.push(payer);
-                lock = false;
             }
-            else
-                lock = false;
         }
         //paid in amount is Via cash
         else{
