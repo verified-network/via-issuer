@@ -108,7 +108,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
         //only to pay in ether
         require(msg.data.length==0);
         //issue via bond tokens
-        issue(ABDKMathQuad.fromUInt(msg.value), msg.sender, "ether", address(this));
+        issue(ABDKMathQuad.fromUInt(msg.value), msg.sender, "ether", address(this), address(0x0));
     }
 
     //forwarding call from issued bond token if at all such a call arrives
@@ -125,7 +125,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
         //check if tokens are being transferred to this bond contract
         if(receiver == address(this) || receiver == forwarder){
             //if token name is the same, this transfer has to be redeemed
-            if(redeem(ABDKMathQuad.fromUInt(tokens), sender, bondName, "ViaBond"))
+            if(redeem(ABDKMathQuad.fromUInt(tokens), sender, bondName, "ViaBond", forwarder))
                 return true;
             else
                 return false;
@@ -152,17 +152,23 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     }
 
     function requestIssue(bytes16 amount, address payer, bytes32 currency, address cashContract) external returns(bool){
-        require(factory.getType(msg.sender) == "ViaCash");
-        return(issue(amount, payer, currency, cashContract));
+        require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBondToken");
+        if(factory.getType(msg.sender) == "ViaCash")
+            return(issue(amount, payer, currency, cashContract, address(0x0)));
+        else if(factory.getType(msg.sender) == "ViaBondToken")
+            return(issue(amount, payer, currency, cashContract, msg.sender));
+        else
+            return false;
     }
 
     //requesting issue of Via bonds to payer (issuer) that can pay in ether, or 
     //requesting transfer of Via bonds to payer (buyer) that can pay in via cash tokens
-    function issue(bytes16 amount, address payer, bytes32 currency, address cashContract) private returns(bool){
+    function issue(bytes16 amount, address payer, bytes32 currency, address cashContract, address tokenContract) private returns(bool){
         //ensure that brought amount is not zero
         require(amount != 0);
         //adds paid in amount to the paid in currency's cash balance
         if(currency!="ether")
+            //non ether currency (or via cash tokens) can be paid in to purchase bonds by non-issuers or redeem bonds by issuer
             if(factory.getType(cashContract)=="ViaCash")
                 if(!ViaCash(address(uint160(cashContract))).requestAddToBalance(amount, payer))
                     return false;
@@ -222,7 +228,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 bytes32 ViaXid = "33";
                 bytes32 ViaRateId = "44";
                 conversion memory c = conversionQ[ViaXid];
-                c.operation = "issue";
+                c.operation = "purchase";
                 c.party = payer;
                 c.amount = amount;
                 c.paid_in_currency = currency;
@@ -235,24 +241,20 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             }
             //if the via cash token paid in is the same denomination of this bond, we need to first find out if the pay in is for a purchase of bonds or repayment of an earlier issue
             else{
-                bool found = false;
-                for(uint256 q=0; q<bondsIssued.length; q++){
-                    if(ABDKMathQuad.cmp(issues[payer][bondsIssued[q]].parValue, amount)==0 &&
-                        issues[payer][bondsIssued[q]].counterParties[0]!=payer){
-                        //if the paying in is for repayment of a bond already issued, then
-                        //transfer the paid in amount to the bond holders, release the collateral back to the issuer and extinguish the bond
-                        found = true;
-                        if(!redeem(amount, payer, currency, "ViaCash"))
-                            return false;
-                    }
+                if(ABDKMathQuad.cmp(issues[payer][tokenContract].parValue, amount)==0 &&
+                    issues[payer][tokenContract].counterParties[0]!=payer){
+                    //if the paying in is for repayment of a bond already issued, then
+                    //transfer the paid in amount to the bond holders, release the collateral back to the issuer and extinguish the bond
+                    if(!redeem(amount, payer, currency, "ViaCash", tokenContract))
+                        return false;
                 }
                 //if the paying in is not for repayment of a bond already issued, then
                 //tokens of this bond need to be transferred from an issuer's account after pricing the bond with the domestic (paid in currency) coupon rates
-                if(!found){
+                else{
                     //bytes32 ViaRateId = oracle.request(currency, "ir","Bond",address(this));
                     bytes32 ViaRateId = "44";
                     conversion memory c = conversionQ[ViaRateId];
-                    c.operation = "issue";
+                    c.operation = "purchase";
                     c.party = payer;
                     c.amount = amount;
                     c.paid_in_currency = currency;
@@ -268,153 +270,139 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     }
 
     //requesting redemption of Via bonds and transfer of ether or via cash collateral to issuer 
-    function redeem(bytes16 amount, address payer, bytes32 tokenName, bytes32 tokenType) private returns(bool){
+    function redeem(bytes16 amount, address payer, bytes32 tokenName, bytes32 tokenType, address tokenContract) private returns(bool){
         //if Via bond holder redeems bond on day of expiry, issuer collateral is transferred to bond holder
         if(tokenType=="ViaBond"){
             bool status = false;
             //find if the bond was issued to payer (purchaser) earlier
-            for(uint256 q=0; q<bondsIssued.length; q++){
-                if(ABDKMathQuad.cmp(purchases[payer][bondsIssued[q]].purchasedIssueAmount, amount)==0){
-                    for(uint256 p=0; p<issues[purchases[payer][bondsIssued[q]].counterParties[0]][bondsIssued[q]].counterParties.length; p++){
-                        if(payer==issues[purchases[payer][bondsIssued[q]].counterParties[0]][bondsIssued[q]].counterParties[p]){
-                            //calculate redemption amount based on duration of holding by bond subscriber
-                            uint256 subscribedDays = (purchases[payer][bondsIssued[q]].timeIssuedOrSubscribed - now)/ 60 / 60 / 24;
-                            bytes16 redemptionAmount = ABDKMathQuad.mul(ABDKMathQuad.mul(ABDKMathQuad.div(purchases[payer][bondsIssued[q]].parValue, purchases[payer][bondsIssued[q]].price), 
-                                                        ABDKMathQuad.div(ABDKMathQuad.fromUInt(subscribedDays),ABDKMathQuad.fromUInt(365))), purchases[payer][bondsIssued[q]].purchasedIssueAmount);
-                            require(!lock);
-                            lock = true;
-                            //if collateral is ether, transfer ether from issuer to purchaser (redeemer) of bond
-                            if(purchases[payer][bondsIssued[q]].paidInCurrency=="ether"){
-                                //adjust total supply of this via bond
-                                ViaToken(bondsIssued[q]).reduceSupply(amount);
-                                //reduce payer's balance of bond held
-                                ViaToken(bondsIssued[q]).reduceBalance(payer, amount);
-                                //send redeemed ether to payer
-                                address(uint160(payer)).transfer(ABDKMathQuad.toUInt(redemptionAmount));
-                                //generate event
-                                emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(redemptionAmount), ABDKMathQuad.toUInt(purchases[payer][bondsIssued[q]].purchasedIssueAmount), subscribedDays);
-                                status = true;
-                                delete(purchases[payer][bondsIssued[q]]);
-                                delete(issues[payer][bondsIssued[q]].counterParties[p]);
-                                lock = false;
-                                break;
-                            }
-                            else    
-                                lock = false;                        
-                        }
-                    }
+            if(ABDKMathQuad.cmp(purchases[payer][tokenContract].purchasedIssueAmount, amount)==0){
+                //calculate redemption amount based on duration of holding by bond subscriber
+                uint256 subscribedDays = (purchases[payer][tokenContract].timeIssuedOrSubscribed - now)/ 60 / 60 / 24;
+                bytes16 redemptionAmount = ABDKMathQuad.mul(ABDKMathQuad.mul(ABDKMathQuad.div(purchases[payer][tokenContract].parValue, purchases[payer][tokenContract].price), 
+                                            ABDKMathQuad.div(ABDKMathQuad.fromUInt(subscribedDays),ABDKMathQuad.fromUInt(365))), purchases[payer][tokenContract].purchasedIssueAmount);
+                require(!lock);
+                lock = true;
+                //if collateral is ether, transfer ether from issuer to purchaser (redeemer) of bond
+                if(purchases[payer][tokenContract].paidInCurrency=="ether"){
+                    //adjust total supply of this via bond
+                    ViaToken(tokenContract).reduceSupply(amount);
+                    //reduce payer's balance of bond held
+                    ViaToken(tokenContract).reduceBalance(payer, amount);
+                    //send redeemed ether to payer
+                    address(uint160(payer)).transfer(ABDKMathQuad.toUInt(redemptionAmount));
+                    //generate event
+                    emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(redemptionAmount), ABDKMathQuad.toUInt(purchases[payer][tokenContract].purchasedIssueAmount), subscribedDays);
+                    status = true;
+                    delete(purchases[payer][tokenContract]);
+                    //delete(issues[payer][tokenContract].counterParties[p]);
+                    lock = false;
                 }
+                else    
+                    lock = false;                        
             }
             //find if the bond was issued to payer (issuer) earlier
-            for(uint256 q=0; q<bondsIssued.length; q++){
-                if(ABDKMathQuad.cmp(ABDKMathQuad.sub(issues[payer][bondsIssued[q]].parValue, issues[payer][bondsIssued[q]].purchasedIssueAmount), amount)==0){
-                    require(!lock);
-                    lock = true;
-                    //calculate redemption amount based on how much collateral is not encumbered
-                    uint256 issuedDays = (issues[payer][bondsIssued[q]].timeIssuedOrSubscribed - now)/ 60 / 60 / 24;
-                    bytes16 uncumberedAmount = ABDKMathQuad.sub(issues[payer][bondsIssued[q]].parValue, issues[payer][bondsIssued[q]].purchasedIssueAmount);
-                    //if collateral is ether, transfer ether from issuer to issuer (redeemer) of bond
-                    if(issues[payer][bondsIssued[q]].paidInCurrency=="ether"){
-                        //adjust total supply of this via bond
-                        ViaToken(bondsIssued[q]).reduceSupply(amount);
-                        //reduce payer's balance of bond held
-                        ViaToken(bondsIssued[q]).reduceBalance(payer, amount);
-                        //send redeemed ether to payer
-                        address(uint160(payer)).transfer(ABDKMathQuad.toUInt(uncumberedAmount));
-                        //generate event
-                        emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(uncumberedAmount), ABDKMathQuad.toUInt(amount), issuedDays);
-                        status = true;
-                        lock = false;
-                    }
-                    if(status && ABDKMathQuad.cmp(issues[payer][bondsIssued[q]].paidInAmount, amount)==0){
-                        //if bond is redeemed in full by issuer, then remove issue from list of issues
-                        delete(issues[payer][bondsIssued[q]]);
-                    }
-                    else{
-                        //else, if bond is redeemed partially by issuer, then adjust redeemed amount with collateral balance in purchaser accounts
-                        for(uint256 p=0; p<issues[payer][bondsIssued[q]].counterParties.length; p++){
-                            purchases[issues[payer][bondsIssued[q]].counterParties[p]][bondsIssued[q]].paidInAmount = 
-                            ABDKMathQuad.sub(purchases[issues[payer][bondsIssued[q]].counterParties[p]][bondsIssued[q]].paidInAmount, uncumberedAmount);
-                        }
-                    }   
-                    break;                 
+            if(ABDKMathQuad.cmp(ABDKMathQuad.sub(issues[payer][tokenContract].parValue, issues[payer][tokenContract].purchasedIssueAmount), amount)==0){
+                require(!lock);
+                lock = true;
+                //calculate redemption amount based on how much collateral is not encumbered
+                uint256 issuedDays = (issues[payer][tokenContract].timeIssuedOrSubscribed - now)/ 60 / 60 / 24;
+                bytes16 uncumberedAmount = ABDKMathQuad.sub(issues[payer][tokenContract].parValue, issues[payer][tokenContract].purchasedIssueAmount);
+                //if collateral is ether, transfer ether from issuer to issuer (redeemer) of bond
+                if(issues[payer][tokenContract].paidInCurrency=="ether"){
+                    //adjust total supply of this via bond
+                    ViaToken(tokenContract).reduceSupply(amount);
+                    //reduce payer's balance of bond held
+                    ViaToken(tokenContract).reduceBalance(payer, amount);
+                    //send redeemed ether to payer
+                    address(uint160(payer)).transfer(ABDKMathQuad.toUInt(uncumberedAmount));
+                    //generate event
+                    emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(uncumberedAmount), ABDKMathQuad.toUInt(amount), issuedDays);
+                    status = true;
+                    lock = false;
                 }
+                if(status && ABDKMathQuad.cmp(issues[payer][tokenContract].paidInAmount, amount)==0){
+                    //if bond is redeemed in full by issuer, then remove issue from list of issues
+                    delete(issues[payer][tokenContract]);
+                }
+                else{
+                    //else, if bond is redeemed partially by issuer, then adjust redeemed amount with collateral balance in purchaser accounts
+                    for(uint256 p=0; p<issues[payer][tokenContract].counterParties.length; p++){
+                        purchases[issues[payer][tokenContract].counterParties[p]][tokenContract].paidInAmount = 
+                        ABDKMathQuad.sub(purchases[issues[payer][tokenContract].counterParties[p]][tokenContract].paidInAmount, uncumberedAmount);
+                    }
+                }   
             }
             return status;
         }
         //if Via bond issuer pays in cash for redemption, it is paid back to Via bond holders and collateral paid back to issuers
-        else{
+        else if(tokenType=="ViaCash"){
             address viaAddress;
             bool status = false;
             bytes16 totalToRedeem;
             //find the bond that was issued by payer (issuer) earlier
-            for(uint256 q=0; q<bondsIssued.length; q++){
-                if(ABDKMathQuad.cmp(amount, issues[payer][bondsIssued[q]].purchasedIssueAmount)==1){
-                    for(uint256 p=0; p<issues[payer][bondsIssued[q]].counterParties.length; p++){
-                        status = false;
-                        address cp = issues[payer][bondsIssued[q]].counterParties[p];
-                        //if collateral is ether, release collateral and transfer ether to issuer of bond
-                        //and send paid in amount to purchaser of bond
-                        if(issues[payer][bondsIssued[q]].paidInCurrency=="ether"){
-                            //calculate redemption amount based on duration of holding by bond subscriber
-                            uint256 subscribedDays = (purchases[cp][bondsIssued[q]].timeIssuedOrSubscribed - now)/ 60 / 60 / 24;
-                            bytes16 redemptionAmount = ABDKMathQuad.mul(ABDKMathQuad.mul(ABDKMathQuad.div(purchases[cp][bondsIssued[q]].parValue, 
-                                                        purchases[cp][bondsIssued[q]].price), 
-                                                        ABDKMathQuad.div(ABDKMathQuad.fromUInt(subscribedDays),ABDKMathQuad.fromUInt(365))), 
-                                                        purchases[cp][bondsIssued[q]].purchasedIssueAmount);
-                            require(!lock);
-                            lock = true;
-                            //if amount available for redemption is more or equal to redemption amount for the purchaser
-                            if(amount >= redemptionAmount){
-                                //send paid in amount to bond purchaser
-                                viaAddress = factory.getIssuer("ViaCash", tokenName);
-                                if(viaAddress!=address(0x0)){
-                                    bytes16 balanceToRedeem = ViaCash(address(uint160(viaAddress))).requestDeductFromBalance(redemptionAmount, cp);
-                                    //adjust total supply of this via bond
-                                    ViaToken(bondsIssued[q]).reduceSupply(redemptionAmount);     
-                                    //reduce counter party's balance of bond held
-                                    ViaToken(bondsIssued[q]).reduceBalance(cp, redemptionAmount);
-                                    totalToRedeem = ABDKMathQuad.add(totalToRedeem, balanceToRedeem);
-                                    //if balance left to redeem is 0
-                                    if(balanceToRedeem==0){
-                                        //adjust amount available for redemption 
-                                        amount = ABDKMathQuad.sub(amount, redemptionAmount);
-                                        //generate event
-                                        emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(redemptionAmount), ABDKMathQuad.toUInt(purchases[cp][bondsIssued[q]].purchasedIssueAmount), subscribedDays);
-                                        status = true; 
-                                    }
-                                    else{
-                                        //adjust amount available for redemption 
-                                        amount = ABDKMathQuad.sub(amount, ABDKMathQuad.sub(redemptionAmount, balanceToRedeem));
-                                        //generate event
-                                        emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(balanceToRedeem), ABDKMathQuad.toUInt(purchases[cp][bondsIssued[q]].purchasedIssueAmount), subscribedDays);
-                                    }
+            if(ABDKMathQuad.cmp(amount, issues[payer][tokenContract].purchasedIssueAmount)==1){
+                for(uint256 p=0; p<issues[payer][tokenContract].counterParties.length; p++){
+                    address cp = issues[payer][tokenContract].counterParties[p];
+                    //if collateral is ether, release collateral and transfer ether to issuer of bond
+                    //and send paid in amount to purchaser of bond
+                    if(issues[payer][tokenContract].paidInCurrency=="ether"){
+                        //calculate redemption amount based on duration of holding by bond subscriber
+                        uint256 subscribedDays = (purchases[cp][tokenContract].timeIssuedOrSubscribed - now)/ 60 / 60 / 24;
+                        bytes16 redemptionAmount = ABDKMathQuad.mul(ABDKMathQuad.mul(ABDKMathQuad.div(purchases[cp][tokenContract].parValue, 
+                                                    purchases[cp][tokenContract].price), 
+                                                    ABDKMathQuad.div(ABDKMathQuad.fromUInt(subscribedDays),ABDKMathQuad.fromUInt(365))), 
+                                                    purchases[cp][tokenContract].purchasedIssueAmount);
+                        require(!lock);
+                        lock = true;
+                        //if amount available for redemption is more or equal to redemption amount for the purchaser
+                        if(amount >= redemptionAmount){
+                            //send paid in amount to bond purchaser
+                            viaAddress = factory.getIssuer("ViaCash", tokenName);
+                            if(viaAddress!=address(0x0)){
+                                bytes16 balanceToRedeem = ViaCash(address(uint160(viaAddress))).requestDeductFromBalance(redemptionAmount, cp);
+                                //adjust total supply of this via bond
+                                ViaToken(tokenContract).reduceSupply(redemptionAmount);     
+                                //reduce counter party's balance of bond held
+                                ViaToken(tokenContract).reduceBalance(cp, redemptionAmount);
+                                totalToRedeem = ABDKMathQuad.add(totalToRedeem, balanceToRedeem);
+                                //if balance left to redeem is 0
+                                if(balanceToRedeem==0){
+                                    //adjust amount available for redemption 
+                                    amount = ABDKMathQuad.sub(amount, redemptionAmount);
+                                    //generate event
+                                    emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(redemptionAmount), ABDKMathQuad.toUInt(purchases[cp][tokenContract].purchasedIssueAmount), subscribedDays);
+                                    status = true; 
                                 }
-                                lock = false;
+                                else{
+                                    //adjust amount available for redemption 
+                                    amount = ABDKMathQuad.sub(amount, ABDKMathQuad.sub(redemptionAmount, balanceToRedeem));
+                                    //generate event
+                                    emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(balanceToRedeem), ABDKMathQuad.toUInt(purchases[cp][tokenContract].purchasedIssueAmount), subscribedDays);
+                                }
                             }
-                            else
-                                lock = false;  
+                            lock = false;
                         }
-                        if(status)
-                            //if a purchaser is redeemed, then delete its record from list of purchases
-                            delete(purchases[cp][bondsIssued[q]]);
-                        if(p==issues[payer][bondsIssued[q]].counterParties.length-1)
-                            //if all bond purchasers are redeemed, then delete the issuer record
-                            delete(issues[payer][bondsIssued[q]]);
+                        else
+                            lock = false;  
                     }
-                    if(status){
-                        //find proportion to redeem
-                        bytes16 proportionToRedeem = ABDKMathQuad.div(totalToRedeem, issues[payer][bondsIssued[q]].purchasedIssueAmount);
-                        //returned redeemed proportion of collateral to payer (issuer)
-                        bytes16 etherToRedeem = ABDKMathQuad.mul(issues[payer][bondsIssued[q]].paidInAmount, ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1), proportionToRedeem));
-                        //send redeemed ether to payer
-                        address(uint160(payer)).transfer(ABDKMathQuad.toUInt(etherToRedeem));   
-                        //if any balance amount remains after redemptions, return the balance to the issuer
-                        if(amount>0){
-                            address(uint160(payer)).transfer(ABDKMathQuad.toUInt(amount));
-                        }
+                    if(status)
+                        //if a purchaser is redeemed, then delete its record from list of purchases
+                        delete(purchases[cp][tokenContract]);
+                    if(p==issues[payer][tokenContract].counterParties.length-1)
+                        //if all bond purchasers are redeemed, then delete the issuer record
+                        delete(issues[payer][tokenContract]);
+                }
+                if(status){
+                    //find proportion to redeem
+                    bytes16 proportionToRedeem = ABDKMathQuad.div(totalToRedeem, issues[payer][tokenContract].purchasedIssueAmount);
+                    //returned redeemed proportion of collateral to payer (issuer)
+                    bytes16 etherToRedeem = ABDKMathQuad.mul(issues[payer][tokenContract].paidInAmount, ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1), proportionToRedeem));
+                    //send redeemed ether to payer
+                    address(uint160(payer)).transfer(ABDKMathQuad.toUInt(etherToRedeem));   
+                    //if any balance amount remains after redemptions, return the balance to the issuer
+                    if(amount>0){
+                        address(uint160(payer)).transfer(ABDKMathQuad.toUInt(amount));
                     }
-                    break;
                 }
             }
             return status;
@@ -450,7 +438,9 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     finallyIssue(conversionQ[txId].party, parValue, viaBondPrice, conversionQ[txId].amount, conversionQ[txId].paid_in_currency);
                 }
             }
-            else if(rtype == "er" || rtype =="ir"){
+        }
+        else if(conversionQ[txId].operation=="purchase"){
+            if(rtype == "er" || rtype =="ir"){
                 if(ABDKMathQuad.cmp(conversionQ[txId].ViaXvalue, ABDKMathQuad.fromUInt(0))!=0 && 
                     ABDKMathQuad.cmp(conversionQ[txId].ViaRateValue, ABDKMathQuad.fromUInt(0))!=0){
                     //calculate par value of via bond by applying exchange rates from via oracle
