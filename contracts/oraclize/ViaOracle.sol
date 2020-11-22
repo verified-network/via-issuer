@@ -9,7 +9,8 @@ import "../interfaces/Oracle.sol";
 import "../utilities/StringUtils.sol";
 import "../interfaces/ViaFactory.sol";
 import "../interfaces/ViaCash.sol";
-import "../interfaces/ViaBond.sol";
+//import "../interfaces/ViaBond.sol";
+import "../Bond.sol";
 import "../interfaces/ViaCash.sol";
 import "../abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
@@ -77,13 +78,13 @@ contract ViaOracle is Oracle, usingProvable, Initializable {
             ViaCash(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
         }
         else if(mpramas.tokenType == "Bond"){
-            ViaBond(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
+            Bond(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
         }
         else if(mpramas.tokenType == "EthCash"){
             ViaCash(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
         }
         else if(mpramas.tokenType == "EthBond"){
-            ViaBond(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
+            Bond(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
         }
     }
 

@@ -1,5 +1,6 @@
 // (c) Kallol Borah, 2020
 // Implements token issued by Bond issuer. Can be reused by any financial product issuer
+// SPDX-License-Identifier: MIT
 
 pragma solidity >=0.5.0 <0.7.0;
 
