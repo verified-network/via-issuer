@@ -11,5 +11,7 @@ interface Oracle{
         external
         payable
         returns (bytes32);
+    
+    function setCallbackId(bytes32 _queryId, bytes32 _callbackId) external;
 
 }
