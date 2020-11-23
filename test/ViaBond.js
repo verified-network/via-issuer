@@ -56,8 +56,9 @@ contract("IssuingViaUSDBond", async (accounts) => {
         
         //let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
         //await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
-        var bondToken = await truffleAssert.eventEmitted(tx, 'ViaBondIssued', (ev)=>{
-          return ev.token;
+        var bondToken;
+        truffleAssert.eventEmitted(tx, 'ViaBondIssued', (ev)=>{
+          return bondToken = ev.token;
         });
         var viausdToken = await Token.at(bondToken);
 

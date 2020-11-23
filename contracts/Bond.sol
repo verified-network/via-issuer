@@ -66,6 +66,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     //data structure holding details of currency conversion requests pending on oraclize
     struct conversion{
         bytes32 operation;
+        address token;
         address party;
         bytes16 amount;
         bytes32 paid_in_currency;
@@ -229,6 +230,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 bytes32 ViaRateId = "44";
                 conversion memory c = conversionQ[ViaXid];
                 c.operation = "purchase";
+                c.token = tokenContract;
                 c.party = payer;
                 c.amount = amount;
                 c.paid_in_currency = currency;
@@ -241,12 +243,14 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             }
             //if the via cash token paid in is the same denomination of this bond, we need to first find out if the pay in is for a purchase of bonds or repayment of an earlier issue
             else{
-                if(ABDKMathQuad.cmp(issues[payer][tokenContract].parValue, amount)==0 &&
-                    issues[payer][tokenContract].counterParties[0]!=payer){
-                    //if the paying in is for repayment of a bond already issued, then
-                    //transfer the paid in amount to the bond holders, release the collateral back to the issuer and extinguish the bond
-                    if(!redeem(amount, payer, currency, "ViaCash", tokenContract))
-                        return false;
+                if(tokenContract!=address(0x0)){
+                    if(ABDKMathQuad.cmp(issues[payer][tokenContract].parValue, amount)==0 &&
+                        issues[payer][tokenContract].counterParties[0]!=payer){
+                        //if the paying in is for repayment of a bond already issued, then
+                        //transfer the paid in amount to the bond holders, release the collateral back to the issuer and extinguish the bond
+                        if(!redeem(amount, payer, currency, "ViaCash", tokenContract))
+                            return false;
+                    }
                 }
                 //if the paying in is not for repayment of a bond already issued, then
                 //tokens of this bond need to be transferred from an issuer's account after pricing the bond with the domestic (paid in currency) coupon rates
@@ -255,6 +259,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     bytes32 ViaRateId = "44";
                     conversion memory c = conversionQ[ViaRateId];
                     c.operation = "purchase";
+                    c.token = tokenContract;
                     c.party = payer;
                     c.amount = amount;
                     c.paid_in_currency = currency;
@@ -435,7 +440,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     //calculate price of via bond by applying interest rates from via oracle
                     bytes16 viaBondPrice = ABDKMathQuad.div(parValue, ABDKMathQuad.add(ABDKMathQuad.fromUInt(1), ABDKMathQuad.fromUInt(0)))^ABDKMathQuad.fromUInt(1);
                     //issue bond to issuer
-                    finallyIssue(conversionQ[txId].party, parValue, viaBondPrice, conversionQ[txId].amount, conversionQ[txId].paid_in_currency);
+                    finallyIssue(conversionQ[txId].party, parValue, viaBondPrice, conversionQ[txId].amount, conversionQ[txId].paid_in_currency, conversionQ[txId].token);
                 }
             }
         }
@@ -448,14 +453,14 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     //calculate price of via bond by applying interest rates from via oracle
                     bytes16 viaBondPrice = ABDKMathQuad.div(parValue, ABDKMathQuad.add(ABDKMathQuad.fromUInt(1), conversionQ[txId].ViaRateValue))^ABDKMathQuad.fromUInt(1);
                     //transfer bond from issuer to purchaser, and transfer paid in cash token from purchaser to issuer
-                    finallyIssue(conversionQ[txId].party, parValue, viaBondPrice, conversionQ[txId].amount, conversionQ[txId].paid_in_currency);
+                    finallyIssue(conversionQ[txId].party, parValue, viaBondPrice, conversionQ[txId].amount, conversionQ[txId].paid_in_currency, conversionQ[txId].token);
                 }
             }
         }
     }
 
     //issue bond tokens if ether is paid in, or transfer bond tokens if via cash tokens are paid in
-    function finallyIssue(address payer, bytes16 parValue, bytes16 bondPrice, bytes16 paidInAmount, bytes32 paidInCashToken) private {
+    function finallyIssue(address payer, bytes16 parValue, bytes16 bondPrice, bytes16 paidInAmount, bytes32 paidInCashToken, address tokenContract) private {
         bool found = false;
         address issuedBond;
         if(paidInCashToken=="ether"){
@@ -485,41 +490,57 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
         }
         //paid in amount is Via cash with which via bond tokens are purchased
         else{
-            for(uint256 i=0; i<issuers.length; i++){
-                for(uint256 q=0; q<bondsIssued.length; q++){
-                    //check if there are enough issued bonds to be purchased
-                    if(ABDKMathQuad.cmp(ABDKMathQuad.sub(issues[issuers[i]][bondsIssued[q]].parValue, issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount), paidInAmount)==0 ||
-                        ABDKMathQuad.cmp(ABDKMathQuad.sub(issues[issuers[i]][bondsIssued[q]].parValue, issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount), paidInAmount)==1){
-                        require(!lock);
-                        lock = true;
-                        //if there is enough issued bonds, transfer bond from issuer to payer
-                        if(ViaToken(bondsIssued[q]).transferToken(issuers[i], payer, ABDKMathQuad.toUInt(paidInAmount))){
-                            issuedBond = bondsIssued[q];
-                            //transfer cash paid in by purchaser to issuer from whom bond is transferred to purchaser
-                            address viaAddress = factory.getIssuer("ViaCash", paidInCashToken);
-                            if(viaAddress!=address(0x0)){
-                                //deduct paid out cash token from purchaser cash balance
-                                ViaCash(address(uint160(viaAddress))).transferFrom(payer, issuers[i], ABDKMathQuad.toUInt(bondPrice));
-                                //add purchaser as counter party in issuer's record
-                                if(issues[issuers[i]][bondsIssued[q]].counterParties.length==1)
-                                    issues[issuers[i]][bondsIssued[q]].counterParties[0] = payer;
-                                else
-                                    issues[issuers[i]][bondsIssued[q]].counterParties[issues[issuers[i]][bondsIssued[q]].counterParties.length] = payer;
-                                //reduce issuable value of bond by amount transferred to purchaser
-                                issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount = ABDKMathQuad.add(issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount, paidInAmount); 
-                                //add bond to purchaser's record
-                                storeBond("purchase", payer, issuers[i], parValue, bondPrice, issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount, bondPrice, paidInCashToken, now, bondsIssued[q]);
-                                lock = false;
-                                break;
-                            }
-                            else
-                                lock = false;         
+            uint256 i;
+            if(tokenContract!=address(0x0)){
+                for(i=0; i<issuers.length; i++){
+                    for(uint256 q=0; q<bondsIssued.length; q++){
+                        if(bondsIssued[q]==tokenContract){
+                            found = true;
+                            break;
                         }
-                        else
-                            lock = false;
                     }
                 }
-            }    
+            }
+            else{
+                //check if there are enough issued bonds to be purchased
+                for(i=0; i<issuers.length; i++){
+                    for(uint256 q=0; q<bondsIssued.length; q++){
+                        if(ABDKMathQuad.cmp(ABDKMathQuad.sub(issues[issuers[i]][bondsIssued[q]].parValue, issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount), paidInAmount)==0 ||
+                        ABDKMathQuad.cmp(ABDKMathQuad.sub(issues[issuers[i]][bondsIssued[q]].parValue, issues[issuers[i]][bondsIssued[q]].purchasedIssueAmount), paidInAmount)==1){
+                            found = true;
+                            tokenContract = bondsIssued[q];
+                            break;
+                        }
+                    }
+                }
+            }        
+            if(found){
+                require(!lock);
+                lock = true;
+                //if there is enough issued bonds, transfer bond from issuer to payer
+                if(ViaToken(tokenContract).transferToken(issuers[i], payer, ABDKMathQuad.toUInt(paidInAmount))){
+                    //transfer cash paid in by purchaser to issuer from whom bond is transferred to purchaser
+                    address viaAddress = factory.getIssuer("ViaCash", paidInCashToken);
+                    if(viaAddress!=address(0x0)){
+                        //deduct paid out cash token from purchaser cash balance and transfer to issuer
+                        ViaCash(address(uint160(viaAddress))).transferFrom(payer, issuers[i], ABDKMathQuad.toUInt(bondPrice));
+                        //add purchaser as counter party in issuer's record
+                        if(issues[issuers[i]][tokenContract].counterParties.length==1)
+                            issues[issuers[i]][tokenContract].counterParties[0] = payer;
+                        else
+                            issues[issuers[i]][tokenContract].counterParties[issues[issuers[i]][tokenContract].counterParties.length] = payer;
+                        //reduce issuable value of bond by amount transferred to purchaser
+                        issues[issuers[i]][tokenContract].purchasedIssueAmount = ABDKMathQuad.add(issues[issuers[i]][tokenContract].purchasedIssueAmount, paidInAmount); 
+                        //add bond to purchaser's record
+                        storeBond("purchase", payer, issuers[i], parValue, bondPrice, issues[issuers[i]][tokenContract].purchasedIssueAmount, bondPrice, paidInCashToken, now, tokenContract);
+                        lock = false;
+                    }
+                    else
+                        lock = false;         
+                }
+                else
+                    lock = false;
+            }        
         }
         //generate event
         emit ViaBondIssued(issuedBond, bondName, ABDKMathQuad.toUInt(parValue), ABDKMathQuad.toUInt(paidInAmount), 1);
