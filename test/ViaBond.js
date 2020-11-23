@@ -24,7 +24,7 @@ contract("BondContractSize", function(accounts) {
       });  
     });
   });
-
+/*
 contract("IssuingViaUSDBond", async (accounts) => {
     it("should send ether to Via-USD bond contract and then get some Via-USD bond tokens to sender (issuer)", async () => {
         var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -73,7 +73,7 @@ contract("IssuingViaUSDBond", async (accounts) => {
       });
     }
 });
-/*
+
 contract("TransferViaUSDBond", async (accounts) => {
   it("should transfer Via-USD bond to another account", async () => {
       var abdkMathQuad = await ABDKMathQuad.deployed();

@@ -289,21 +289,23 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 lock = true;
                 //if collateral is ether, transfer ether from issuer to purchaser (redeemer) of bond
                 if(purchases[payer][tokenContract].paidInCurrency=="ether"){
+                    //send redeemed ether to payer
+                    address(uint160(payer)).transfer(ABDKMathQuad.toUInt(redemptionAmount));
+                    status = true;
+                }
+                if(status){
                     //adjust total supply of this via bond
                     ViaToken(tokenContract).reduceSupply(amount);
                     //reduce payer's balance of bond held
                     ViaToken(tokenContract).reduceBalance(payer, amount);
-                    //send redeemed ether to payer
-                    address(uint160(payer)).transfer(ABDKMathQuad.toUInt(redemptionAmount));
                     //generate event
                     emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(redemptionAmount), ABDKMathQuad.toUInt(purchases[payer][tokenContract].purchasedIssueAmount), subscribedDays);
-                    status = true;
                     delete(purchases[payer][tokenContract]);
                     //delete(issues[payer][tokenContract].counterParties[p]);
                     lock = false;
                 }
-                else    
-                    lock = false;                        
+                else
+                    lock = false;
             }
             //find if the bond was issued to payer (issuer) earlier
             if(ABDKMathQuad.cmp(ABDKMathQuad.sub(issues[payer][tokenContract].parValue, issues[payer][tokenContract].purchasedIssueAmount), amount)==0){
@@ -523,7 +525,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     address viaAddress = factory.getIssuer("ViaCash", paidInCashToken);
                     if(viaAddress!=address(0x0)){
                         //deduct paid out cash token from purchaser cash balance and transfer to issuer
-                        ViaCash(address(uint160(viaAddress))).transferFrom(payer, issuers[i], ABDKMathQuad.toUInt(bondPrice));
+                        ViaCash(address(uint160(viaAddress))).transferFrom(address(uint160(viaAddress)), issuers[i], ABDKMathQuad.toUInt(bondPrice));
                         //add purchaser as counter party in issuer's record
                         if(issues[issuers[i]][tokenContract].counterParties.length==1)
                             issues[issuers[i]][tokenContract].counterParties[0] = payer;
