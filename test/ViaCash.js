@@ -24,7 +24,7 @@ contract("CashContractSize", function(accounts) {
     });
   });
 
-contract("IssuingViaUSD", async (accounts) => {
+/*contract("IssuingViaUSD", async (accounts) => {
     it("should send ether to Via-USD cash contract and then get some Via-USD cash tokens", async () => {
         var abdkMathQuad = await ABDKMathQuad.deployed();
         await Cash.link(abdkMathQuad);
@@ -183,7 +183,7 @@ contract("ViaUSDExchange", async (accounts) => {
   }
 
 });
-
+*/
 contract("ViaUSDRedemption", async (accounts) => {
   it("should send Via-USD to Via-USD cash contract and then get ether sent during issuing process", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -233,7 +233,7 @@ contract("ViaUSDRedemption", async (accounts) => {
   }
 
 });
-
+/*
 contract("ViaEURRedemption", async (accounts) => {
   it("should send Via-EUR tokens to Via-EUR contract and get back ether paid in earlier", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -483,4 +483,4 @@ contract("ViaUSDRedemptionAfterEURExchangeTransferAndRedemption", async (account
     });
   }
 
-});
+});*/

@@ -16,19 +16,19 @@ module.exports = {
         development: {
             host: "127.0.0.1", // Localhost (default: none)
             port: 8545, // Standard Ethereum port (default: none)
-            //url : "ws://127.0.0.1:8545",
             network_id: "*", // Any network (default: none)
             websockets: true,
             gas:6721975
         },
         ropsten: {
-            provider: () => new HDWalletProvider(mnemonic, "https://ropsten.infura.io/v3/"+ process.env.INFURA_API_KEY),
+            provider: () => new HDWalletProvider(mnemonic, "wss://ropsten.infura.io/ws/v3/" + process.env.INFURA_API_KEY),
             network_id: 3,
             gas: 5500000,
             gasPrice: 10000000000,
+            networkCheckTimeout: 10000000,
             confirmations: 2,    
             timeoutBlocks: 200,  
-            skipDryRun: true     
+            skipDryRun: true      
           },
         kovan: {
             provider: () => new HDWalletProvider(mnemonic, "https://kovan.infura.io/v3/" + process.env.INFURA_API_KEY),
@@ -44,6 +44,7 @@ module.exports = {
             network_id: 4,
             gas: 6721975,
             gasPrice: 10000000000,
+            networkCheckTimeout: 10000000,
             confirmations: 2,    
             timeoutBlocks: 200,  
             skipDryRun: true  

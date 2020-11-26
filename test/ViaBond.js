@@ -393,6 +393,7 @@ contract("BondRedemptionByIssuerByPayingCash", async (accounts) => {
     
     await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
     await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
+    await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
     
     var viaeurBondAddress = await factory.tokens(4);
     var viaeurBondName = await web3.utils.hexToUtf8(await factory.getName(viaeurBondAddress));
