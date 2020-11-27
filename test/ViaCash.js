@@ -229,6 +229,8 @@ contract("ViaUSDRedemption", async (accounts) => {
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
       _event.once('data', resolve).once('error', reject)
+    }).then( (_event) => { 
+      done();
     });
   }
 
