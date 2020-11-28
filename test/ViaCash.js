@@ -185,10 +185,10 @@ contract("ViaUSDExchange", async (accounts) => {
 });
 */
 contract("ViaUSDRedemption", async (accounts) => {
-  this.timeout(300000);
   it("should send Via-USD to Via-USD cash contract and then get ether sent during issuing process", async (done) => {
+    this.timeout(300000);
     setTimeout(done, 200000);
-    
+
     var abdkMathQuad = await ABDKMathQuad.deployed();
     await Cash.link(abdkMathQuad);
 
