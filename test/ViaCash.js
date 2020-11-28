@@ -211,7 +211,7 @@ contract("ViaUSDRedemption", async (accounts) => {
     
     await viausdCash.sendTransaction({from:accounts[0], to:viausdCashAddress, value:1e18});
     let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
+    //await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
     
     console.log("Via-USD cash token contract ether balance after sending ether and before sending Via-USD:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Account ether balance after sending ether and before sending Via-USD:", await web3.eth.getBalance(accounts[0]));
@@ -220,7 +220,7 @@ contract("ViaUSDRedemption", async (accounts) => {
     
     await viausdCash.transferFrom(accounts[0], viausdCashAddress, 10);
     let callbackForRedemption = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    await truffleAssert.createTransactionResult(oracle, callbackForRedemption.transactionHash);
+    //await truffleAssert.createTransactionResult(oracle, callbackForRedemption.transactionHash);
     
     console.log("Via-USD cash token contract ether balance after sending Via-USD:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Account ether balance after sending Via-USD:", await web3.eth.getBalance(accounts[0]));
