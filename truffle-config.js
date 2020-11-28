@@ -7,8 +7,8 @@ const mnemonic = fs.readFileSync(".secret").toString().trim();
 
 module.exports = {
     mocha: {
-        enableTimeouts: false,
-        before_timeout: 120000 
+        enableTimeouts: true,
+        before_timeout: 200000 
     },
     // See <http://truffleframework.com/docs/advanced/configuration>
     // to customize your Truffle configuration!
