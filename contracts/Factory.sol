@@ -76,7 +76,7 @@ contract Factory is ViaFactory, Initializable, Ownable {
 
         // Deploy proxy
         //address _issuer = deployMinimal(_target, _payload);
-        address _issuer;
+        address _issuer; //to do : can we use deployproxy() here passing parameters to cash and bond initialize() programmatically ?
         emit IssuerCreated(_issuer, tokenName, tokenType);
 
         if(tokenType == "Cash"){
@@ -100,13 +100,13 @@ contract Factory is ViaFactory, Initializable, Ownable {
 
         // Deploy proxy
         //address _token = deployMinimal(_target, _payload);
-        address _token;
+        address _token; //to do : can we use deployproxy() here too ?
 
         token[_token] = via("ViaBondToken", tokenName);
         tokens.push(_token);
         products[tokenSymbol] = _token;       
         emit TokenCreated(_token, tokenName, tokenProduct);
-        return _token;
+        return _token; 
     }
 }
 
