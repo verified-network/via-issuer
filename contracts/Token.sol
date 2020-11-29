@@ -2,7 +2,7 @@
 // Implements token issued by Bond issuer. Can be reused by any financial product issuer
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.5.0 <0.7.0;
+pragma solidity 0.5.7;
 
 import "./erc/ERC20.sol";
 import "./interfaces/ViaBond.sol";

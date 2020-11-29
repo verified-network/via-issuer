@@ -1,7 +1,8 @@
 // (c) Kallol Borah, 2020
 // Interface definition of the token issued by Bond issuer
+// SPDX-License-Identifier: MIT
 
-pragma solidity >=0.5.0 <0.7.0;
+pragma solidity 0.5.7;
 
 interface ViaToken{
 

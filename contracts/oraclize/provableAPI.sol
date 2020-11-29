@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 */
-pragma solidity >=0.5.0 <0.7.0; // Incompatible compiler version - please select a compiler within the stated pragma range, or use a different version of the provableAPI!
+pragma solidity 0.5.7; // Incompatible compiler version - please select a compiler within the stated pragma range, or use a different version of the provableAPI!
 
 // Dummy contract only used to emit to end-user they are using wrong solc
 contract solcChecker {

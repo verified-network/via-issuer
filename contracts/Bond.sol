@@ -2,7 +2,7 @@
 // Implementation of the Via zero coupon bond.
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.5.0 <0.7.0;
+pragma solidity 0.5.7;
 
 import "./erc/ERC20.sol";
 import "./interfaces/Oracle.sol";
