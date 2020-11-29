@@ -96,6 +96,7 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
 
         // Deploy proxy
         address _token = deployMinimal(_target, _payload);
+        
         token[_token] = via("ViaBondToken", tokenName);
         tokens.push(_token);
         products[tokenSymbol] = _token;       
