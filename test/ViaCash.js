@@ -24,7 +24,7 @@ contract("CashContractSize", function(accounts) {
     });
   });
 
-/*contract("IssuingViaUSD", async (accounts) => {
+contract("IssuingViaUSD", async (accounts) => {
     it("should send ether to Via-USD cash contract and then get some Via-USD cash tokens", async () => {
         var abdkMathQuad = await ABDKMathQuad.deployed();
         await Cash.link(abdkMathQuad);
@@ -34,7 +34,7 @@ contract("CashContractSize", function(accounts) {
         var oracle = await ViaOracle.deployed(); 
         var token = await Token.deployed();   
         
-        await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
+        await factory.createIssuer(Math.floor(Math.random() * (1000 - 1) + 1), cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
         
         var viausdCashAddress = await factory.tokens(0);
         var viausdCashName = await web3.utils.hexToUtf8(await factory.getName(viausdCashAddress));
@@ -67,7 +67,7 @@ contract("CashContractSize", function(accounts) {
       });
     }
 });
-
+/*
 contract("IssuingViaEUR", async (accounts) => {
   it("should send ether to Via-EUR cash contract and then get some Via-EUR cash tokens", async () => {
       var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -183,7 +183,7 @@ contract("ViaUSDExchange", async (accounts) => {
   }
 
 });
-*/
+
 contract("ViaUSDRedemption", async (accounts) => {
   it("should send Via-USD to Via-USD cash contract and then get ether sent during issuing process", async () => {
 
@@ -240,7 +240,7 @@ contract("ViaUSDRedemption", async (accounts) => {
   }
 
 });
-/*
+
 contract("ViaEURRedemption", async (accounts) => {
   it("should send Via-EUR tokens to Via-EUR contract and get back ether paid in earlier", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
