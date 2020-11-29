@@ -67,14 +67,14 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     }
 
     //token issuer factory 
-    function createIssuer(address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token) external{
+    function createIssuer(uint256 salt, address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token) external{
         address _owner = address(this);
 
         bytes memory _payload = abi.encodeWithSignature("initialize(bytes32,bytes32,address,address,address)", tokenName, tokenType, _owner, _oracle, _token);
 
         // Deploy proxy
         //address _issuer = deployMinimal(_target, _payload);
-        address _issuer = deploy(uint256(blockhash(block.number+2)), _target, msg.sender, _payload);
+        address _issuer = deploy(salt, _target, msg.sender, _payload);
         emit IssuerCreated(_issuer, tokenName, tokenType);
 
         if(tokenType == "Cash"){
@@ -98,7 +98,7 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
 
         // Deploy proxy
         //address _token = deployMinimal(_target, _payload);
-        address _token = deploy(uint256(blockhash(block.number+2)), _target, msg.sender, _payload);
+        address _token = deploy(uint256(keccak256(abi.encodePacked(now,block.difficulty))), _target, msg.sender, _payload);
         
         token[_token] = via("ViaBondToken", tokenName);
         tokens.push(_token);
