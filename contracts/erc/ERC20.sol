@@ -1,8 +1,8 @@
 // (c) Kallol Borah, 2020
 // Base ERC20 implementation.
 
-pragma solidity >=0.5.0 <0.7.0;
-
+//pragma solidity >=0.5.0 <0.7.0;
+pragma solidity 0.6.12;
 import "../abdk-libraries-solidity/ABDKMathQuad.sol";
 
 contract ERC20 {
@@ -57,7 +57,7 @@ contract ERC20 {
         return ABDKMathQuad.toUInt(allowed[tokenOwner][spender]);
     }
 
-    function transferFrom(address owner, address buyer, uint tokens) external returns (bool){
+    function transferFrom(address owner, address buyer, uint tokens) virtual external returns (bool){
         require(ABDKMathQuad.cmp(ABDKMathQuad.fromUInt(tokens), balances[owner])==-1 ||
                 ABDKMathQuad.cmp(ABDKMathQuad.fromUInt(tokens), balances[owner])==0);
         //require(ABDKMathQuad.cmp(ABDKMathQuad.fromUInt(tokens), balances[owner])==0);

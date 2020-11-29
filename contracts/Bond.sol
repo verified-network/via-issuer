@@ -2,18 +2,21 @@
 // Implementation of the Via zero coupon bond.
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.5.0 <0.7.0;
-
+//pragma solidity >=0.5.0 <0.7.0;
+pragma solidity 0.6.12;
 import "./erc/ERC20.sol";
 import "./interfaces/Oracle.sol";
 import "./abdk-libraries-solidity/ABDKMathQuad.sol";
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
+//import "@openzeppelin/upgrades/contracts/Initializable.sol";
+//import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "./interfaces/ViaFactory.sol";
 import "./interfaces/ViaCash.sol";
 import "./interfaces/ViaBond.sol";
 import "./interfaces/ViaToken.sol";
 import "./utilities/StringUtils.sol";
+import "@openzeppelin/contracts/proxy/Initializable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+//import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 contract Bond is ViaBond, ERC20, Initializable, Ownable {
 
@@ -90,7 +93,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
 
     //initiliaze proxies
     function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token) public initializer {
-        Ownable.initialize(_owner);
+        //Ownable.initialize(_owner);
         factory = ViaFactory(_owner);
         oracle = Oracle(_oracle);
         viaoracle = _oracle;
@@ -103,7 +106,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     }
 
     //handling pay in of ether for issue of via bond tokens
-    function() external payable{
+    //function() external payable{
+    receive() external payable{
         //ether paid in
         require(msg.value !=0);
         //only to pay in ether
@@ -113,7 +117,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     }
 
     //forwarding call from issued bond token if at all such a call arrives
-    function transferForward(bytes32 _symbol, address _forwarder, address _sender, address _receiver, uint256 _tokens) external returns (bool){
+    function transferForward(bytes32 _symbol, address _forwarder, address _sender, address _receiver, uint256 _tokens) override external returns (bool){
         require(factory.getProduct(_symbol)==_forwarder);
         if(transferFrom(_sender, _receiver, _tokens, _forwarder, _symbol))
             return true;
@@ -152,7 +156,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
         }
     }
 
-    function requestIssue(bytes16 amount, address payer, bytes32 currency, address cashContract) external returns(bool){
+    function requestIssue(bytes16 amount, address payer, bytes32 currency, address cashContract) override external returns(bool){
         require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBondToken");
         if(factory.getType(msg.sender) == "ViaCash")
             return(issue(amount, payer, currency, cashContract, address(0x0)));
@@ -417,7 +421,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     }
 
     //function called back from Oraclize
-    function convert(bytes32 txId, bytes16 result, bytes32 rtype) public {
+    function convert(bytes32 txId, bytes16 result, bytes32 rtype) override public {
         //require(viaoracle == msg.sender);
         //check type of result returned
         if(rtype =="ethusd"){

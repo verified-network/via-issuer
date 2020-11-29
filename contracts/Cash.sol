@@ -1,8 +1,9 @@
 // (c) Kallol Borah, 2020
 // Implementation of the Via cash token.
+// SPDX-License-Identifier: MIT
 
-pragma solidity >=0.5.0 <0.7.0;
-
+//pragma solidity >=0.5.0 <0.7.0;
+pragma solidity 0.6.12;
 import "./erc/ERC20.sol";
 import "./interfaces/Oracle.sol";
 import "./interfaces/ViaFactory.sol";
@@ -10,8 +11,11 @@ import "./interfaces/ViaCash.sol";
 import "./interfaces/ViaBond.sol";
 import "./interfaces/ViaToken.sol";
 import "./abdk-libraries-solidity/ABDKMathQuad.sol";
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
+//import "@openzeppelin/upgrades/contracts/Initializable.sol";
+//import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts/proxy/Initializable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+//import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "./utilities/StringUtils.sol";
 
 contract Cash is ViaCash, ERC20, Initializable, Ownable {
@@ -63,7 +67,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
 
     //initiliaze proxies
     function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token) public initializer{
-        Ownable.initialize(_owner);
+        //Ownable.initialize(_owner);
         factory = ViaFactory(_owner);
         oracle = Oracle(_oracle);
         viaoracle = _oracle;
@@ -75,7 +79,8 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
     }
 
     //handling pay in of ether for issue of via cash tokens
-    function() external payable{
+    //function() external payable{
+    receive() external payable{
         //ether paid in
         require(msg.value !=0);
         //only to pay in ether
@@ -85,7 +90,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
     }
 
     //overriding this function of ERC20 standard for transfer of via cash tokens to other users or to this contract for redemption
-    function transferFrom(address sender, address receiver, uint256 tokens) external returns (bool){
+    function transferFrom(address sender, address receiver, uint256 tokens) override(ViaCash,ERC20) external returns (bool){
         //ensure sender has enough tokens in balance before transferring or redeeming them
         require(ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))!=-1);// || 
                 //ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==0);
@@ -143,7 +148,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
     }
 
     //accessor for addToBalance function
-    function requestAddToBalance(bytes16 tokens, address sender) external returns (bool){
+    function requestAddToBalance(bytes16 tokens, address sender) override external returns (bool){
         require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
         return(addToBalance(tokens, sender));
     }
@@ -161,7 +166,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
     }
 
     //accessor for deductFromBalance function
-    function requestDeductFromBalance(bytes16 tokens, address receiver) external returns (bytes16){
+    function requestDeductFromBalance(bytes16 tokens, address receiver) override external returns (bytes16){
         require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
         return(deductFromBalance(tokens, receiver));
     }
@@ -283,7 +288,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
     }    
 
     //function called back from Via oracle
-    function convert(bytes32 txId, bytes16 result, bytes32 rtype) external {
+    function convert(bytes32 txId, bytes16 result, bytes32 rtype) override external {
         require(viaoracle == msg.sender);
         //check type of result returned
         if(rtype =="ethusd"){

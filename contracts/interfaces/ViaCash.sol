@@ -1,9 +1,9 @@
 // (c) Kallol Borah, 2020
 // Interface of the Via cash token.
+// SPDX-License-Identifier: MIT
 
-pragma solidity >=0.5.0 <0.7.0;
-
-
+//pragma solidity >=0.5.0 <0.7.0;
+pragma solidity 0.6.12;
 interface ViaCash{
 
     function convert(bytes32 txId, bytes16 result, bytes32 rtype) external;

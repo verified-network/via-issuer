@@ -2,8 +2,8 @@
 // Via oracle client
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.5.0 <0.7.0;
-
+//pragma solidity >=0.5.0 <0.7.0;
+pragma solidity 0.6.12;
 import "./provableAPI.sol";
 import "../interfaces/Oracle.sol";
 import "../utilities/StringUtils.sol";
@@ -12,7 +12,8 @@ import "../interfaces/ViaCash.sol";
 import "../interfaces/ViaBond.sol";
 import "../interfaces/ViaCash.sol";
 import "../abdk-libraries-solidity/ABDKMathQuad.sol";
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
+//import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "@openzeppelin/contracts/proxy/Initializable.sol";
 
 contract ViaOracle is Oracle, usingProvable, Initializable {
 
@@ -59,7 +60,7 @@ contract ViaOracle is Oracle, usingProvable, Initializable {
         string memory _result,
         bytes memory _proof
     )
-        public 
+        override public 
     {
         //to do : lines below throw error
         require(msg.sender == provable_cbAddress());
@@ -88,6 +89,7 @@ contract ViaOracle is Oracle, usingProvable, Initializable {
     }
 
     function request(bytes32 _currency, bytes32 _ratetype, bytes32 _tokenType, address payable _tokenContract)
+        override
         external
         payable
         returns (bytes32)
@@ -119,7 +121,7 @@ contract ViaOracle is Oracle, usingProvable, Initializable {
         }        
     }
 
-    function setCallbackId(bytes32 _queryId, bytes32 _callbackId) external {
+    function setCallbackId(bytes32 _queryId, bytes32 _callbackId) override external {
         require(pendingQueries[_queryId].caller==msg.sender);
         pendingQueries[_queryId].callbackId = _callbackId;
     }
