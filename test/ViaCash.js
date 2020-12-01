@@ -3,6 +3,7 @@ const truffleAssert = require('truffle-assertions');
 
 const Factory = artifacts.require('Factory');
 const Cash = artifacts.require('Cash');
+const CashFactory = artifacts.require('CashFactory');
 const stringutils = artifacts.require('stringutils');
 const ABDKMathQuad = artifacts.require('ABDKMathQuad');
 const ViaOracle = artifacts.require('ViaOracle');
@@ -12,7 +13,7 @@ web3.setProvider("http://localhost:8545");
 
 contract("CashContractSize", function(accounts) {
     it("get the size of the Cash contract", function() {
-      return Cash.deployed().then(function(instance) {
+      return CashFactory.deployed().then(function(instance) {
         var bytecode = instance.constructor._json.bytecode;
         var deployed = instance.constructor._json.deployedBytecode;
         var sizeOfB  = bytecode.length / 2;

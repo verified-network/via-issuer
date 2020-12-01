@@ -4,6 +4,7 @@ const truffleAssert = require('truffle-assertions');
 const Factory = artifacts.require('Factory');
 const Cash = artifacts.require('Cash');
 const Bond = artifacts.require('Bond');
+const BondFactory = artifacts.require('BondFactory');
 const stringutils = artifacts.require('stringutils');
 const ABDKMathQuad = artifacts.require('ABDKMathQuad');
 const ViaOracle = artifacts.require('ViaOracle');
