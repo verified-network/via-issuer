@@ -3,12 +3,14 @@ const truffleAssert = require('truffle-assertions');
 
 const Factory = artifacts.require('Factory');
 const Cash = artifacts.require('Cash');
+const CashV2Test = artifacts.require('CashV2Test');
 const CashFactory = artifacts.require('CashFactory');
 const TokenFactory = artifacts.require('TokenFactory');
 const stringutils = artifacts.require('stringutils');
 const ABDKMathQuad = artifacts.require('ABDKMathQuad');
 const ViaOracle = artifacts.require('ViaOracle');
 const Token = artifacts.require('Token');
+const UpgradeableProxy = artifacts.require('TransparentUpgradeableProxy');
 
 web3.setProvider("http://localhost:8545");
 
@@ -487,3 +489,17 @@ contract("ViaUSDRedemptionAfterEURExchangeTransferAndRedemption", async (account
   }
 
 });*/
+
+contract("ViaUSDUpgrade", async (accounts) => {
+  it("should upgrade proxy to new address", async () => {
+    var factory = await Factory.deployed();
+    var cash2 = await CashV2Test.deployed();
+    var viausdCashAddress = await factory.tokens(0);
+    console.log("cashv2 test contract address ", cash2.address);
+
+    var upgradeProxy = await UpgradeableProxy.at(viausdCashAddress);
+    await upgradeProxy.upgradeTo(cash2.address, {from:accounts[2]});
+    var viausdCash = await Cash.at(viausdCashAddress);
+    await viausdCash.sendTransaction({from:accounts[0], to:viausdCashAddress, value:1e18});
+  })
+})
