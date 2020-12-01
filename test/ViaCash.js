@@ -36,7 +36,7 @@ contract("IssuingViaUSD", async (accounts) => {
         var oracle = await ViaOracle.deployed(); 
         var token = await TokenFactory.deployed();   
         
-        await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
+        await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address, {from: accounts[2]});
         
         var viausdCashAddress = await factory.tokens(0);
         var viausdCashName = await web3.utils.hexToUtf8(await factory.getName(viausdCashAddress));
@@ -193,9 +193,9 @@ contract("ViaUSDRedemption", async (accounts) => {
     await Cash.link(abdkMathQuad);
 
     var factory = await Factory.deployed();
-    var cash = await Cash.deployed();
+    var cash = await CashFactory.deployed();
     var oracle = await ViaOracle.deployed();  
-    var token = await Token.deployed(); 
+    var token = await TokenFactory.deployed(); 
     
     await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
     
