@@ -98,10 +98,20 @@ contract("IssuingViaEUR", async (accounts) => {
       console.log("Via-EUR cash token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurCashAddress));
       console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
       
-      let firstCallbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-      await truffleAssert.createTransactionResult(oracle, firstCallbackToViaOracle.transactionHash);
-      let secondCallbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-      await truffleAssert.createTransactionResult(oracle, secondCallbackToViaOracle.transactionHash).then(done);
+      //let firstCallbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+      //await truffleAssert.createTransactionResult(oracle, firstCallbackToViaOracle.transactionHash);
+      //let secondCallbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+      //await truffleAssert.createTransactionResult(oracle, secondCallbackToViaOracle.transactionHash);
+
+      await getFirstEvent(oracle.LogResult({fromBlock:'latest'})).then(function(res){
+        truffleAssert.createTransactionResult(oracle, res.transactionHash);
+        done();
+      });
+      console.log("received first callback");
+      await getSecondEvent(oracle.LogResult({fromBlock:'latest'})).then(function(res){
+        truffleAssert.createTransactionResult(oracle, res.transactionHash);
+        done();
+      });
       
       console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
       console.log("Account Via-EUR cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
@@ -109,6 +119,12 @@ contract("IssuingViaEUR", async (accounts) => {
   });
 
   const getFirstEvent = (_event) => {
+    return new Promise((resolve, reject) => {
+      _event.once('data', resolve).once('error', reject)
+    });
+  }
+
+  const getSecondEvent = (_event) => {
     return new Promise((resolve, reject) => {
       _event.once('data', resolve).once('error', reject)
     });
