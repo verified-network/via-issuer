@@ -6,6 +6,7 @@ const ABDKMathQuad = artifacts.require('ABDKMathQuad');
 const Factory = artifacts.require('Factory');
 const Bond = artifacts.require('Bond');
 const Cash = artifacts.require('Cash');
+const CashV2Test = artifacts.require('CashV2Test');
 const ViaOracle = artifacts.require('ViaOracle');
 const usingProvable = artifacts.require('usingProvable');
 const ERC20 = artifacts.require('ERC20');
@@ -16,12 +17,11 @@ const BondFactory = artifacts.require('BondFactory');
 const CashFactory = artifacts.require('CashFactory');
 
 module.exports = function(deployer, network, accounts) {
-    
     deployer.deploy(stringutils);
-    deployer.link(stringutils, [Bond, Cash, ViaOracle, CashFactory, BondFactory, TokenFactory]);
+    deployer.link(stringutils, [Bond, Cash, ViaOracle, CashFactory, BondFactory, TokenFactory, CashV2Test]);
 
     deployer.deploy(ABDKMathQuad);
-    deployer.link(ABDKMathQuad,[Cash, Bond, ViaOracle, ERC20, Token, CashFactory, BondFactory, TokenFactory]);
+    deployer.link(ABDKMathQuad,[Cash, Bond, ViaOracle, ERC20, Token, CashFactory, BondFactory, TokenFactory, CashV2Test]);
 
     deployer.deploy(usingProvable);
     deployer.deploy(ViaOracle, {from: accounts[0], gas:6721975, value: 0.25e18});
@@ -31,6 +31,9 @@ module.exports = function(deployer, network, accounts) {
     deployer.deploy(CashFactory, {from: accounts[2], gas:6721975});
     deployer.deploy(BondFactory, {from: accounts[2], gas:6721975});
     deployer.deploy(TokenFactory, {from: accounts[2], gas:6721975});
+
+    // deploy the test upgrade contract
+    deployer.deploy(CashV2Test);
 
     deployer.deploy(Factory).then(async () => {
         const factory = await Factory.deployed();
