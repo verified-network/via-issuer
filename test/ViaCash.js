@@ -68,9 +68,9 @@ contract("IssuingViaUSD", async (accounts) => {
       });
     }
 });
-/*
+
 contract("IssuingViaEUR", async (accounts) => {
-  it("should send ether to Via-EUR cash contract and then get some Via-EUR cash tokens", async () => {
+  it("should send ether to Via-EUR cash contract and then get some Via-EUR cash tokens", async (done) => {
       var abdkMathQuad = await ABDKMathQuad.deployed();
       await Cash.link(abdkMathQuad);
 
@@ -101,7 +101,7 @@ contract("IssuingViaEUR", async (accounts) => {
       let firstCallbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
       await truffleAssert.createTransactionResult(oracle, firstCallbackToViaOracle.transactionHash);
       let secondCallbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-      await truffleAssert.createTransactionResult(oracle, secondCallbackToViaOracle.transactionHash);
+      await truffleAssert.createTransactionResult(oracle, secondCallbackToViaOracle.transactionHash).then(done);
       
       console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
       console.log("Account Via-EUR cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
@@ -115,7 +115,7 @@ contract("IssuingViaEUR", async (accounts) => {
   }
 
 });
-
+/*
 contract("ViaUSDExchange", async (accounts) => {
   it("should send Via-USD to Via-EUR cash contract and then get some Via-EUR cash tokens", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
