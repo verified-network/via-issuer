@@ -54,9 +54,13 @@ contract("IssuingViaUSD", async (accounts) => {
         console.log("Via-USD cash token contract ether balance after sending ether:", await web3.eth.getBalance(viausdCashAddress));
         console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
         
-        let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-        await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
-        done();
+        //let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+        //await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
+        
+        await getFirstEvent(oracle.LogResult({fromBlock:'latest'})).then(function(res){
+          truffleAssert.createTransactionResult(oracle, res.transactionHash);
+          done();
+        });
           
         console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
         console.log("Account Via-USD cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
@@ -106,7 +110,7 @@ contract("IssuingViaEUR", async (accounts) => {
 
       await getFirstEvent(oracle.LogResult({fromBlock:'latest'})).then(function(res){
         truffleAssert.createTransactionResult(oracle, res.transactionHash);
-        //done();
+        done();
       });
       console.log("received first callback");
       await getSecondEvent(oracle.LogResult({fromBlock:'latest'})).then(function(res){
