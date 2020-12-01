@@ -11,6 +11,10 @@ import "./interfaces/ViaFactory.sol";
 import "@openzeppelin/contracts/proxy/Initializable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+interface ProxyFactory {
+    function deployInstance(address admin, bytes memory initializerData) external returns (address);
+}
+
 //contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
 contract Factory is ViaFactory, Initializable, Ownable {
 
@@ -75,8 +79,7 @@ contract Factory is ViaFactory, Initializable, Ownable {
         bytes memory _payload = abi.encodeWithSignature("initialize(bytes32,bytes32,address,address,address)", tokenName, tokenType, _owner, _oracle, _token);
 
         // Deploy proxy
-        //address _issuer = deployMinimal(_target, _payload);
-        address _issuer; //to do : can we use deployproxy() here passing parameters to cash and bond initialize() programmatically ?
+        address _issuer = ProxyFactory(_target).deployInstance(msg.sender, _payload);
         emit IssuerCreated(_issuer, tokenName, tokenType);
 
         if(tokenType == "Cash"){
@@ -100,7 +103,7 @@ contract Factory is ViaFactory, Initializable, Ownable {
 
         // Deploy proxy
         //address _token = deployMinimal(_target, _payload);
-        address _token; //to do : can we use deployproxy() here too ?
+        address _token = ProxyFactory(_target).deployInstance(msg.sender, _payload);
 
         token[_token] = via("ViaBondToken", tokenName);
         tokens.push(_token);
