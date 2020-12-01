@@ -4,6 +4,7 @@ const truffleAssert = require('truffle-assertions');
 const Factory = artifacts.require('Factory');
 const Cash = artifacts.require('Cash');
 const CashFactory = artifacts.require('CashFactory');
+const TokenFactory = artifacts.require('TokenFactory');
 const stringutils = artifacts.require('stringutils');
 const ABDKMathQuad = artifacts.require('ABDKMathQuad');
 const ViaOracle = artifacts.require('ViaOracle');
@@ -25,15 +26,15 @@ contract("CashContractSize", function(accounts) {
     });
   });
 
-/*contract("IssuingViaUSD", async (accounts) => {
+contract("IssuingViaUSD", async (accounts) => {
     it("should send ether to Via-USD cash contract and then get some Via-USD cash tokens", async () => {
         var abdkMathQuad = await ABDKMathQuad.deployed();
         await Cash.link(abdkMathQuad);
 
         var factory = await Factory.deployed();
-        var cash = await Cash.deployed();
+        var cash = await CashFactory.deployed();
         var oracle = await ViaOracle.deployed(); 
-        var token = await Token.deployed();   
+        var token = await TokenFactory.deployed();   
         
         await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
         
@@ -68,7 +69,7 @@ contract("CashContractSize", function(accounts) {
       });
     }
 });
-
+/*
 contract("IssuingViaEUR", async (accounts) => {
   it("should send ether to Via-EUR cash contract and then get some Via-EUR cash tokens", async () => {
       var abdkMathQuad = await ABDKMathQuad.deployed();
