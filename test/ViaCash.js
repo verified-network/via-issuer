@@ -25,7 +25,7 @@ contract("CashContractSize", function(accounts) {
   });
 
 contract("IssuingViaUSD", async (accounts) => {
-    it("should send ether to Via-USD cash contract and then get some Via-USD cash tokens", async (done) => {
+    it("should send ether to Via-USD cash contract and then get some Via-USD cash tokens", async () => {
         var abdkMathQuad = await ABDKMathQuad.deployed();
         await Cash.link(abdkMathQuad);
 
@@ -70,7 +70,7 @@ contract("IssuingViaUSD", async (accounts) => {
 });
 
 contract("IssuingViaEUR", async (accounts) => {
-  it("should send ether to Via-EUR cash contract and then get some Via-EUR cash tokens", async (done) => {
+  it("should send ether to Via-EUR cash contract and then get some Via-EUR cash tokens", async () => {
       var abdkMathQuad = await ABDKMathQuad.deployed();
       await Cash.link(abdkMathQuad);
 
@@ -99,10 +99,10 @@ contract("IssuingViaEUR", async (accounts) => {
       console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
       
       let firstCallbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-      let secondCallbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-      await Promise.all([firstCallbackToViaOracle, secondCallbackToViaOracle]);
-
+      Promise.race([firstCallbackToViaOracle, timeoutPromise]);
       await truffleAssert.createTransactionResult(oracle, firstCallbackToViaOracle.transactionHash);
+      let secondCallbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+      Promise.race([secondCallbackToViaOracle, timeoutPromise]);
       await truffleAssert.createTransactionResult(oracle, secondCallbackToViaOracle.transactionHash);
 
       console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
@@ -115,6 +115,12 @@ contract("IssuingViaEUR", async (accounts) => {
       _event.once('data', resolve).once('error', reject)
     });
   }
+
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Request timed out'));
+    }, 200000);
+  })
 
 });
 /*
