@@ -13,7 +13,7 @@ import "../interfaces/ViaBond.sol";
 import "../interfaces/ViaCash.sol";
 import "../abdk-libraries-solidity/ABDKMathQuad.sol";
 //import "@openzeppelin/upgrades/contracts/Initializable.sol";
-import "@openzeppelin/contracts/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 contract ViaOracle is Oracle, usingProvable, Initializable {
 
@@ -21,7 +21,7 @@ contract ViaOracle is Oracle, usingProvable, Initializable {
 
     using ABDKMathQuad for uint256;
     using ABDKMathQuad for int256;
-    using ABDKMathQuad for bytes16;
+    using ABDKMathQuad for bytes16; 
 
     //via factory address
     ViaFactory private factory;
@@ -45,7 +45,7 @@ contract ViaOracle is Oracle, usingProvable, Initializable {
         payable
     {
         // note : replace OAR if you are testing Oracle with ethereum-bridge (https://github.com/provable-things/ethereum-bridge)
-        OAR = OracleAddrResolverI(0x6f485C8BF6fc43eA212E93BBF8ce046C7f1cb475); 
+        OAR = OracleAddrResolverI(0xD8AdCb026A84A93312471E4Dd6A71c23387cA4D0); 
         provable_setProof(proofType_TLSNotary | proofStorage_IPFS);
         provable_setCustomGasPrice(4000000000); // i.e. 4 GWei
     }

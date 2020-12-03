@@ -60,6 +60,8 @@ contract ProxiesFactory is Proxies {
     // used for the proxies it creates.
     ProxyFactory factory;
 
+    event InstanceDeployed(address _contractAddress);
+
     constructor(bytes memory _creationCode) public {
         // Initializes the factory struct by deploying the implementation
         // and storing its address.
@@ -68,6 +70,8 @@ contract ProxiesFactory is Proxies {
 
     // initializerData is the encoded call to the initializer function.
     function deployInstance(address admin, bytes memory initializerData) public returns (address) {
-        return deploy(factory, admin, initializerData);
+        address addr = deploy(factory, admin, initializerData);
+        emit InstanceDeployed(addr);
+        return addr;
     }
 }

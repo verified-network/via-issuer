@@ -14,11 +14,10 @@ import "./interfaces/ViaCash.sol";
 import "./interfaces/ViaBond.sol";
 import "./interfaces/ViaToken.sol";
 import "./utilities/StringUtils.sol";
-import "@openzeppelin/contracts/proxy/Initializable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 //import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-contract Bond is ViaBond, ERC20, Initializable, Ownable {
+contract Bond is ViaBond, ERC20, Initializable, OwnableUpgradeable {
 
     using stringutils for *;
 

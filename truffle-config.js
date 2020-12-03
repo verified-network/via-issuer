@@ -6,6 +6,10 @@ const fs = require('fs');
 const mnemonic = fs.readFileSync(".secret").toString().trim();
 
 module.exports = {
+    mocha: {
+        enableTimeouts: true,
+        before_timeout: 20000 // Here is 2min but can be whatever timeout is suitable for you.
+    },    
     // See <http://truffleframework.com/docs/advanced/configuration>
     // to customize your Truffle configuration!
     networks: {
@@ -36,12 +40,12 @@ module.exports = {
             skipDryRun: true  
         },
         rinkeby: {
-            provider: () => new HDWalletProvider(mnemonic, "https://rinkeby.infura.io/v3/" + process.env.INFURA_API_KEY),
+            provider: () => new HDWalletProvider(mnemonic, "wss://rinkeby.infura.io/ws/v3/" + process.env.INFURA_API_KEY),
             network_id: 4,
             gas: 6721975,
             gasPrice: 10000000000,
             networkCheckTimeout: 10000000,
-            confirmations: 2,    
+            confirmations: 1,    
             timeoutBlocks: 200,  
             skipDryRun: true  
         },

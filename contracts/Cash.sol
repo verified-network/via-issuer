@@ -13,12 +13,11 @@ import "./interfaces/ViaToken.sol";
 import "./abdk-libraries-solidity/ABDKMathQuad.sol";
 //import "@openzeppelin/upgrades/contracts/Initializable.sol";
 //import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
-import "@openzeppelin/contracts/proxy/Initializable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 //import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "./utilities/StringUtils.sol";
 
-contract Cash is ViaCash, ERC20, Initializable, Ownable {
+contract Cash is ViaCash, ERC20, Initializable, OwnableUpgradeable {
 
     using stringutils for *;
 

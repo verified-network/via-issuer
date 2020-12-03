@@ -8,15 +8,14 @@ import "./interfaces/ViaFactory.sol";
 //import "@openzeppelin/upgrades/contracts/Initializable.sol";
 //import "@openzeppelin/upgrades/contracts/upgradeability/ProxyFactory.sol";
 //import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
-import "@openzeppelin/contracts/proxy/Initializable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 interface ProxyFactory {
     function deployInstance(address admin, bytes memory initializerData) external returns (address);
 }
 
 //contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
-contract Factory is ViaFactory, Initializable, Ownable {
+contract Factory is ViaFactory, Initializable, OwnableUpgradeable {
 
     //data structure for token proxies
     struct via{

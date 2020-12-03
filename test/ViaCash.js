@@ -1,3 +1,4 @@
+const { prepareUpgrade, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 
@@ -487,19 +488,28 @@ contract("ViaUSDRedemptionAfterEURExchangeTransferAndRedemption", async (account
       _event.once('data', resolve).once('error', reject)
     });
   }
-
+ 
 });*/
 
 contract("ViaUSDUpgrade", async (accounts) => {
   it("should upgrade proxy to new address", async () => {
     var oracle = await ViaOracle.deployed(); 
     var factory = await Factory.deployed();
-    var cash2 = await CashV2Test.deployed();
     var viausdCashAddress = await factory.tokens(0);
-    console.log("cashv2 test contract address ", cash2.address);
 
-    var upgradeProxy = await UpgradeableProxy.at(viausdCashAddress);
-    await upgradeProxy.upgradeTo(cash2.address, {from:accounts[2]});
+    var cashv2Address = await upgradeProxy(
+      viausdCashAddress,
+      CashV2Test,
+      {
+        unsafeAllowCustomTypes: true,
+        unsafeAllowLinkedLibraries: true
+      }
+    )
+    //    var cash2 = await CashV2Test.deployed();
+    console.log("cashv2 test contract address ", cashv2Address);
+
+    // var upgradedProxy = await UpgradeableProxy.at(viausdCashAddress);
+    // await upgradeProxy.upgradeTo(cash2.address, {from:accounts[2]});
     var viausdCash = await Cash.at(viausdCashAddress);
     console.log("Account address:", accounts[0]);
     console.log("Account Via-USD cash token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
