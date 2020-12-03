@@ -1,6 +1,6 @@
 // (c) Kallol Borah, 2020
 // deploying via tokens
-
+ 
 const stringutils = artifacts.require('stringutils');
 const ABDKMathQuad = artifacts.require('ABDKMathQuad');
 const Factory = artifacts.require('Factory');
@@ -11,37 +11,42 @@ const usingProvable = artifacts.require('usingProvable');
 const ERC20 = artifacts.require('ERC20');
 const Token = artifacts.require('Token');
 
+const TokenFactory = artifacts.require('TokenFactory');
+const BondFactory = artifacts.require('BondFactory');
+const CashFactory = artifacts.require('CashFactory');
+
 module.exports = function(deployer, network, accounts) {
-    
     deployer.deploy(stringutils);
-    deployer.link(stringutils, [Bond, Cash, ViaOracle]);
+    deployer.link(stringutils, [Bond, Cash, ViaOracle, CashFactory, BondFactory, TokenFactory]);
 
     deployer.deploy(ABDKMathQuad);
-    deployer.link(ABDKMathQuad,[Cash, Bond, ViaOracle, ERC20, Token]);
+    deployer.link(ABDKMathQuad,[Cash, Bond, ViaOracle, ERC20, Token, CashFactory, BondFactory, TokenFactory]);
 
     deployer.deploy(usingProvable);
     deployer.deploy(ViaOracle, {from: accounts[0], gas:6721975, value: 0.25e18});
     deployer.deploy(ERC20);
-    deployer.deploy(Cash);
-    deployer.deploy(Bond);
-    deployer.deploy(Token);
+
+    // factory contracts (we use different account to prevent admin falllback errors)
+    deployer.deploy(CashFactory, {from: accounts[2], gas:6721975});
+    deployer.deploy(BondFactory, {from: accounts[2], gas:6721975});
+    deployer.deploy(TokenFactory, {from: accounts[2], gas:6721975});
 
     deployer.deploy(Factory).then(async () => {
         const factory = await Factory.deployed();
-        const cash = await Cash.deployed();
-        const bond = await Bond.deployed();
+        const cash = await CashFactory.deployed();
+        const bond = await BondFactory.deployed();
         const oracle = await ViaOracle.deployed();
-        const token = await Token.deployed();
+        const token = await TokenFactory.deployed();
 
         await oracle.initialize(factory.address);
 
-        await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
-        await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
-        await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_INR"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
+        await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address, {from: accounts[2]});
+        await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address, {from: accounts[2]});
+        await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_INR"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address, {from: accounts[2]});
 
-        await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
-        await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
-        await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_INR"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
+        await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address, {from: accounts[2]});
+        await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address, {from: accounts[2]});
+        await factory.createIssuer(bond.address, web3.utils.utf8ToHex("Via_INR"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address, {from: accounts[2]});
 
         for (let i = 0; i < 6; i++) {
             var factoryTokenAddress = await factory.tokens(i);

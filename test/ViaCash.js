@@ -3,16 +3,20 @@ const truffleAssert = require('truffle-assertions');
 
 const Factory = artifacts.require('Factory');
 const Cash = artifacts.require('Cash');
+const CashV2Test = artifacts.require('CashV2Test');
+const CashFactory = artifacts.require('CashFactory');
+const TokenFactory = artifacts.require('TokenFactory');
 const stringutils = artifacts.require('stringutils');
 const ABDKMathQuad = artifacts.require('ABDKMathQuad');
 const ViaOracle = artifacts.require('ViaOracle');
 const Token = artifacts.require('Token');
+const UpgradeableProxy = artifacts.require('TransparentUpgradeableProxy');
 
 web3.setProvider("http://localhost:8545");
 
 contract("CashContractSize", function(accounts) {
     it("get the size of the Cash contract", function() {
-      return Cash.deployed().then(function(instance) {
+      return CashFactory.deployed().then(function(instance) {
         var bytecode = instance.constructor._json.bytecode;
         var deployed = instance.constructor._json.deployedBytecode;
         var sizeOfB  = bytecode.length / 2;
@@ -24,17 +28,17 @@ contract("CashContractSize", function(accounts) {
     });
   });
 
-/*contract("IssuingViaUSD", async (accounts) => {
+contract("IssuingViaUSD", async (accounts) => {
     it("should send ether to Via-USD cash contract and then get some Via-USD cash tokens", async () => {
         var abdkMathQuad = await ABDKMathQuad.deployed();
         await Cash.link(abdkMathQuad);
 
         var factory = await Factory.deployed();
-        var cash = await Cash.deployed();
+        var cash = await CashFactory.deployed();
         var oracle = await ViaOracle.deployed(); 
-        var token = await Token.deployed();   
+        var token = await TokenFactory.deployed();   
         
-        await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
+        await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address, {from: accounts[2]});
         
         var viausdCashAddress = await factory.tokens(0);
         var viausdCashName = await web3.utils.hexToUtf8(await factory.getName(viausdCashAddress));
@@ -67,7 +71,7 @@ contract("CashContractSize", function(accounts) {
       });
     }
 });
-
+/*
 contract("IssuingViaEUR", async (accounts) => {
   it("should send ether to Via-EUR cash contract and then get some Via-EUR cash tokens", async () => {
       var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -191,9 +195,9 @@ contract("ViaUSDRedemption", async (accounts) => {
     await Cash.link(abdkMathQuad);
 
     var factory = await Factory.deployed();
-    var cash = await Cash.deployed();
+    var cash = await CashFactory.deployed();
     var oracle = await ViaOracle.deployed();  
-    var token = await Token.deployed(); 
+    var token = await TokenFactory.deployed(); 
     
     await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
     
@@ -485,3 +489,39 @@ contract("ViaUSDRedemptionAfterEURExchangeTransferAndRedemption", async (account
   }
 
 });*/
+
+contract("ViaUSDUpgrade", async (accounts) => {
+  it("should upgrade proxy to new address", async () => {
+    var oracle = await ViaOracle.deployed(); 
+    var factory = await Factory.deployed();
+    CashV2Test.link(stringutils);
+    CashV2Test.link(ABDKMathQuad);
+    var cash2 = await CashV2Test.new();
+
+    var viausdCashAddress = await factory.tokens(0);
+    console.log("cashv2 test contract address ", cash2.address);
+
+    var upgradeProxy = await UpgradeableProxy.at(viausdCashAddress);
+    await upgradeProxy.upgradeTo(cash2.address, {from:accounts[2]});
+    var viausdCash = await Cash.at(viausdCashAddress);
+    console.log("Account address:", accounts[0]);
+    console.log("Account Via-USD cash token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
+    console.log("Via-USD cash token contract ether balance before sending ether:", await web3.eth.getBalance(viausdCashAddress));
+    console.log("Via oracle ether balance before query:", await web3.eth.getBalance(oracle.address));
+    console.log("");
+
+    await viausdCash.sendTransaction({from:accounts[0], to:viausdCashAddress, value:1e18});
+    let callbackForRedemption = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+
+    console.log("Via-USD cash token contract ether balance after sending ether:", await web3.eth.getBalance(viausdCashAddress));
+    console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));
+
+
+    
+  });
+  const getFirstEvent = (_event) => {
+    return new Promise((resolve, reject) => {
+      _event.once('data', resolve).once('error', reject)
+    });
+  };
+})

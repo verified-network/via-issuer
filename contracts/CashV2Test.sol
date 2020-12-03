@@ -17,7 +17,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 //import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "./utilities/StringUtils.sol";
 
-contract Cash is ViaCash, ERC20, Initializable, OwnableUpgradeable {
+contract CashV2Test is ViaCash, ERC20, Initializable, OwnableUpgradeable {
 
     using stringutils for *;
 
@@ -63,6 +63,7 @@ contract Cash is ViaCash, ERC20, Initializable, OwnableUpgradeable {
 
     //mutex
     bool lock;
+    bool someNewVariable;
 
     //initiliaze proxies
     function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token) public initializer{
@@ -106,7 +107,7 @@ contract Cash is ViaCash, ERC20, Initializable, OwnableUpgradeable {
             require(!lock);
             lock = true;
             //only issue if cash tokens are paid in, since bond tokens can't be paid to issue bond token
-            if(Cash(address(uint160(receiver))).requestIssue(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName)){
+            if(CashV2Test(address(uint160(receiver))).requestIssue(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName)){
                 balances[sender] = ABDKMathQuad.sub(balances[sender], ABDKMathQuad.fromUInt(tokens));
                 //adjust total supply
                 totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.fromUInt(tokens));
@@ -424,7 +425,7 @@ contract Cash is ViaCash, ERC20, Initializable, OwnableUpgradeable {
                 address viaAddress = factory.getToken(q);
                 (bytes32 tname, bytes32 ttype) = factory.getNameAndType(viaAddress);
                 if(tname == currency && ttype == "ViaCash"){
-                    if(ABDKMathQuad.cmp(Cash(address(uint160(viaAddress))).requestDeductFromBalance(value, party),0)==1){
+                    if(ABDKMathQuad.cmp(CashV2Test(address(uint160(viaAddress))).requestDeductFromBalance(value, party),0)==1){
                         deposits[party][currency] = ABDKMathQuad.sub(deposits[party][currency], value);
                         //reduces balances
                         balances[party] = ABDKMathQuad.sub(balances[party], amount);
