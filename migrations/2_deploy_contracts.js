@@ -32,9 +32,6 @@ module.exports = function(deployer, network, accounts) {
     deployer.deploy(BondFactory, {from: accounts[2], gas:6721975});
     deployer.deploy(TokenFactory, {from: accounts[2], gas:6721975});
 
-    // deploy the test upgrade contract
-    deployer.deploy(CashV2Test);
-
     deployer.deploy(Factory).then(async () => {
         const factory = await Factory.deployed();
         const cash = await CashFactory.deployed();
