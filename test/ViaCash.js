@@ -492,6 +492,7 @@ contract("ViaUSDRedemptionAfterEURExchangeTransferAndRedemption", async (account
 
 contract("ViaUSDUpgrade", async (accounts) => {
   it("should upgrade proxy to new address", async () => {
+    var oracle = await ViaOracle.deployed(); 
     var factory = await Factory.deployed();
     var cash2 = await CashV2Test.deployed();
     var viausdCashAddress = await factory.tokens(0);
@@ -500,6 +501,25 @@ contract("ViaUSDUpgrade", async (accounts) => {
     var upgradeProxy = await UpgradeableProxy.at(viausdCashAddress);
     await upgradeProxy.upgradeTo(cash2.address, {from:accounts[2]});
     var viausdCash = await Cash.at(viausdCashAddress);
+    console.log("Account address:", accounts[0]);
+    console.log("Account Via-USD cash token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
+    console.log("Via-USD cash token contract ether balance before sending ether:", await web3.eth.getBalance(viausdCashAddress));
+    console.log("Via oracle ether balance before query:", await web3.eth.getBalance(oracle.address));
+    console.log("");
+
     await viausdCash.sendTransaction({from:accounts[0], to:viausdCashAddress, value:1e18});
-  })
+
+    console.log("Via-USD cash token contract ether balance after sending ether:", await web3.eth.getBalance(viausdCashAddress));
+    console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));
+
+    let callbackForRedemption = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+
+    console.log("Account Via-USD cash token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
+    
+  });
+  const getFirstEvent = (_event) => {
+    return new Promise((resolve, reject) => {
+      _event.once('data', resolve).once('error', reject)
+    });
+  };
 })
