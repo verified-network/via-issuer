@@ -1,12 +1,11 @@
 // (c) Kallol Borah, 2020
 // deploying via tokens
-
+ 
 const stringutils = artifacts.require('stringutils');
 const ABDKMathQuad = artifacts.require('ABDKMathQuad');
 const Factory = artifacts.require('Factory');
 const Bond = artifacts.require('Bond');
 const Cash = artifacts.require('Cash');
-const CashV2Test = artifacts.require('CashV2Test');
 const ViaOracle = artifacts.require('ViaOracle');
 const usingProvable = artifacts.require('usingProvable');
 const ERC20 = artifacts.require('ERC20');
@@ -18,10 +17,10 @@ const CashFactory = artifacts.require('CashFactory');
 
 module.exports = function(deployer, network, accounts) {
     deployer.deploy(stringutils);
-    deployer.link(stringutils, [Bond, Cash, ViaOracle, CashFactory, BondFactory, TokenFactory, CashV2Test]);
+    deployer.link(stringutils, [Bond, Cash, ViaOracle, CashFactory, BondFactory, TokenFactory]);
 
     deployer.deploy(ABDKMathQuad);
-    deployer.link(ABDKMathQuad,[Cash, Bond, ViaOracle, ERC20, Token, CashFactory, BondFactory, TokenFactory, CashV2Test]);
+    deployer.link(ABDKMathQuad,[Cash, Bond, ViaOracle, ERC20, Token, CashFactory, BondFactory, TokenFactory]);
 
     deployer.deploy(usingProvable);
     deployer.deploy(ViaOracle, {from: accounts[0], gas:6721975, value: 0.25e18});
