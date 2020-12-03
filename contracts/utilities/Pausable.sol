@@ -28,8 +28,6 @@ contract Pausable {
 
     /**
         * @notice returns whether or not the contract is paused
-        * @return True: contract is paused
-        * @return False: contract is not paused
     */
     function isPaused() public view returns (bool) {
         return paused;
