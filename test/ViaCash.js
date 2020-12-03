@@ -508,13 +508,12 @@ contract("ViaUSDUpgrade", async (accounts) => {
     console.log("");
 
     await viausdCash.sendTransaction({from:accounts[0], to:viausdCashAddress, value:1e18});
+    let callbackForRedemption = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
 
     console.log("Via-USD cash token contract ether balance after sending ether:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));
 
-    let callbackForRedemption = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
 
-    console.log("Account Via-USD cash token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
     
   });
   const getFirstEvent = (_event) => {
