@@ -11,10 +11,15 @@ module.exports = function(deployer, network, accounts) {
     var cash_factory_proxy_addr = "";
     var token_factory_proxy_addr = "";
     // instances of the upgradeable proxy contracts
-    var bondInstance = await UpgradeableProxy.at(bond_factory_proxy_addr);
-    var cashInstance = await UpgradeableProxy.at(cash_factory_proxy_addr);
-    var tokenInstance = await UpgradeableProxy.at(token_factory_proxy_addr);
-    // addresses of new implementation contracts for Cash.sol, Bond.sol, Token.sol
+    var bondInstance;
+    var cashInstance;
+    var tokenInstance;
+    async () => {
+        bondInstance = await UpgradeableProxy.at(bond_factory_proxy_addr);
+        cashInstance = await UpgradeableProxy.at(cash_factory_proxy_addr);
+        tokenInstance = await UpgradeableProxy.at(token_factory_proxy_addr);    
+    };
+     // addresses of new implementation contracts for Cash.sol, Bond.sol, Token.sol
     var new_bond_implementation = "";
     var new_cash_implementation = "";
     var new_token_implementation = "";
