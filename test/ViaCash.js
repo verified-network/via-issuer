@@ -494,7 +494,10 @@ contract("ViaUSDUpgrade", async (accounts) => {
   it("should upgrade proxy to new address", async () => {
     var oracle = await ViaOracle.deployed(); 
     var factory = await Factory.deployed();
+    CashV2Test.link(stringutils);
+    CashV2Test.link(ABDKMathQuad);
     var cash2 = await CashV2Test.new();
+
     var viausdCashAddress = await factory.tokens(0);
     console.log("cashv2 test contract address ", cash2.address);
 
