@@ -73,7 +73,7 @@ contract Factory is ViaFactory, Initializable, OwnableUpgradeable {
 
     //token issuer factory 
     function createIssuer(address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token) external{
-        address _owner = address(this);
+        address _owner = msg.sender;
 
         bytes memory _payload = abi.encodeWithSignature("initialize(bytes32,bytes32,address,address,address)", tokenName, tokenType, _owner, _oracle, _token);
 

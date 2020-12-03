@@ -39,7 +39,7 @@ contract ViaOracle is Oracle, usingProvable, Initializable {
 
     event LogNewProvableQuery(string description);
     event LogResult(address payable caller, bytes32 myid, bytes32 tokenType, bytes32 rateType, string result);
-
+    
     constructor()
         public
         payable
