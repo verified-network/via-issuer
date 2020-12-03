@@ -98,12 +98,28 @@ contract("IssuingViaEUR", async (accounts) => {
       console.log("Via-EUR cash token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurCashAddress));
       console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
       
-      let firstCallbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-      Promise.race([firstCallbackToViaOracle, timeoutPromise]);
-      await truffleAssert.createTransactionResult(oracle, firstCallbackToViaOracle.transactionHash);
-      let secondCallbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-      Promise.race([secondCallbackToViaOracle, timeoutPromise]);
-      await truffleAssert.createTransactionResult(oracle, secondCallbackToViaOracle.transactionHash);
+      //let firstCallbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+      let firstCallbackToViaOracle = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+      try{
+          await firstCallbackToViaOracle;
+          await truffleAssert.createTransactionResult(oracle, firstCallbackToViaOracle.transactionHash);
+      } catch (error) { 
+        console.log(error);
+      } finally {
+        clearTimeout(firstCallbackToViaOracle);
+      }
+      //let secondCallbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+      let secondCallbackToViaOracle = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+      try{
+          await secondCallbackToViaOracle;
+          await truffleAssert.createTransactionResult(oracle, secondCallbackToViaOracle.transactionHash);
+      } catch (error) { 
+        console.log(error);
+      } finally {
+        clearTimeout(secondCallbackToViaOracle);
+      }
+      //Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+      //await truffleAssert.createTransactionResult(oracle, secondCallbackToViaOracle.transactionHash);
 
       console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
       console.log("Account Via-EUR cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
