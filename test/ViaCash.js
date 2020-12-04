@@ -535,14 +535,13 @@ contract("ViaUSDUpgrade", async (accounts) => {
       _event.once('data', resolve).once('error', reject)
     });
   };
-})
+});
 
 contract("ViaCashUpgradesPluginIntegrationTest", async (accounts) => {
-  var cashUpgradeInst;
-  var oracle = await ViaOracle.deployed(); 
-  var factory = await Factory.deployed();
-  it("should pass deploy checks", async () => {
-    cashUpgradeInst = await deployProxy(
+  it("should not fail", async () => {
+    var oracle = await ViaOracle.deployed(); 
+    var factory = await Factory.deployed();
+    const cashUpgradeInst = await deployProxy(
       Cash,
       [
         web3.utils.utf8ToHex("Via_EUR"), // name
@@ -556,11 +555,7 @@ contract("ViaCashUpgradesPluginIntegrationTest", async (accounts) => {
         "unsafeAllowLinkedLibraries": true
       }
     );
-  });
-  it("should upgrade to v2", async () => {
     await upgradeProxy(cashUpgradeInst.address, CashV2Test);
-  })
-  it("should prepare upgrade", async () => {
     await prepareUpgrade(cashUpgradeInst.address, CashV2Test);
-  })
-})
+  });
+});
