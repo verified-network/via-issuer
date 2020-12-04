@@ -12,6 +12,8 @@ const ViaOracle = artifacts.require('ViaOracle');
 const Token = artifacts.require('Token');
 const UpgradeableProxy = artifacts.require('TransparentUpgradeableProxy');
 
+const { deployProxy, upgradeProxy, prepareUpgrade} = require('@openzeppelin/truffle-upgrades');
+
 web3.setProvider("http://localhost:8545");
 
 contract("CashContractSize", function(accounts) {
@@ -497,7 +499,7 @@ contract("ViaUSDRedemptionAfterEURExchangeTransferAndRedemption", async (account
     });
   }
 
-});*/
+});*/ 
 
 contract("ViaUSDUpgrade", async (accounts) => {
   it("should upgrade proxy to new address", async () => {
@@ -510,8 +512,8 @@ contract("ViaUSDUpgrade", async (accounts) => {
     var viausdCashAddress = await factory.tokens(0);
     console.log("cashv2 test contract address ", cash2.address);
 
-    var upgradeProxy = await UpgradeableProxy.at(viausdCashAddress);
-    await upgradeProxy.upgradeTo(cash2.address, {from:accounts[2]});
+    var upgradedProxy = await UpgradeableProxy.at(viausdCashAddress);
+    await upgradedProxy.upgradeTo(cash2.address, {from:accounts[2]});
     var viausdCash = await Cash.at(viausdCashAddress);
     console.log("Account address:", accounts[0]);
     console.log("Account Via-USD cash token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
@@ -533,4 +535,32 @@ contract("ViaUSDUpgrade", async (accounts) => {
       _event.once('data', resolve).once('error', reject)
     });
   };
+})
+
+contract("ViaCashUpgradesPluginIntegrationTest", async (accounts) => {
+  var cashUpgradeInst;
+  var oracle = await ViaOracle.deployed(); 
+  var factory = await Factory.deployed();
+  it("should pass deploy checks", async () => {
+    cashUpgradeInst = await deployProxy(
+      Cash,
+      [
+        web3.utils.utf8ToHex("Via_EUR"), // name
+        web3.utils.utf8ToHex("Cash"), // type
+        accounts[0], // owner
+        oracle.address, // oracle
+        factory.address // factory
+      ],
+      {
+        "unsafeAllowCustomTypes": true, 
+        "unsafeAllowLinkedLibraries": true
+      }
+    );
+  });
+  it("should upgrade to v2", async () => {
+    await upgradeProxy(cashUpgradeInst.address, CashV2Test);
+  })
+  it("should prepare upgrade", async () => {
+    await prepareUpgrade(cashUpgradeInst.address, CashV2Test);
+  })
 })

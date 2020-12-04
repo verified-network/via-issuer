@@ -10,6 +10,10 @@ const ABDKMathQuad = artifacts.require('ABDKMathQuad');
 const ViaOracle = artifacts.require('ViaOracle');
 const Token = artifacts.require('Token');
 const TokenFactory = artifacts.require('TokenFactory');
+const BondV2Test = artifacts.require('BondV2Test');
+const TokenV2Test = artifacts.require('TokenV2Test');
+
+const { deployProxy, upgradeProxy, prepareUpgrade} = require('@openzeppelin/truffle-upgrades');
 
 web3.setProvider("http://127.0.0.1:8545");
 
@@ -560,3 +564,48 @@ contract("BondRedemptionByPurchasersWithIssuingCollateral", async (accounts) => 
   }
 
 });*/
+
+contract("ViaBondUpgradesPluginIntegrationTest", async (accounts) => {
+  var bondUpgradeInst;
+  var tokenUpgradeInst;
+  var oracle = await ViaOracle.deployed(); 
+  var factory = await Factory.deployed();
+  it("should pass deploy checks", async () => {
+    bondUpgradeInst = await deployProxy(
+      Bond, 
+      [
+        web3.utils.utf8ToHex("Via_EUR"), // name
+        web3.utils.utf8ToHex("Cash"), // type
+        accounts[0], // owner
+        oracle.address, // oracle
+        factory.address // factory
+      ],
+      {
+          "unsafeAllowCustomTypes": true, 
+          "unsafeAllowLinkedLibraries": true
+      }
+    );
+    tokenUpgradeInst = await deployProxy(
+      Token, 
+      [
+        factory.address, 
+        web3.utils.utf8ToHex("Token"),
+        accounts[0],
+        web3.utils.utf8ToHex("Product"),
+        web3.utils.utf8ToHex("Symbol")
+      ],
+      {
+          "unsafeAllowCustomTypes": true, 
+          "unsafeAllowLinkedLibraries": true
+      }
+    );
+  });
+  it ("shold upgrade to v2", async () => {
+    await upgradeProxy(bondUpgradeInst.address, BondV2Test);
+    await upgradeProxy(tokenUpgradeInst.address, TokenV2Test);
+  })
+  it("should prepare upgrade", async () => {
+    await prepareUpgrade(bondUpgradeInst.address, BondV2Test);
+    await prepareUpgrade(tokenUpgradeInst.address, TokenV2Test);
+  })
+})
