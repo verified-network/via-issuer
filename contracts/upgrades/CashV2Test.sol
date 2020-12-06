@@ -4,18 +4,17 @@
 
 pragma solidity 0.6.12;
 
-import "./erc/ERC20.sol";
-import "./interfaces/Oracle.sol";
-import "./interfaces/ViaFactory.sol";
-import "./interfaces/ViaCash.sol";
-import "./interfaces/ViaBond.sol";
-import "./interfaces/ViaToken.sol";
-import "./abdk-libraries-solidity/ABDKMathQuad.sol";
+import "../erc/ERC20.sol";
+import "../interfaces/Oracle.sol";
+import "../interfaces/ViaFactory.sol";
+import "../interfaces/ViaCash.sol";
+import "../interfaces/ViaBond.sol";
+import "../interfaces/ViaToken.sol";
+import "../abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "./utilities/StringUtils.sol";
-import "./utilities/Pausable.sol";
+import "../utilities/StringUtils.sol";
 
-contract Cash is ViaCash, ERC20, Initializable, OwnableUpgradeable, Pausable {
+contract CashV2Test is ViaCash, ERC20, Initializable, OwnableUpgradeable {
 
     using stringutils for *;
 
@@ -34,7 +33,6 @@ contract Cash is ViaCash, ERC20, Initializable, OwnableUpgradeable, Pausable {
     string public name;
     string public symbol;
     bytes32 public cashtokenName;
-
 
     //mapping of buyers (address) to currency (bytes32) to deposit (bytes16) amounts they make against which via cash tokens are issued
     mapping(address => mapping(bytes32 => bytes16)) public deposits;
@@ -62,6 +60,7 @@ contract Cash is ViaCash, ERC20, Initializable, OwnableUpgradeable, Pausable {
 
     //mutex
     bool lock;
+    bool someNewVariable;
 
     //initiliaze proxies
     function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token) public initializer{
@@ -83,16 +82,12 @@ contract Cash is ViaCash, ERC20, Initializable, OwnableUpgradeable, Pausable {
         require(msg.value !=0);
         //only to pay in ether
         require(msg.data.length==0);
-        // contract must not be paused
-        require(paused == false);
         //issue via cash tokens
         issue(ABDKMathQuad.fromUInt(msg.value), msg.sender, "ether");
     }
 
     //overriding this function of ERC20 standard for transfer of via cash tokens to other users or to this contract for redemption
     function transferFrom(address sender, address receiver, uint256 tokens) override(ViaCash,ERC20) external returns (bool){
-        // contract must not be paused
-        require(paused == false);
         //ensure sender has enough tokens in balance before transferring or redeeming them
         require(ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))!=-1);// || 
                 //ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))==0);
@@ -109,7 +104,7 @@ contract Cash is ViaCash, ERC20, Initializable, OwnableUpgradeable, Pausable {
             require(!lock);
             lock = true;
             //only issue if cash tokens are paid in, since bond tokens can't be paid to issue bond token
-            if(Cash(address(uint160(receiver))).requestIssue(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName)){
+            if(CashV2Test(address(uint160(receiver))).requestIssue(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName)){
                 balances[sender] = ABDKMathQuad.sub(balances[sender], ABDKMathQuad.fromUInt(tokens));
                 //adjust total supply
                 totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.fromUInt(tokens));
@@ -427,7 +422,7 @@ contract Cash is ViaCash, ERC20, Initializable, OwnableUpgradeable, Pausable {
                 address viaAddress = factory.getToken(q);
                 (bytes32 tname, bytes32 ttype) = factory.getNameAndType(viaAddress);
                 if(tname == currency && ttype == "ViaCash"){
-                    if(ABDKMathQuad.cmp(Cash(address(uint160(viaAddress))).requestDeductFromBalance(value, party),0)==1){
+                    if(ABDKMathQuad.cmp(CashV2Test(address(uint160(viaAddress))).requestDeductFromBalance(value, party),0)==1){
                         deposits[party][currency] = ABDKMathQuad.sub(deposits[party][currency], value);
                         //reduces balances
                         balances[party] = ABDKMathQuad.sub(balances[party], amount);
@@ -518,12 +513,4 @@ contract Cash is ViaCash, ERC20, Initializable, OwnableUpgradeable, Pausable {
         }
     }
     
-    function pause() public {
-        require(msg.sender == owner() || msg.sender == address(factory));
-        _pause();
-    }
-    function unpause() public {
-        require(msg.sender == owner() || msg.sender == address(factory));
-        _unpause();
-    }
 }

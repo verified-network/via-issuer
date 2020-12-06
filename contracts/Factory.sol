@@ -2,12 +2,9 @@
 // Implementation of the Via cash and bond factory.
 // SPDX-License-Identifier: MIT
 
-//pragma solidity >=0.5.0 <0.7.0;
 pragma solidity 0.6.12;
+
 import "./interfaces/ViaFactory.sol";
-//import "@openzeppelin/upgrades/contracts/Initializable.sol";
-//import "@openzeppelin/upgrades/contracts/upgradeability/ProxyFactory.sol";
-//import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 interface ProxyFactory {

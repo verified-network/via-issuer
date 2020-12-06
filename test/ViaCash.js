@@ -101,7 +101,6 @@ contract("IssuingViaUSD", async (accounts) => {
 
 });
 
-
 contract("IssuingViaEUR", async (accounts) => {
   it("should send ether to Via-EUR cash contract and then get some Via-EUR cash tokens", async () => {
       var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -723,15 +722,14 @@ contract("ViaUSDUpgrade", async (accounts) => {
 
     console.log("Via-USD cash token contract ether balance after sending ether:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));
-
-
-    
   });
+
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
       _event.once('data', resolve).once('error', reject)
     });
   };
+  
 });
 
 /*contract("ViaCashUpgradesPluginIntegrationTest", async (accounts) => {

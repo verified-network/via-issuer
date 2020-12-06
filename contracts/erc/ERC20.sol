@@ -1,7 +1,6 @@
 // (c) Kallol Borah, 2020
 // Base ERC20 implementation.
 
-//pragma solidity >=0.5.0 <0.7.0;
 pragma solidity 0.6.12;
 import "../abdk-libraries-solidity/ABDKMathQuad.sol";
 

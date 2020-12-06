@@ -4,15 +4,15 @@
 
 pragma solidity 0.6.12;
 
-import "./erc/ERC20.sol";
-import "./interfaces/ViaBond.sol";
-import "./interfaces/ViaToken.sol";
-import "./interfaces/ViaFactory.sol";
-import "./abdk-libraries-solidity/ABDKMathQuad.sol";
-import "./utilities/StringUtils.sol";
+import "../erc/ERC20.sol";
+import "../interfaces/ViaBond.sol";
+import "../interfaces/ViaToken.sol";
+import "../interfaces/ViaFactory.sol";
+import "../abdk-libraries-solidity/ABDKMathQuad.sol";
+import "../utilities/StringUtils.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract Token is ViaToken, ERC20, Initializable, OwnableUpgradeable {
+contract TokenV2Test is ViaToken, ERC20, Initializable, OwnableUpgradeable {
 
     using stringutils for *;
 
@@ -23,6 +23,8 @@ contract Token is ViaToken, ERC20, Initializable, OwnableUpgradeable {
     bytes32 public tokenSymbol;
 
     ViaFactory private factory;
+
+    bool public someVariable;
 
     //initiliaze proxies
     function initialize(address _factory, bytes32 _name, address payable _owner, bytes32 _product, bytes32 _symbol) public initializer{

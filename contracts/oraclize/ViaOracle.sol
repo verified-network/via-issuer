@@ -2,8 +2,8 @@
 // Via oracle client
 // SPDX-License-Identifier: MIT
 
-//pragma solidity >=0.5.0 <0.7.0;
 pragma solidity 0.6.12;
+
 import "./provableAPI.sol";
 import "../interfaces/Oracle.sol";
 import "../utilities/StringUtils.sol";
@@ -12,7 +12,6 @@ import "../interfaces/ViaCash.sol";
 import "../interfaces/ViaBond.sol";
 import "../interfaces/ViaCash.sol";
 import "../abdk-libraries-solidity/ABDKMathQuad.sol";
-//import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 contract ViaOracle is Oracle, usingProvable, Initializable {

@@ -1,5 +1,6 @@
-//pragma solidity >=0.5.0 <0.7.0;
+// SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
+
 library stringutils { // Only relevant functions
     
     //added from https://ethereum.stackexchange.com/questions/62371/convert-a-string-to-a-uint256-with-error-handling

@@ -4,18 +4,18 @@
 
 pragma solidity 0.6.12;
 
-import "./erc/ERC20.sol";
-import "./interfaces/Oracle.sol";
-import "./abdk-libraries-solidity/ABDKMathQuad.sol";
-import "./interfaces/ViaFactory.sol";
-import "./interfaces/ViaCash.sol";
-import "./interfaces/ViaBond.sol";
-import "./interfaces/ViaToken.sol";
-import "./utilities/StringUtils.sol";
+import "../erc/ERC20.sol";
+import "../interfaces/Oracle.sol";
+import "../abdk-libraries-solidity/ABDKMathQuad.sol";
+import "../interfaces/ViaFactory.sol";
+import "../interfaces/ViaCash.sol";
+import "../interfaces/ViaBond.sol";
+import "../interfaces/ViaToken.sol";
+import "../utilities/StringUtils.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "./utilities/Pausable.sol";
+import "../utilities/Pausable.sol";
 
-contract Bond is ViaBond, ERC20, Initializable, OwnableUpgradeable, Pausable {
+contract BondV2Test is ViaBond, ERC20, Initializable, OwnableUpgradeable, Pausable {
 
     using stringutils for *;
 
@@ -87,6 +87,7 @@ contract Bond is ViaBond, ERC20, Initializable, OwnableUpgradeable, Pausable {
 
     //mutex
     bool lock;
+    bool lock2;
 
     //initiliaze proxies
     function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token) public initializer {

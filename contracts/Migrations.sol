@@ -1,5 +1,5 @@
-//pragma solidity >=0.5.0 <0.7.0;
 pragma solidity 0.6.12;
+
 contract Migrations {
   address public owner;
   uint public last_completed_migration;
