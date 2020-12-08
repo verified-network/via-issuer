@@ -72,16 +72,6 @@ contract("IssuingViaUSD", async (accounts) => {
       console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
       console.log("Account Via-USD cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
               
-      await viausdCash.pause();
-      await truffleAssert.reverts(
-        viausdCash.sendTransaction({from:accounts[0], to:viausdCashAddress, value:1e18}),
-        "contract is paused"
-      );
-      await viausdCash.unpause();
-      truffleAssert.passes(
-        viausdCash.sendTransaction({from:accounts[0], to:viausdCashAddress, value:1e18}),
-        "contract is unpaused"          
-      )
   });
 
   const getFirstEvent = (_event) => {
