@@ -290,8 +290,8 @@ contract Cash is ViaCash, ERC20, Initializable, OwnableUpgradeable, Pausable {
     }    
 
     //function called back from Via oracle
-    function convert(bytes32 txId, bytes16 result, bytes32 rtype) override external {
-        require(viaoracle == msg.sender);
+    function convert(bytes32 txId, bytes16 result, bytes32 rtype) override public {
+        //require(viaoracle == msg.sender);
         //check type of result returned
         if(rtype =="ethusd"){
             conversionQ[txId].EthXvalue = result;
