@@ -24,7 +24,7 @@ contract("BondContractSize", function(accounts) {
       });  
     });
   });
-/*
+
 contract("IssuingViaUSDBond", async (accounts) => {
     it("should send ether to Via-USD bond contract and then get some Via-USD bond tokens to sender (issuer)", async () => {
         var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -42,36 +42,49 @@ contract("IssuingViaUSDBond", async (accounts) => {
         var viausdBondType = await web3.utils.hexToUtf8(await factory.getType(viausdBondAddress));
         var viausdBond = await Bond.at(viausdBondAddress);
 
-        console.log(viausdBondName, viausdBondType, "token address:", viausdBondAddress);
-        console.log(viausdBondName, viausdBondType, "token contract ether balance before sending ether:", await web3.eth.getBalance(viausdBondAddress));
+        console.log(viausdBondName, viausdBondType, " contract address:", viausdBondAddress);
+        console.log(viausdBondName, viausdBondType, " contract ether balance before sending ether:", await web3.eth.getBalance(viausdBondAddress));
         console.log("Account address:", accounts[0]);
         console.log("Account ether balance before sending ether:", await web3.eth.getBalance(accounts[0]));
-        console.log("Account Via-USD bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[0]))));
+        //console.log("Account Via-USD bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[0]))));
         console.log();
 
         console.log("Via oracle ether balance before query:", await web3.eth.getBalance(oracle.address));
         let tx = await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
-        console.log("Via-USD bond token contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
+        console.log("Via-USD bond contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
         console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
         
-        //let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-        //await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
-        var bondToken;
-        truffleAssert.eventEmitted(tx, 'ViaBondIssued', (ev)=>{
-          return bondToken = ev.token;
-        });
-        var viausdToken = await Token.at(bondToken);
+        /*let ivub = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+        try{
+            await ivub;
+        } catch (error) { 
+          console.log(error);
+        } finally {
+          clearTimeout(ivub);
+        }*/
 
+        var viausdBondToken;
+        truffleAssert.eventEmitted(result, 'ViaBondIssued', (ev) => {
+          return viausdBondToken = await Token.at(ev.token);
+        });
+        
         console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
-        console.log("Account Via-USD bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdToken.balanceOf(accounts[0]))));
+        console.log("Account Via-USD bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[0]))));
         
     });
 
     const getFirstEvent = (_event) => {
       return new Promise((resolve, reject) => {
-        _event.once('data', resolve).once('error', reject)
+        _event.once('result', resolve).once('error', reject)
       });
     }
+
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error('Request timed out'));
+      }, 200000);
+    })
+
 });
 
 contract("TransferViaUSDBond", async (accounts) => {
@@ -91,39 +104,57 @@ contract("TransferViaUSDBond", async (accounts) => {
       var viausdBondType = await web3.utils.hexToUtf8(await factory.getType(viausdBondAddress));
       var viausdBond = await Bond.at(viausdBondAddress);
 
-      console.log(viausdBondName, viausdBondType, "token address:", viausdBondAddress);
-      console.log(viausdBondName, viausdBondType, "token contract ether balance before sending ether:", await web3.eth.getBalance(viausdBondAddress));
+      console.log(viausdBondName, viausdBondType, " contract address:", viausdBondAddress);
+      console.log(viausdBondName, viausdBondType, " contract ether balance before sending ether:", await web3.eth.getBalance(viausdBondAddress));
       console.log("Account address:", accounts[0]);
       console.log("Account ether balance before sending ether:", await web3.eth.getBalance(accounts[0]));
-      console.log("Account Via-USD bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[0]))));
+      //console.log("Account Via-USD bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[0]))));
       console.log();
 
       await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
-      console.log("Via-USD bond token contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
+      console.log("Via-USD bond contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
       console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
       
-      //let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-      //await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
+      /*let tvub = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+      try{
+          await tvub;
+      } catch (error) { 
+        console.log(error);
+      } finally {
+        clearTimeout(tvub);
+      }*/
 
-      console.log("Sender Via-USD bond token balance after sending ether and before transferring Via-USD bond:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[0]))));
+      var viausdBondToken;
+      truffleAssert.eventEmitted(result, 'ViaBondIssued', (ev) => {
+        return viausdBondToken = await Token.at(ev.token);
+      });
+
+      console.log("Sender Via-USD bond token balance after sending ether and before transferring Via-USD bond:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[0]))));
       console.log("Receiver address:", accounts[1]);
       console.log("Receiver ether balance before Via-USD bond is transferred by sender:", await web3.eth.getBalance(accounts[1]));
-      console.log("Receiver Via-USD bond token balance before receiving Via-USD bond:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[1]))));
+      console.log("Receiver Via-USD bond token balance before receiving Via-USD bond:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[1]))));
       console.log();
       
-      await viausdBond.transferFrom(accounts[0], accounts[1], 10);
+      await viausdBondToken.transferFrom(accounts[0], accounts[1], 10);
 
       console.log("Sender ether balance after transferring Via-USD bond:", await web3.eth.getBalance(accounts[0]));
-      console.log("Sender Via-USD bond token balance after transferring Via-USD bond:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[0]))));
+      console.log("Sender Via-USD bond token balance after transferring Via-USD bond:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[0]))));
       console.log("Receiver ether balance after Via-USD bond is transferred by sender:", await web3.eth.getBalance(accounts[1]));
-      console.log("Receiver Via-USD bond token balance after receiving Via-USD bond:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[1]))));
+      console.log("Receiver Via-USD bond token balance after receiving Via-USD bond:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[1]))));
   });
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
+      _event.once('result', resolve).once('error', reject)
     });
   }
+
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Request timed out'));
+    }, 200000);
+  })
+
 });
 
 contract("ViaEURBondIssue", async (accounts) => {
@@ -145,29 +176,46 @@ contract("ViaEURBondIssue", async (accounts) => {
     var viaeurBondType = await web3.utils.hexToUtf8(await factory.getType(viaeurBondAddress));
     var viaeurBond = await Bond.at(viaeurBondAddress);
 
-    console.log(viaeurBondName, viaeurBondType, "token address:", viaeurBondAddress);
-    console.log(viaeurBondName, viaeurBondType, "token contract ether balance before sending ether:", await web3.eth.getBalance(viaeurBondAddress));
+    console.log(viaeurBondName, viaeurBondType, " contract address:", viaeurBondAddress);
+    console.log(viaeurBondName, viaeurBondType, " contract ether balance before sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account address:", accounts[0]);
     console.log("Account ether balance before sending ether:", await web3.eth.getBalance(accounts[0]));
-    console.log("Account Via-EUR bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
+    //console.log("Account Via-EUR bond issuer balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
     console.log();
 
     await viaeurBond.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
-    console.log("Via-EUR bond token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
+    console.log("Via-EUR bond contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
-    //let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
+    /*let vebi = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await vebi;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(vebi);
+    }*/
 
-    console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
+    var viaeurBondToken;
+    truffleAssert.eventEmitted(result, 'ViaBondIssued', (ev) => {
+      return viaeurBondToken = await Token.at(ev.token);
+    });
+
+    console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
         
   });
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
+      _event.once('result', resolve).once('error', reject)
     });
   }
+
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Request timed out'));
+    }, 200000);
+  })
 
 });
 
@@ -198,24 +246,37 @@ contract("BondPurchaseWithCashTokensOfDifferentCurrency", async (accounts) => {
     var viausdCashType = await web3.utils.hexToUtf8(await factory.getType(viausdCashAddress));
     var viausdCash = await Cash.at(viausdCashAddress);
 
-    console.log(viaeurBondName, viaeurBondType, "token address:", viaeurBondAddress);
-    console.log(viaeurBondName, viaeurBondType, "token contract ether balance before sending ether:", await web3.eth.getBalance(viaeurBondAddress));
+    console.log(viaeurBondName, viaeurBondType, " contract address:", viaeurBondAddress);
+    console.log(viaeurBondName, viaeurBondType, " contract ether balance before sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account address:", accounts[0]);
     console.log("Account ether balance before sending ether:", await web3.eth.getBalance(accounts[0]));
-    console.log("Account Via-EUR bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
+    //console.log("Account Via-EUR bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
     console.log();
 
     await viaeurBond.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
-    console.log("Via-EUR bond token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
+    console.log("Via-EUR bond contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
-    //let callbackOracleForBondIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondIssue.transactionHash);
+    /*let bpdca = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await bpdca;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(bpdca);
+    }*/
 
-    console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
+    var viaeurBondToken;
+    var viaeurBondTokenAddress;
+    truffleAssert.eventEmitted(result, 'ViaBondIssued', (ev) => {
+      viaeurBondTokenAddress = ev.token;
+      return viaeurBondToken = await Token.at(ev.token);
+    });
 
-    console.log(viausdCashName, viausdCashType, "Cash token address:", viausdCashAddress);
-    console.log(viausdCashName, viausdCashType, "Cash token contract ether balance before sending ether:", await web3.eth.getBalance(viausdCashAddress));
+    console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
+
+    console.log(viausdCashName, viausdCashType, " cash contract address:", viausdCashAddress);
+    console.log(viausdCashName, viausdCashType, " cash contract ether balance before sending ether:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Account address:", accounts[1]);
     console.log("Account ether balance before sending ether:", await web3.eth.getBalance(accounts[1]));
     console.log("Account Via-USD cash token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
@@ -225,26 +286,44 @@ contract("BondPurchaseWithCashTokensOfDifferentCurrency", async (accounts) => {
     console.log("Via-USD cash token contract ether balance after sending ether:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[1]));  
     
-    //let callbackOracleForCashIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackOracleForCashIssue.transactionHash);
+    /*let bpdcb = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await bpdcb;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(bpdcb);
+    }*/
 
     console.log("Account Via-USD cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
     
-    await viausdCash.transferFrom(accounts[1], viaeurBondAddress, 100);
+    await viausdCash.transferFrom(accounts[1], viaeurBondTokenAddress, 100);
     console.log("Purchaser Account Via-USD cash token balance after sending Via-USD for Via-EUR bond purchase:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
     
-    //let callbackOracleForBondPurchase = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondPurchase.transactionHash);
+    /*let bpdcc = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await bpdcc;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(bpdcc);
+    }*/
 
-    console.log("Purchaser Account Via-EUR bond token balance after purchase with Via-USD cash :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[1]))));
+    console.log("Purchaser Account Via-EUR bond token balance after purchase with Via-USD cash :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[1]))));
         
   });
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
+      _event.once('result', resolve).once('error', reject)
     });
   }
+
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Request timed out'));
+    }, 200000);
+  })
 
 });
 
@@ -275,24 +354,37 @@ contract("BondPurchaseWithCashTokensOfSameCurrency", async (accounts) => {
     var viaeurCashType = await web3.utils.hexToUtf8(await factory.getType(viaeurCashAddress));
     var viaeurCash = await Cash.at(viaeurCashAddress);
 
-    console.log(viaeurBondName, viaeurBondType, "token address:", viaeurBondAddress);
-    console.log(viaeurBondName, viaeurBondType, "token contract ether balance before sending ether:", await web3.eth.getBalance(viaeurBondAddress));
+    console.log(viaeurBondName, viaeurBondType, " contract address:", viaeurBondAddress);
+    console.log(viaeurBondName, viaeurBondType, " contract ether balance before sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account address:", accounts[0]);
     console.log("Account ether balance before sending ether:", await web3.eth.getBalance(accounts[0]));
-    console.log("Account Via-EUR bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
+    //console.log("Account Via-EUR bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
     console.log();
 
     await viaeurBond.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
     console.log("Via-EUR bond token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
-    //let callbackOracleForBondIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondIssue.transactionHash);
+    /*let bpsca = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await bpsca;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(bpsca);
+    }*/
 
-    console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
+    var viaeurBondToken;
+    var viaeurBondTokenAddress;
+    truffleAssert.eventEmitted(result, 'ViaBondIssued', (ev) => {
+      viaeurBondTokenAddress = ev.token;
+      return viaeurBondToken = await Token.at(ev.token);
+    });
 
-    console.log(viaeurCashName, viaeurCashType, "Cash token address:", viaeurCashAddress);
-    console.log(viaeurCashName, viaeurCashType, "Cash token contract ether balance before sending ether:", await web3.eth.getBalance(viaeurCashAddress));
+    console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
+
+    console.log(viaeurCashName, viaeurCashType, "cash contract address:", viaeurCashAddress);
+    console.log(viaeurCashName, viaeurCashType, "cash contract ether balance before sending ether:", await web3.eth.getBalance(viaeurCashAddress));
     console.log("Account address:", accounts[1]);
     console.log("Account ether balance before sending ether:", await web3.eth.getBalance(accounts[1]));
     console.log("Account Via-EUR cash token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[1]))));
@@ -302,26 +394,45 @@ contract("BondPurchaseWithCashTokensOfSameCurrency", async (accounts) => {
     console.log("Via-EUR cash token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurCashAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[1]));  
     
-    //let callbackOracleForCashIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackOracleForCashIssue.transactionHash);
+    /*let bpscb = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await bpscb;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(bpscb);
+    }*/
 
     console.log("Account Via-EUR cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[1]))));
     
-    await viaeurCash.transferFrom(accounts[1], viaeurBondAddress, 100);
+    await viaeurCash.transferFrom(accounts[1], viaeurBondTokenAddress, 100);
     console.log("Purchaser Account Via-EUR cash token balance after sending Via-EUR for Via-EUR bond purchase:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[1]))));
     
-    //let callbackOracleForBondPurchase = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondPurchase.transactionHash);
+    /*let bpscc = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await bpscc;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(bpscc);
+    }*/
 
-    console.log("Purchaser Account Via-EUR bond token balance after purchase with Via-EUR cash :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[1]))));
+    console.log("Purchaser Account Via-EUR bond token balance after purchase with Via-EUR cash :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[1]))));
         
   });
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
+      _event.once('result', resolve).once('error', reject)
     });
   }
+
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Request timed out'));
+    }, 200000);
+  })
+
 });
 
 contract("BondRedemptionByIssuerByReturningBonds", async (accounts) => {
@@ -343,41 +454,67 @@ contract("BondRedemptionByIssuerByReturningBonds", async (accounts) => {
     var viausdBondType = await web3.utils.hexToUtf8(await factory.getType(viausdBondAddress));
     var viausdBond = await Bond.at(viausdBondAddress);
 
-    console.log(viausdBondName, viausdBondType, "token address:", viausdBondAddress);
-    console.log(viausdBondName, viausdBondType, "token contract ether balance before sending ether:", await web3.eth.getBalance(viausdBondAddress));
+    console.log(viausdBondName, viausdBondType, " contract address:", viausdBondAddress);
+    console.log(viausdBondName, viausdBondType, " contract ether balance before sending ether:", await web3.eth.getBalance(viausdBondAddress));
     console.log("Account address:", accounts[0]);
     console.log("Account ether balance before sending ether:", await web3.eth.getBalance(accounts[0]));
-    console.log("Account Via-USD bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[0]))));
+    //console.log("Account Via-USD bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[0]))));
     console.log();
 
     await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
     console.log("Via-USD bond token contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
-    //let callbackToViaOracle = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackToViaOracle.transactionHash);
+    /*let brrba = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await brrba;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(brrba);
+    }*/
 
-    console.log("Account Via-USD bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[0]))));
+    var viausdBondToken;
+    var viausdBondTokenAddress;
+    truffleAssert.eventEmitted(result, 'ViaBondIssued', (ev) => {
+      viausdBondTokenAddress = ev.token;
+      return viausdBondToken = await Token.at(ev.token);
+    });
+
+    console.log("Account Via-USD bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[0]))));
     
-    await viausdBond.transferFrom(accounts[0], viausdBondAddress, 100);
-    //let callbackForRedemption = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackForRedemption.transactionHash);
+    await viausdBond.transferFrom(accounts[0], viausdBondTokenAddress, 100);
+    /*let brrbb = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await brrbb;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(brrbb);
+    }*/
 
-    console.log("Via-USD bond token contract ether balance after redeeming Via-USD bonds:", await web3.eth.getBalance(viausdBondAddress));
+    console.log("Via-USD bond token contract ether balance after redeeming Via-USD bonds:", await web3.eth.getBalance(viausdBondTokenAddress));
     console.log("Account ether balance after redeeming Via-USD bonds:", await web3.eth.getBalance(accounts[0]));
-    console.log("Account Via-USD bond token balance after redeeming Via-USD bonds:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[0]))));
+    console.log("Account Via-USD bond token balance after redeeming Via-USD bonds:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[0]))));
 
   });
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
+      _event.once('result', resolve).once('error', reject)
     });
   }
+
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Request timed out'));
+    }, 200000);
+  })
+
 });
 
 contract("BondRedemptionByIssuerByPayingCash", async (accounts) => {
-  it("should send Via-USD cash tokens to Via-USD bond contract and pay out paid in ether and cash tokens by bond purchasers", async () => {
+  it("should send Via-EUR cash tokens to Via-EUR bond contract and pay out paid in ether and cash tokens by bond purchasers", async () => {
     //in this test cases, first ether should be sent from account[0] to Via-EUR bond contract to issue Via-EUR bonds to issuer
     //then, Via-USD cash tokens should be sent from account[1] to the Via-EUR bond contract to purchase Via-EUR bond tokens issued
     //then, issuer of Via-EUR bonds (account[0]) should send Via-EUR cash tokens to the Via-EUR bond contract which will return Via-USD cash to account[1] paid in earlier
@@ -410,24 +547,37 @@ contract("BondRedemptionByIssuerByPayingCash", async (accounts) => {
     var viaeurCashType = await web3.utils.hexToUtf8(await factory.getType(viaeurCashAddress));
     var viaeurCash = await Cash.at(viaeurCashAddress);
 
-    console.log(viaeurBondName, viaeurBondType, "token address:", viaeurBondAddress);
-    console.log(viaeurBondName, viaeurBondType, "token contract ether balance before sending ether:", await web3.eth.getBalance(viaeurBondAddress));
+    console.log(viaeurBondName, viaeurBondType, " contract address:", viaeurBondAddress);
+    console.log(viaeurBondName, viaeurBondType, " contract ether balance before sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account address:", accounts[0]);
     console.log("Account ether balance before sending ether:", await web3.eth.getBalance(accounts[0]));
-    console.log("Account Via-EUR bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
+    //console.log("Account Via-EUR bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
     console.log();
 
     await viaeurBond.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
     console.log("Via-EUR bond token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
-    //let callbackOracleForBondIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondIssue.transactionHash);
+    /*let brpca = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await brpca;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(brpca);
+    }*/
 
-    console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
+    var viaeurBondToken;
+    var viaeurBondTokenAddress;
+    truffleAssert.eventEmitted(result, 'ViaBondIssued', (ev) => {
+      viaeurBondTokenAddress = ev.token;
+      return viaeurBondToken = await Token.at(ev.token);
+    });
 
-    console.log(viausdCashName, viausdCashType, "Cash token address:", viausdCashAddress);
-    console.log(viausdCashName, viausdCashType, "Cash token contract ether balance before sending ether:", await web3.eth.getBalance(viausdCashAddress));
+    console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
+
+    console.log(viausdCashName, viausdCashType, " cash token address:", viausdCashAddress);
+    console.log(viausdCashName, viausdCashType, " cash token contract ether balance before sending ether:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Account address:", accounts[1]);
     console.log("Account ether balance before sending ether:", await web3.eth.getBalance(accounts[1]));
     console.log("Account Via-USD cash token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
@@ -437,43 +587,73 @@ contract("BondRedemptionByIssuerByPayingCash", async (accounts) => {
     console.log("Via-USD cash token contract ether balance after sending ether:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[1]));  
     
-    //let callbackOracleForCashIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackOracleForCashIssue.transactionHash);
+    /*let brpcb = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await brpcb;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(brpcb);
+    }*/
 
     console.log("Account Via-USD cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
     
-    await viausdCash.transferFrom(accounts[1], viaeurBondAddress, 100);
+    await viausdCash.transferFrom(accounts[1], viaeurBondTokenAddress, 100);
     console.log("Account Via-USD cash token balance after sending Via-USD for Via-EUR bond purchase:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
     
-    //let callbackOracleForBondPurchase = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondPurchase.transactionHash);
+    /*let brpcc = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await brpcc;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(brpcc);
+    }*/
 
-    console.log("Account Via-EUR bond token balance after purchase with Via-USD cash :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[1]))));
+    console.log("Account Via-EUR bond token balance after purchase with Via-USD cash :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[1]))));
     
     await viaeurCash.sendTransaction({from:accounts[0], to:viaeurCashAddress, value:1e18});
     console.log("Via-EUR cash token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurCashAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
-    //let callbackOracleForEURCashIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackOracleForEURCashIssue.transactionHash);
-
+    /*let brpcd = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await brpcd;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(brpcd);
+    }*/
     console.log("Issuer Account Via-EUR cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
     
-    await viaeurCash.transferFrom(accounts[0], viaeurBondAddress, 1);
+    await viaeurCash.transferFrom(accounts[0], viaeurBondTokenAddress, 1);
     console.log("Issuer Account Via-EUR cash token balance after sending Via-EUR for Via-EUR bond redemption:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
     
-    //let callbackOracleForBondRedemption = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondRedemption.transactionHash);
+    /*let brpce = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await brpce;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(brpce);
+    }*/
 
-    console.log("Purchaser Account Via-EUR bond token balance after redemption with Via-EUR cash :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[1]))));
+    console.log("Purchaser Account Via-USD cash token balance after redemption with Via-EUR cash :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[1]))));
     console.log("Issuer Account ether balance after redeeming Via-EUR bonds with Via-EUR cash:", await web3.eth.getBalance(accounts[0]));
   });
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
+      _event.once('result', resolve).once('error', reject)
     });
   }
+
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Request timed out'));
+    }, 200000);
+  })
+
 });
 
 contract("BondRedemptionByPurchasersWithIssuingCollateral", async (accounts) => {
@@ -504,21 +684,34 @@ contract("BondRedemptionByPurchasersWithIssuingCollateral", async (accounts) => 
     var viausdCashType = await web3.utils.hexToUtf8(await factory.getType(viausdCashAddress));
     var viausdCash = await Cash.at(viausdCashAddress);
 
-    console.log(viaeurBondName, viaeurBondType, "token address:", viaeurBondAddress);
-    console.log(viaeurBondName, viaeurBondType, "token contract ether balance before sending ether:", await web3.eth.getBalance(viaeurBondAddress));
+    console.log(viaeurBondName, viaeurBondType, " contract address:", viaeurBondAddress);
+    console.log(viaeurBondName, viaeurBondType, " contract ether balance before sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account address:", accounts[0]);
     console.log("Account ether balance before sending ether:", await web3.eth.getBalance(accounts[0]));
-    console.log("Account Via-EUR bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
+    //console.log("Account Via-EUR bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
     console.log();
 
     await viaeurBond.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
     console.log("Via-EUR bond token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
-    //let callbackOracleForBondIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondIssue.transactionHash);
+    /*let brpia = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await brpia;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(brpia);
+    }*/
 
-    console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
+    var viaeurBondToken;
+    var viaeurBondTokenAddress;
+    truffleAssert.eventEmitted(result, 'ViaBondIssued', (ev) => {
+      viaeurBondTokenAddress = ev.token;
+      return viaeurBondToken = await Token.at(ev.token);
+    });
+
+    console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
 
     console.log(viausdCashName, viausdCashType, "Cash token address:", viausdCashAddress);
     console.log(viausdCashName, viausdCashType, "Cash token contract ether balance before sending ether:", await web3.eth.getBalance(viausdCashAddress));
@@ -531,30 +724,54 @@ contract("BondRedemptionByPurchasersWithIssuingCollateral", async (accounts) => 
     console.log("Via-USD cash token contract ether balance after sending ether:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[1]));  
     
-    //let callbackOracleForCashIssue = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackOracleForCashIssue.transactionHash);
+    /*let brpib = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await brpib;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(brpib);
+    }*/
 
     console.log("Account Via-USD cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
     
     await viausdCash.transferFrom(accounts[1], viaeurBondAddress, 100);
     console.log("Account Via-USD cash token balance after sending Via-USD for Via-EUR bond purchase:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
     
-    //let callbackOracleForBondPurchase = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackOracleForBondPurchase.transactionHash);
+    /*let brpic = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await brpic;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(brpic);
+    }*/
 
     console.log("Account Via-EUR bond token balance after purchase with Via-USD cash :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[1]))));
   
-    await viaeurBond.transferFrom(accounts[1], viaeurBondAddress, 100);
-    //let callbackForRedemption = await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
-    //await truffleAssert.createTransactionResult(oracle, callbackForRedemption.transactionHash);
+    await viaeurBond.transferFrom(accounts[1], viaeurBondTokenAddress, 100);
+    /*let brpid = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
+    try{
+        await brpid;
+    } catch (error) { 
+      console.log(error);
+    } finally {
+      clearTimeout(brpid);
+    }*/
 
     console.log("Account Via-USD cash token balance after redeeming Via-EUR bonds:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
   });
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
+      _event.once('result', resolve).once('error', reject)
     });
   }
 
-});*/
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Request timed out'));
+    }, 200000);
+  })
+
+});

@@ -489,6 +489,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 if(!found)
                     issuers.push(payer);
             }
+            //generate event
+            emit ViaBondIssued(issuedBond, bondName, ABDKMathQuad.toUInt(parValue), ABDKMathQuad.toUInt(paidInAmount), 1);
         }
         //paid in amount is Via cash with which via bond tokens are purchased
         else{
@@ -542,10 +544,9 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 }
                 else
                     lock = false;
-            }        
+            }    
+            //emit bond purchased event    
         }
-        //generate event
-        emit ViaBondIssued(issuedBond, bondName, ABDKMathQuad.toUInt(parValue), ABDKMathQuad.toUInt(paidInAmount), 1);
     }
 
     //convert given currency and amount to via cash token

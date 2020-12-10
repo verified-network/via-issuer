@@ -70,7 +70,7 @@ contract("IssuingViaUSD", async (accounts) => {
 
     const getFirstEvent = (_event) => {
       return new Promise((resolve, reject) => {
-        _event.once('data', resolve).once('error', reject)
+        _event.once('result', resolve).once('error', reject)
       });
     }
 
@@ -136,7 +136,7 @@ contract("IssuingViaEUR", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
+      _event.once('result', resolve).once('error', reject)
     });
   }
 
@@ -225,7 +225,7 @@ contract("ViaUSDExchange", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
+      _event.once('result', resolve).once('error', reject)
     });
   }
 
@@ -364,7 +364,7 @@ contract("ViaEURRedemption", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
+      _event.once('result', resolve).once('error', reject)
     });
   }
 
@@ -444,7 +444,7 @@ contract("ViaUSDRedemptionAfterTransfer", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
+      _event.once('result', resolve).once('error', reject)
     });
   }
 
@@ -509,7 +509,7 @@ contract("TransferViaUSD", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
+      _event.once('result', resolve).once('error', reject)
     });
   }
 
@@ -629,7 +629,7 @@ contract("ViaUSDRedemptionAfterEURExchangeTransferAndRedemption", async (account
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
+      _event.once('result', resolve).once('error', reject)
     });
   }
 
