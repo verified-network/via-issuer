@@ -65,7 +65,7 @@ contract("IssuingViaUSDBond", async (accounts) => {
 
         var viausdBondToken;
         truffleAssert.eventEmitted(result, 'ViaBondIssued', (ev) => {
-          return viausdBondToken = await Token.at(ev.token);
+          return viausdBondToken = Token.at(ev.token);
         });
         
         console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
@@ -126,7 +126,7 @@ contract("TransferViaUSDBond", async (accounts) => {
 
       var viausdBondToken;
       truffleAssert.eventEmitted(result, 'ViaBondIssued', (ev) => {
-        return viausdBondToken = await Token.at(ev.token);
+        return viausdBondToken = Token.at(ev.token);
       });
 
       console.log("Sender Via-USD bond token balance after sending ether and before transferring Via-USD bond:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[0]))));
@@ -198,7 +198,7 @@ contract("ViaEURBondIssue", async (accounts) => {
 
     var viaeurBondToken;
     truffleAssert.eventEmitted(result, 'ViaBondIssued', (ev) => {
-      return viaeurBondToken = await Token.at(ev.token);
+      return viaeurBondToken = Token.at(ev.token);
     });
 
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
@@ -270,7 +270,7 @@ contract("BondPurchaseWithCashTokensOfDifferentCurrency", async (accounts) => {
     var viaeurBondTokenAddress;
     truffleAssert.eventEmitted(result, 'ViaBondIssued', (ev) => {
       viaeurBondTokenAddress = ev.token;
-      return viaeurBondToken = await Token.at(ev.token);
+      return viaeurBondToken = Token.at(ev.token);
     });
 
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
@@ -378,7 +378,7 @@ contract("BondPurchaseWithCashTokensOfSameCurrency", async (accounts) => {
     var viaeurBondTokenAddress;
     truffleAssert.eventEmitted(result, 'ViaBondIssued', (ev) => {
       viaeurBondTokenAddress = ev.token;
-      return viaeurBondToken = await Token.at(ev.token);
+      return viaeurBondToken = Token.at(ev.token);
     });
 
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
@@ -478,7 +478,7 @@ contract("BondRedemptionByIssuerByReturningBonds", async (accounts) => {
     var viausdBondTokenAddress;
     truffleAssert.eventEmitted(result, 'ViaBondIssued', (ev) => {
       viausdBondTokenAddress = ev.token;
-      return viausdBondToken = await Token.at(ev.token);
+      return viausdBondToken = Token.at(ev.token);
     });
 
     console.log("Account Via-USD bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[0]))));
@@ -571,7 +571,7 @@ contract("BondRedemptionByIssuerByPayingCash", async (accounts) => {
     var viaeurBondTokenAddress;
     truffleAssert.eventEmitted(result, 'ViaBondIssued', (ev) => {
       viaeurBondTokenAddress = ev.token;
-      return viaeurBondToken = await Token.at(ev.token);
+      return viaeurBondToken = Token.at(ev.token);
     });
 
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
@@ -708,7 +708,7 @@ contract("BondRedemptionByPurchasersWithIssuingCollateral", async (accounts) => 
     var viaeurBondTokenAddress;
     truffleAssert.eventEmitted(result, 'ViaBondIssued', (ev) => {
       viaeurBondTokenAddress = ev.token;
-      return viaeurBondToken = await Token.at(ev.token);
+      return viaeurBondToken = Token.at(ev.token);
     });
 
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
