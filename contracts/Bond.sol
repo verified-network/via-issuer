@@ -84,7 +84,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     //events to capture and report to Via oracle
     event ViaBondIssued(address token, bytes32 currency, uint256 value, uint256 price, uint256 tenure);
     event ViaBondRedeemed(bytes32 currency, uint256 value, uint256 price, uint256 tenure);
-
+    event Log(bytes32 message);
+    
     //mutex
     bool lock;
 
@@ -211,6 +212,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.bond_currency = bondName;
                 c.ViaXvalue =ABDKMathQuad.fromUInt(1);
                 convert("11","451.25","ethusd");
+                emit Log("calling convert");
             }
         }
         //if a via cash token is paid into this bond contract
@@ -441,6 +443,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     bytes16 parValue = convertToVia(conversionQ[txId].amount, conversionQ[txId].paid_in_currency,conversionQ[txId].EthXvalue,conversionQ[txId].ViaXvalue);
                     //calculate price of via bond by applying interest rates from via oracle
                     bytes16 viaBondPrice = ABDKMathQuad.div(parValue, ABDKMathQuad.add(ABDKMathQuad.fromUInt(1), ABDKMathQuad.fromUInt(0)))^ABDKMathQuad.fromUInt(1);
+                    emit Log("converted");
                     //issue bond to issuer
                     finallyIssue(conversionQ[txId].party, parValue, viaBondPrice, conversionQ[txId].amount, conversionQ[txId].paid_in_currency, conversionQ[txId].token);
                 }
@@ -474,6 +477,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             ViaToken(issuedBond).addTotalSupply(parValue);
             //first, add bond balance
             ViaToken(issuedBond).addBalance(issuedBond, parValue);
+            emit Log("finally issuing");
             //issue bond to payer if ether is paid in as collateral
             if(ViaToken(issuedBond).requestTransfer(payer, ABDKMathQuad.toUInt(parValue))){    
                 //keep track of issues
