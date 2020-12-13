@@ -82,8 +82,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     mapping(bytes32 => conversion) private conversionQ;
 
     //events to capture and report to Via oracle
-    event ViaBondIssued(address token, bytes32 currency, uint256 value, uint256 price, uint256 tenure);
-    event ViaBondRedeemed(bytes32 currency, uint256 value, uint256 price, uint256 tenure);
+    event ViaBondIssued(address indexed token, bytes32 currency, uint256 value, uint256 price, uint256 tenure);
+    event ViaBondRedeemed(bytes32 indexed currency, uint256 value, uint256 price, uint256 tenure);
     event Log(bytes32 message);
     
     //mutex
