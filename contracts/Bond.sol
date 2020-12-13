@@ -211,8 +211,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.EthXvalue = ABDKMathQuad.fromUInt(0);
                 c.bond_currency = bondName;
                 c.ViaXvalue =ABDKMathQuad.fromUInt(1);
-                convert("11","451.25","ethusd");
                 emit Log("calling convert");
+                convert("11","451.25","ethusd");
             }
         }
         //if a via cash token is paid into this bond contract

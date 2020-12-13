@@ -75,7 +75,7 @@ contract("IssuingViaUSDBond", async (accounts) => {
 
     const getFirstEvent = (_event) => {
       return new Promise((resolve, reject) => {
-        _event.once('result', resolve).once('error', reject)
+        _event.once('data', resolve).once('error', reject)
       });
     }
 
@@ -145,7 +145,7 @@ contract("TransferViaUSDBond", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('result', resolve).once('error', reject)
+      _event.once('data', resolve).once('error', reject)
     });
   }
 
@@ -207,7 +207,7 @@ contract("ViaEURBondIssue", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('result', resolve).once('error', reject)
+      _event.once('data', resolve).once('error', reject)
     });
   }
 
@@ -315,7 +315,7 @@ contract("BondPurchaseWithCashTokensOfDifferentCurrency", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('result', resolve).once('error', reject)
+      _event.once('data', resolve).once('error', reject)
     });
   }
 
@@ -423,7 +423,7 @@ contract("BondPurchaseWithCashTokensOfSameCurrency", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('result', resolve).once('error', reject)
+      _event.once('data', resolve).once('error', reject)
     });
   }
 
@@ -501,7 +501,7 @@ contract("BondRedemptionByIssuerByReturningBonds", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('result', resolve).once('error', reject)
+      _event.once('data', resolve).once('error', reject)
     });
   }
 
@@ -644,7 +644,7 @@ contract("BondRedemptionByIssuerByPayingCash", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('result', resolve).once('error', reject)
+      _event.once('data', resolve).once('error', reject)
     });
   }
 
@@ -764,7 +764,7 @@ contract("BondRedemptionByPurchasersWithIssuingCollateral", async (accounts) => 
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('result', resolve).once('error', reject)
+      _event.once('data', resolve).once('error', reject)
     });
   }
 

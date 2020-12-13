@@ -68,7 +68,7 @@ contract("IssuingViaUSD", async (accounts) => {
           return viaCashCurrency = ev.currency;
         });
         console.log("Via cash token issued for : ", viaCashCurrency);
-        
+
         console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
         console.log("Account Via-USD cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
                 
@@ -76,7 +76,7 @@ contract("IssuingViaUSD", async (accounts) => {
 
     const getFirstEvent = (_event) => {
       return new Promise((resolve, reject) => {
-        _event.once('result', resolve).once('error', reject)
+        _event.once('data', resolve).once('error', reject)
       });
     }
 
@@ -142,7 +142,7 @@ contract("IssuingViaEUR", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('result', resolve).once('error', reject)
+      _event.once('data', resolve).once('error', reject)
     });
   }
 
@@ -231,7 +231,7 @@ contract("ViaUSDExchange", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('result', resolve).once('error', reject)
+      _event.once('data', resolve).once('error', reject)
     });
   }
 
@@ -302,7 +302,7 @@ contract("ViaUSDRedemption", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('result', resolve).once('error', reject)
+      _event.once('data', resolve).once('error', reject)
     });
   }
 
@@ -370,7 +370,7 @@ contract("ViaEURRedemption", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('result', resolve).once('error', reject)
+      _event.once('data', resolve).once('error', reject)
     });
   }
 
@@ -450,7 +450,7 @@ contract("ViaUSDRedemptionAfterTransfer", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('result', resolve).once('error', reject)
+      _event.once('data', resolve).once('error', reject)
     });
   }
 
@@ -515,7 +515,7 @@ contract("TransferViaUSD", async (accounts) => {
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('result', resolve).once('error', reject)
+      _event.once('data', resolve).once('error', reject)
     });
   }
 
@@ -635,7 +635,7 @@ contract("ViaUSDRedemptionAfterEURExchangeTransferAndRedemption", async (account
 
   const getFirstEvent = (_event) => {
     return new Promise((resolve, reject) => {
-      _event.once('result', resolve).once('error', reject)
+      _event.once('data', resolve).once('error', reject)
     });
   }
 
