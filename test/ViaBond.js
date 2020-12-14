@@ -63,7 +63,7 @@ contract("IssuingViaUSDBond", async (accounts) => {
           clearTimeout(ivub);
         }*/
 
-        var viausdBondToken = truffleAssert.eventEmitted(tx, 'ViaBondIssued', (ev) => {
+        var viausdBondToken = await truffleAssert.eventEmitted(tx, 'ViaBondIssued', (ev) => {
           return Token.at(ev.token);
         });
         
