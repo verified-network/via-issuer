@@ -196,8 +196,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.bond_currency = bondName;
                 c.ViaXvalue =ABDKMathQuad.fromUInt(0);
                 emit Log("calling convert");
-                convert("22","1.2","ver");
-                convert("22","451.25","ethusd");
+                convert("22",ABDKMathQuad.fromUInt("1.2".stringToUint()),"ver");
+                convert("22",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
             }
             //if ether is paid into a Via-USD bond contract, issuing the bond token will only require the ether to Via-USD exchange rate. 
             else{
@@ -213,7 +213,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.bond_currency = bondName;
                 c.ViaXvalue =ABDKMathQuad.fromUInt(1);
                 emit Log("calling convert");
-                convert("11","451.25","ethusd");
+                convert("11",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
             }
         }
         //if a via cash token is paid into this bond contract
@@ -242,8 +242,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.ViaRateId = ViaRateId; 
                 c.ViaRateValue = ABDKMathQuad.fromUInt(0);
                 emit Log("calling convert");
-                convert("33","7.6","er");
-                convert("33","1.5","ir");
+                convert("33",ABDKMathQuad.fromUInt("7.6".stringToUint()),"er");
+                convert("33",ABDKMathQuad.fromUInt("1.5".stringToUint()),"ir");
             }
             //if the via cash token paid in is the same denomination of this bond, we need to first find out if the pay in is for a purchase of bonds or repayment of an earlier issue
             else{
@@ -272,7 +272,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     c.ViaRateId = ViaRateId; 
                     c.ViaRateValue = ABDKMathQuad.fromUInt(0);
                     emit Log("calling convert");
-                    convert("44","1.5","ir");
+                    convert("44",ABDKMathQuad.fromUInt("1.5".stringToUint()),"ir");
                 }                
             }
         }

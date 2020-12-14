@@ -63,8 +63,7 @@ contract("IssuingViaUSD", async (accounts) => {
           clearTimeout(ViaUsdCashCallback);
         }*/
 
-        var viaCashCurrency;
-        truffleAssert.eventEmitted(tx, 'ViaCashIssued', (ev) => {
+        var viaCashCurrency = truffleAssert.eventEmitted(tx, 'ViaCashIssued', (ev) => {
           return ev.currency;
         });
         console.log("Via cash token issued for : ", viaCashCurrency);
