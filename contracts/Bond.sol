@@ -186,7 +186,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 //oracle.setCallbackId(EthXid,ViaXid);
                 bytes32 EthXid = "11";
                 bytes32 ViaXid = "22";
-                conversion memory c = conversionQ[ViaXid];
+                conversion storage c = conversionQ[ViaXid];
                 c.operation = "issue";
                 c.party = payer;
                 c.amount = amount;
@@ -203,16 +203,16 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             else{
                 //bytes32 EthXid = oracle.request("eth","ethusd","EthBond", address(this));
                 bytes32 EthXid = "11";
-                conversionQ[EthXid]=conversion("issue",address(0x0),payer,amount,currency,EthXid,ABDKMathQuad.fromUInt(0),bondName,ABDKMathQuad.fromUInt(1),"null",ABDKMathQuad.fromUInt(0));
-                //conversion memory c = conversionQ[EthXid];
-                //c.operation = "issue";
-                //c.party = payer;
-                //c.amount = amount;
-                //c.paid_in_currency = currency;
-                //c.EthXid = EthXid;
-                //c.EthXvalue = ABDKMathQuad.fromUInt(0);
-                //c.bond_currency = bondName;
-                //c.ViaXvalue =ABDKMathQuad.fromUInt(1);
+                //conversionQ[EthXid]=conversion("issue",address(0x0),payer,amount,currency,EthXid,ABDKMathQuad.fromUInt(0),bondName,ABDKMathQuad.fromUInt(1),"null",ABDKMathQuad.fromUInt(0));
+                conversion storage c = conversionQ[EthXid];
+                c.operation = "issue";
+                c.party = payer;
+                c.amount = amount;
+                c.paid_in_currency = currency;
+                c.EthXid = EthXid;
+                c.EthXvalue = ABDKMathQuad.fromUInt(0);
+                c.bond_currency = bondName;
+                c.ViaXvalue =ABDKMathQuad.fromUInt(1);
                 emit Log("calling convert");
                 convert("11",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
             }
@@ -232,7 +232,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 //}
                 bytes32 ViaXid = "33";
                 bytes32 ViaRateId = "44";
-                conversion memory c = conversionQ[ViaXid];
+                conversion storage c = conversionQ[ViaXid];
                 c.operation = "purchase";
                 c.token = tokenContract;
                 c.party = payer;
@@ -262,7 +262,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 else{
                     //bytes32 ViaRateId = oracle.request(currency, "ir","Bond",address(this));
                     bytes32 ViaRateId = "44";
-                    conversion memory c = conversionQ[ViaRateId];
+                    conversion storage c = conversionQ[ViaRateId];
                     c.operation = "purchase";
                     c.token = tokenContract;
                     c.party = payer;

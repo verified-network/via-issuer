@@ -64,7 +64,7 @@ contract("IssuingViaUSD", async (accounts) => {
         }*/
 
         var viaCashCurrency = truffleAssert.eventEmitted(tx, 'ViaCashIssued', (ev) => {
-          viaCashCurrency = ev.currency;
+          return !ev.currency.eq("");
         });
         console.log("Via cash token issued for : ", viaCashCurrency);
 
