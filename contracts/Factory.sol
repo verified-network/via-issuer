@@ -2,7 +2,6 @@
 // Implementation of the Via cash and bond factory.
 // SPDX-License-Identifier: MIT
 
-//pragma solidity >=0.5.0 <0.7.0;
 pragma solidity 0.5.7;
 
 import "./interfaces/ViaFactory.sol";
@@ -75,7 +74,6 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
 
         // Deploy proxy
         address _issuer = deployMinimal(_target, _payload);
-        //address _issuer = deploy(salt, _target, msg.sender, _payload);
         emit IssuerCreated(_issuer, tokenName, tokenType);
 
         if(tokenType == "Cash"){
@@ -98,8 +96,7 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         bytes memory _payload = abi.encodeWithSignature("initialize(address,bytes32,address,bytes32,bytes32)", address(this), tokenName, _owner, tokenProduct, tokenSymbol);
 
         // Deploy proxy
-        //address _token = deployMinimal(_target, _payload);
-        address _token = deploy(uint256(keccak256(abi.encodePacked(now,block.difficulty))), _target, msg.sender, _payload);
+        address _token = deployMinimal(_target, _payload);
         
         token[_token] = via("ViaBondToken", tokenName);
         tokens.push(_token);

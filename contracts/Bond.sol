@@ -83,7 +83,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
 
     //events to capture and report to Via oracle
     event ViaBondIssued(address indexed token, bytes32 currency, uint256 value, uint256 price, uint256 tenure);
-    event ViaBondRedeemed(bytes32 indexed currency, uint256 value, uint256 price, uint256 tenure);
+    event ViaBondRedeemed(bytes32 currency, uint256 value, uint256 price, uint256 tenure);
     event Log(bytes32 message);
     
     //mutex
@@ -195,6 +195,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.EthXvalue = ABDKMathQuad.fromUInt(0);
                 c.bond_currency = bondName;
                 c.ViaXvalue =ABDKMathQuad.fromUInt(0);
+                emit Log("calling convert");
                 convert("22","1.2","ver");
                 convert("22","451.25","ethusd");
             }
@@ -240,6 +241,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.ViaXvalue =ABDKMathQuad.fromUInt(0);
                 c.ViaRateId = ViaRateId; 
                 c.ViaRateValue = ABDKMathQuad.fromUInt(0);
+                emit Log("calling convert");
                 convert("33","7.6","er");
                 convert("33","1.5","ir");
             }
@@ -269,6 +271,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     c.ViaXvalue =ABDKMathQuad.fromUInt(1);
                     c.ViaRateId = ViaRateId; 
                     c.ViaRateValue = ABDKMathQuad.fromUInt(0);
+                    emit Log("calling convert");
                     convert("44","1.5","ir");
                 }                
             }
@@ -439,11 +442,11 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             if(rtype == "ethusd" || rtype == "ver"){
                 if(ABDKMathQuad.cmp(conversionQ[txId].EthXvalue, ABDKMathQuad.fromUInt(0))!=0 &&
                     ABDKMathQuad.cmp(conversionQ[txId].ViaXvalue, ABDKMathQuad.fromUInt(0))!=0){
+                    emit Log("converted");
                     //calculate par value of via bond by applying exchange rates from via oracle    
                     bytes16 parValue = convertToVia(conversionQ[txId].amount, conversionQ[txId].paid_in_currency,conversionQ[txId].EthXvalue,conversionQ[txId].ViaXvalue);
                     //calculate price of via bond by applying interest rates from via oracle
                     bytes16 viaBondPrice = ABDKMathQuad.div(parValue, ABDKMathQuad.add(ABDKMathQuad.fromUInt(1), ABDKMathQuad.fromUInt(0)))^ABDKMathQuad.fromUInt(1);
-                    emit Log("converted");
                     //issue bond to issuer
                     finallyIssue(conversionQ[txId].party, parValue, viaBondPrice, conversionQ[txId].amount, conversionQ[txId].paid_in_currency, conversionQ[txId].token);
                 }

@@ -56,7 +56,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
 
     //events to capture and report to Via oracle
     event ViaCashIssued(bytes32 indexed currency, bytes16 value);
-    event ViaCashRedeemed(bytes32 indexed currency, bytes16 value);
+    event ViaCashRedeemed(bytes32 currency, bytes16 value);
     event LogCallback(bytes32 EthXid, bytes16 EthXvalue, bytes32 txId, bytes16 ViaXvalue);
 
     //mutex
