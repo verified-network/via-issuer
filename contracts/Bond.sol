@@ -203,15 +203,16 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             else{
                 //bytes32 EthXid = oracle.request("eth","ethusd","EthBond", address(this));
                 bytes32 EthXid = "11";
-                conversion memory c = conversionQ[EthXid];
-                c.operation = "issue";
-                c.party = payer;
-                c.amount = amount;
-                c.paid_in_currency = currency;
-                c.EthXid = EthXid;
-                c.EthXvalue = ABDKMathQuad.fromUInt(0);
-                c.bond_currency = bondName;
-                c.ViaXvalue =ABDKMathQuad.fromUInt(1);
+                conversionQ[EthXid]=conversion("issue",address(0x0),payer,amount,currency,EthXid,ABDKMathQuad.fromUInt(0),bondName,ABDKMathQuad.fromUInt(1),"null",ABDKMathQuad.fromUInt(0));
+                //conversion memory c = conversionQ[EthXid];
+                //c.operation = "issue";
+                //c.party = payer;
+                //c.amount = amount;
+                //c.paid_in_currency = currency;
+                //c.EthXid = EthXid;
+                //c.EthXvalue = ABDKMathQuad.fromUInt(0);
+                //c.bond_currency = bondName;
+                //c.ViaXvalue =ABDKMathQuad.fromUInt(1);
                 emit Log("calling convert");
                 convert("11",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
             }
@@ -440,9 +441,9 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
         //check if bond needs to be issued
         if(conversionQ[txId].operation=="issue"){
             if(rtype == "ethusd" || rtype == "ver"){
+                emit Log("converted");
                 if(ABDKMathQuad.cmp(conversionQ[txId].EthXvalue, ABDKMathQuad.fromUInt(0))!=0 &&
                     ABDKMathQuad.cmp(conversionQ[txId].ViaXvalue, ABDKMathQuad.fromUInt(0))!=0){
-                    emit Log("converted");
                     //calculate par value of via bond by applying exchange rates from via oracle    
                     bytes16 parValue = convertToVia(conversionQ[txId].amount, conversionQ[txId].paid_in_currency,conversionQ[txId].EthXvalue,conversionQ[txId].ViaXvalue);
                     //calculate price of via bond by applying interest rates from via oracle

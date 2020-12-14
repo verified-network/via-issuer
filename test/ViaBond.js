@@ -64,7 +64,7 @@ contract("IssuingViaUSDBond", async (accounts) => {
         }*/
 
         var viausdBondToken = truffleAssert.eventEmitted(tx, 'ViaBondIssued', (ev) => {
-          return Token.at(ev.token);
+          viausdBondToken = Token.at(ev.token);
         });
         
         console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
