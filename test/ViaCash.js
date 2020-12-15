@@ -63,11 +63,6 @@ contract("IssuingViaUSD", async (accounts) => {
           clearTimeout(ViaUsdCashCallback);
         }*/
 
-        var viaCashCurrency;
-        await truffleAssert.eventEmitted(tx, 'ViaCashIssued', (ev) => {
-          viaCashCurrency = ev.currency;
-        });
-
         console.log("Via cash token issued for : ", viaCashCurrency);
 
         console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
