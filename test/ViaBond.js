@@ -1,6 +1,6 @@
 const assert = require("chai").assert;
-const truffleAssert = require('truffle-assertions');
-const truffleEvent  = require('truffle-events');
+var truffleAssert = require('truffle-assertions');
+var truffleEvent  = require('truffle-events');
 
 const Factory = artifacts.require('Factory');
 const Cash = artifacts.require('Cash');
