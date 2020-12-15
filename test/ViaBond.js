@@ -52,6 +52,7 @@ contract("IssuingViaUSDBond", async (accounts) => {
 
         console.log("Via oracle ether balance before query:", await web3.eth.getBalance(oracle.address));
         let tx = await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
+        console.log("tx is on the way : ",tx);
         var bondTx = truffleEvent.formTxObject('Bond', 1, tx);
         console.log("Via-USD bond contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
         console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
@@ -112,7 +113,8 @@ contract("TransferViaUSDBond", async (accounts) => {
       //console.log("Account Via-USD bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[0]))));
       console.log();
 
-      let tx = await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
+      let tx = await web3.eth.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
+      console.log("tx is on the way : ",tx);
       var bondTx = truffleEvent.formTxObject('Bond', 1, tx);
       console.log("Via-USD bond contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
       console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
