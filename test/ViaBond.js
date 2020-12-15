@@ -123,7 +123,7 @@ contract("TransferViaUSDBond", async (accounts) => {
       try{
           await tvub;
       } catch (error) { 
-        console.log(error);
+        console.log(error);gi 
       } finally {
         clearTimeout(tvub);
       }*/
@@ -366,7 +366,8 @@ contract("BondPurchaseWithCashTokensOfSameCurrency", async (accounts) => {
     //console.log("Account Via-EUR bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
     console.log();
 
-    let tx = await viaeurBond.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
+    let tx = await web3.eth.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
+    console.log("tx is on the way : ",tx);
     console.log("Via-EUR bond token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
