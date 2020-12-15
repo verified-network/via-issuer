@@ -63,8 +63,6 @@ contract("IssuingViaUSD", async (accounts) => {
           clearTimeout(ViaUsdCashCallback);
         }*/
 
-        console.log("Via cash token issued for : ", viaCashCurrency);
-
         console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
         console.log("Account Via-USD cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
         

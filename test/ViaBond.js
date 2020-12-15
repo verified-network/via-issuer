@@ -1,5 +1,6 @@
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
+const truffleEvent  = require('truffle-events');
 
 const Factory = artifacts.require('Factory');
 const Cash = artifacts.require('Cash');
@@ -51,6 +52,7 @@ contract("IssuingViaUSDBond", async (accounts) => {
 
         console.log("Via oracle ether balance before query:", await web3.eth.getBalance(oracle.address));
         let tx = await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
+        var bondTx = truffleEvent.formTxObject('Bond', 1, tx);
         console.log("Via-USD bond contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
         console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
         
@@ -63,8 +65,8 @@ contract("IssuingViaUSDBond", async (accounts) => {
           clearTimeout(ivub);
         }*/
 
-        var viausdBondToken = await truffleAssert.eventEmitted(tx, 'TokenCreated', (ev) => {
-          return Token.at(ev._address);
+        var viausdBondToken = truffleAssert.eventEmitted(bondTx, 'ViaBondIssued', (ev) => {
+          return Token.at(ev.token);
         });
         
         console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
@@ -111,6 +113,7 @@ contract("TransferViaUSDBond", async (accounts) => {
       console.log();
 
       let tx = await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
+      var bondTx = truffleEvent.formTxObject('Bond', 1, tx);
       console.log("Via-USD bond contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
       console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
       
@@ -124,8 +127,8 @@ contract("TransferViaUSDBond", async (accounts) => {
       }*/
 
       var viausdBondToken;
-      truffleAssert.eventEmitted(tx, 'TokenCreated', (ev) => {
-        return viausdBondToken = Token.at(ev._address);
+      truffleAssert.eventEmitted(bondTx, 'ViaBondIssued', (ev) => {
+        viausdBondToken = Token.at(ev.token);
       });
 
       console.log("Sender Via-USD bond token balance after sending ether and before transferring Via-USD bond:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[0]))));
@@ -183,6 +186,7 @@ contract("ViaEURBondIssue", async (accounts) => {
     console.log();
 
     let tx = await viaeurBond.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
+    var bondTx = truffleEvent.formTxObject('Bond', 1, tx);
     console.log("Via-EUR bond contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
@@ -195,9 +199,8 @@ contract("ViaEURBondIssue", async (accounts) => {
       clearTimeout(vebi);
     }*/
 
-    var viaeurBondToken;
-    truffleAssert.eventEmitted(tx, 'TokenCreated', (ev) => {
-      return viaeurBondToken = Token.at(ev._address);
+    var viaeurBondToken = truffleAssert.eventEmitted(bondTx, 'ViaBondIssued', (ev) => {
+      viaeurBondToken = Token.at(ev.token);
     });
 
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
@@ -253,6 +256,7 @@ contract("BondPurchaseWithCashTokensOfDifferentCurrency", async (accounts) => {
     console.log();
 
     let tx = await viaeurBond.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
+    var factoryTx = truffleEvent.formTxObject('Factory', 1, tx);
     console.log("Via-EUR bond contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
@@ -267,7 +271,7 @@ contract("BondPurchaseWithCashTokensOfDifferentCurrency", async (accounts) => {
 
     var viaeurBondToken;
     var viaeurBondTokenAddress;
-    truffleAssert.eventEmitted(tx, 'TokenCreated', (ev) => {
+    truffleAssert.eventEmitted(factoryTx, 'TokenCreated', (ev) => {
       viaeurBondTokenAddress = ev._address;
       return viaeurBondToken = Token.at(ev._address);
     });
