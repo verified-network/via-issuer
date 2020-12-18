@@ -20,7 +20,8 @@ module.exports = function(deployer, network, accounts) {
     deployer.link(stringutils, [Bond, Cash, ViaOracle, CashFactory, BondFactory, TokenFactory]);
 
     deployer.deploy(ABDKMathQuad);
-    deployer.link(ABDKMathQuad,[Cash, Bond, ViaOracle, ERC20, Token, CashFactory, BondFactory, TokenFactory]);
+    // not needed supposedly https://forum.openzeppelin.com/t/test-with-deployproxy-errors-with-object-getlinkedbytecode/4930/12
+    // deployer.link(ABDKMathQuad,[Cash, Bond, ViaOracle, ERC20, Token, CashFactory, BondFactory, TokenFactory]);
 
     deployer.deploy(ViaOracle, {from: accounts[0], gas:6721975, value: 0.25e18});
     deployer.deploy(ERC20);

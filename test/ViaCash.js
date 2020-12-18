@@ -32,8 +32,6 @@ contract("CashContractSize", function(accounts) {
 
 contract("IssuingViaUSD", async (accounts) => {
   it("should send ether to Via-USD cash contract and then get some Via-USD cash tokens", async () => {
-      var abdkMathQuad = await ABDKMathQuad.deployed();
-      await Cash.link(abdkMathQuad);
 
       var factory = await Factory.deployed();
       var cash = await CashFactory.deployed();
@@ -90,8 +88,6 @@ contract("IssuingViaUSD", async (accounts) => {
 
 contract("IssuingViaEUR", async (accounts) => {
   it("should send ether to Via-EUR cash contract and then get some Via-EUR cash tokens", async () => {
-      var abdkMathQuad = await ABDKMathQuad.deployed();
-      await Cash.link(abdkMathQuad);
 
       var factory = await Factory.deployed();
       var cash = await CashFactory.deployed();
@@ -155,9 +151,7 @@ contract("IssuingViaEUR", async (accounts) => {
 });
 
 contract("ViaUSDExchange", async (accounts) => {
-  it("should send Via-USD to Via-EUR cash contract and then get some Via-EUR cash tokens", async () => {
-    var abdkMathQuad = await ABDKMathQuad.deployed();
-    await Cash.link(abdkMathQuad);
+  it("should send Via-USD to Via-EUR cash contract and then get some Via-EUR cash tokens", async () => {;
 
     var factory = await Factory.deployed();
     var cash = await CashFactory.deployed();
@@ -243,10 +237,6 @@ contract("ViaUSDExchange", async (accounts) => {
 
 contract("ViaUSDRedemption", async (accounts) => {
   it("should send Via-USD to Via-USD cash contract and then get ether sent during issuing process", async () => {
-
-    var abdkMathQuad = await ABDKMathQuad.deployed();
-    await Cash.link(abdkMathQuad);
-
     var factory = await Factory.deployed();
     var cash = await CashFactory.deployed();
     var oracle = await ViaOracle.deployed(); 
@@ -312,9 +302,6 @@ contract("ViaUSDRedemption", async (accounts) => {
 
 contract("ViaEURRedemption", async (accounts) => {
   it("should send Via-EUR tokens to Via-EUR contract and get back ether paid in earlier", async () => {
-    var abdkMathQuad = await ABDKMathQuad.deployed();
-      await Cash.link(abdkMathQuad);
-
       var factory = await Factory.deployed();
       var cash = await CashFactory.deployed();
       var oracle = await ViaOracle.deployed(); 
@@ -380,9 +367,6 @@ contract("ViaEURRedemption", async (accounts) => {
 
 contract("ViaUSDRedemptionAfterTransfer", async (accounts) => {
   it("should send Via-USD tokens to Via-USD contract after transfer of Via-USD tokens from one user account to another", async () => {
-    var abdkMathQuad = await ABDKMathQuad.deployed();
-    await Cash.link(abdkMathQuad);
-
     var factory = await Factory.deployed();
     var cash = await CashFactory.deployed();
     var oracle = await ViaOracle.deployed(); 
@@ -459,8 +443,6 @@ contract("ViaUSDRedemptionAfterTransfer", async (accounts) => {
 
 contract("TransferViaUSD", async (accounts) => {
   it("should transfer Via-USD to another account", async () => {
-    var abdkMathQuad = await ABDKMathQuad.deployed();
-    await Cash.link(abdkMathQuad);
 
     var factory = await Factory.deployed();
     var cash = await CashFactory.deployed();
@@ -524,9 +506,6 @@ contract("TransferViaUSD", async (accounts) => {
 
 contract("ViaUSDRedemptionAfterEURExchangeTransferAndRedemption", async (accounts) => {
   it("should send Via-USD to Via-EUR cash contract, get some Via-EUR cash tokens which it should transfer to another account which will redeem Via-EUR to get Via-USD which it will again redeem to get ether", async () => {
-    var abdkMathQuad = await ABDKMathQuad.deployed();
-    await Cash.link(abdkMathQuad);
-
     var factory = await Factory.deployed();
     var cash = await CashFactory.deployed();
     var oracle = await ViaOracle.deployed(); 
@@ -674,7 +653,7 @@ contract("ViaUSDUpgrade", async (accounts) => {
   
 });
 
-/*contract("ViaCashUpgradesPluginIntegrationTest", async (accounts) => {
+contract("ViaCashUpgradesPluginIntegrationTest", async (accounts) => {
   it("should not fail", async () => {
     var oracle = await ViaOracle.deployed(); 
     var factory = await Factory.deployed();
@@ -695,4 +674,4 @@ contract("ViaUSDUpgrade", async (accounts) => {
     await upgradeProxy(cashUpgradeInst.address, CashV2Test);
     await prepareUpgrade(cashUpgradeInst.address, CashV2Test);
   });
-});*/
+});
