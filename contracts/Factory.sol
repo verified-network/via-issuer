@@ -68,14 +68,15 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     //retrieves address and type of token for name specified
     function getAddressAndType(bytes32 tokenName) external view returns (address, bytes32){
         bool found = false;
-        for(int i=0; i<tokens.size(); i++){
+        uint256 i=0;
+        for(i=0; i<tokens.length; i++){
             if(token[tokens[i]].name==tokenName){
                 found == true;
                 break;
             }
         }
         if(found)
-            return (token[tokens[i]], token[tokens[i]].tokenType);
+            return (tokens[i], token[tokens[i]].tokenType);
         else
             return (address(0x0), "");
     }
