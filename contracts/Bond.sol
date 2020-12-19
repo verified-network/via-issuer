@@ -195,7 +195,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.EthXvalue = ABDKMathQuad.fromUInt(0);
                 c.bond_currency = bondName;
                 c.ViaXvalue =ABDKMathQuad.fromUInt(0);
-                emit Log("calling convert");
+                //emit Log("calling convert");
                 convert("22",ABDKMathQuad.fromUInt("1.2".stringToUint()),"ver");
                 convert("22",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
             }
@@ -213,7 +213,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.EthXvalue = ABDKMathQuad.fromUInt(0);
                 c.bond_currency = bondName;
                 c.ViaXvalue =ABDKMathQuad.fromUInt(1);
-                emit Log("calling convert");
+                //emit Log("calling convert");
                 convert("11",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
             }
         }
@@ -242,7 +242,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.ViaXvalue =ABDKMathQuad.fromUInt(0);
                 c.ViaRateId = ViaRateId; 
                 c.ViaRateValue = ABDKMathQuad.fromUInt(0);
-                emit Log("calling convert");
+                //emit Log("calling convert");
                 convert("33",ABDKMathQuad.fromUInt("7.6".stringToUint()),"er");
                 convert("33",ABDKMathQuad.fromUInt("1.5".stringToUint()),"ir");
             }
@@ -272,7 +272,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     c.ViaXvalue =ABDKMathQuad.fromUInt(1);
                     c.ViaRateId = ViaRateId; 
                     c.ViaRateValue = ABDKMathQuad.fromUInt(0);
-                    emit Log("calling convert");
+                    //emit Log("calling convert");
                     convert("44",ABDKMathQuad.fromUInt("1.5".stringToUint()),"ir");
                 }                
             }
@@ -441,7 +441,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
         //check if bond needs to be issued
         if(conversionQ[txId].operation=="issue"){
             if(rtype == "ethusd" || rtype == "ver"){
-                emit Log("converted");
+                //emit Log("converted");
                 if(ABDKMathQuad.cmp(conversionQ[txId].EthXvalue, ABDKMathQuad.fromUInt(0))!=0 &&
                     ABDKMathQuad.cmp(conversionQ[txId].ViaXvalue, ABDKMathQuad.fromUInt(0))!=0){
                     //calculate par value of via bond by applying exchange rates from via oracle    
