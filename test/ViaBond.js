@@ -63,7 +63,7 @@ contract("IssuingViaUSDBond", async (accounts) => {
         console.log();
 
         console.log("Via oracle ether balance before query:", await web3.eth.getBalance(oracle.address));
-        let txObj = await getFirstEvent(factory.TokenCreated({fromBlock:'latest'}));
+        //let txObj = await getFirstEvent(factory.TokenCreated({fromBlock:'latest'}));
         await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
         console.log("Via-USD bond contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
         console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
@@ -77,8 +77,9 @@ contract("IssuingViaUSDBond", async (accounts) => {
           clearTimeout(ivub);
         }*/
         
-        console.log("tx 1 is on the way : ", txObj);
-        var viausdBondToken = truffleAssert.eventEmitted(txObj, 'TokenCreated', (ev) => {
+        //console.log("tx 1 is on the way : ", txObj);
+        var viausdBondToken = truffleAssert.eventEmitted(factory, 'TokenCreated', (ev) => {
+          console.log("Token created !");
           return Token.at(ev._address);
         });
         
