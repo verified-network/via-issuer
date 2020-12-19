@@ -12,6 +12,18 @@ const Token = artifacts.require('Token');
 
 web3.setProvider("http://127.0.0.1:8545");
 
+const getFirstEvent = (_event) => {
+  return new Promise((resolve, reject) => {
+    _event.once('data', resolve).once('error', reject)
+  });
+}
+
+const timeoutPromise = new Promise((_, reject) => {
+  setTimeout(() => {
+    reject(new Error('Request timed out'));
+  }, 200000);
+})
+
 contract("BondContractSize", function(accounts) {
     it("get the size of the Bond contract", function() {
       return Bond.deployed().then(function(instance) {
@@ -53,10 +65,9 @@ contract("IssuingViaUSDBond", async (accounts) => {
         console.log("Via oracle ether balance before query:", await web3.eth.getBalance(oracle.address));
         
         await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
-        let txObj = await getFirstEventOne(bond.ViaBondIssued({fromBlock:'latest'}));
-        var bondTx = truffleEvent.formTxObject('Factory', 1, txObj);
-        console.log("1 tx is on the way : ",bondTx);
-        var viausdBondToken = truffleAssert.eventEmitted(bondTx, 'TokenCreated', (ev) => {
+        let txObj = await getFirstEvent(factory.TokenCreated({fromBlock:'latest'}));
+        console.log("tx 1 is on the way : ", txObj);
+        var viausdBondToken = truffleAssert.eventEmitted(txObj, 'TokenCreated', (ev) => {
           return Token.at(ev._address);
         });
 
@@ -75,19 +86,7 @@ contract("IssuingViaUSDBond", async (accounts) => {
         console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
         console.log("Account Via-USD bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[0]))));
         
-    });
-
-    const getFirstEventOne = (_event) => {
-      return new Promise((resolve, reject) => {
-        _event.once('data', resolve).once('error', reject)
-      });
-    }
-
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new Error('Request timed out'));
-      }, 200000);
-    })
+    });    
 
 });
 
@@ -118,7 +117,7 @@ contract("TransferViaUSDBond", async (accounts) => {
       await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
       let txObj = await getFirstEvent(bond.ViaBondIssued({fromBlock:'latest'}));
       var bondTx = truffleEvent.formTxObject('Factory', 1, txObj);
-      console.log("tx is on the way : ",bondTx);
+      console.log("tx 2 is on the way : ",bondTx);
       console.log("Via-USD bond contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
       console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
       
@@ -149,18 +148,6 @@ contract("TransferViaUSDBond", async (accounts) => {
       console.log("Receiver ether balance after Via-USD bond is transferred by sender:", await web3.eth.getBalance(accounts[1]));
       console.log("Receiver Via-USD bond token balance after receiving Via-USD bond:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[1]))));
   });
-
-  const getFirstEvent = (_event) => {
-    return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
-    });
-  }
-
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('Request timed out'));
-    }, 200000);
-  })
 
 });
 
@@ -210,18 +197,6 @@ contract("ViaEURBondIssue", async (accounts) => {
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
         
   });
-
-  const getFirstEvent = (_event) => {
-    return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
-    });
-  }
-
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('Request timed out'));
-    }, 200000);
-  })
 
 });
 
@@ -319,18 +294,6 @@ contract("BondPurchaseWithCashTokensOfDifferentCurrency", async (accounts) => {
         
   });
 
-  const getFirstEvent = (_event) => {
-    return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
-    });
-  }
-
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('Request timed out'));
-    }, 200000);
-  })
-
 });
 
 contract("BondPurchaseWithCashTokensOfSameCurrency", async (accounts) => {
@@ -420,18 +383,6 @@ contract("BondPurchaseWithCashTokensOfSameCurrency", async (accounts) => {
         
   });
 
-  const getFirstEvent = (_event) => {
-    return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
-    });
-  }
-
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('Request timed out'));
-    }, 200000);
-  })
-
 });
 
 contract("BondRedemptionByIssuerByReturningBonds", async (accounts) => {
@@ -490,18 +441,6 @@ contract("BondRedemptionByIssuerByReturningBonds", async (accounts) => {
     console.log("Account Via-USD bond token balance after redeeming Via-USD bonds:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[0]))));
 
   });
-
-  const getFirstEvent = (_event) => {
-    return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
-    });
-  }
-
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('Request timed out'));
-    }, 200000);
-  })
 
 });
 
@@ -627,18 +566,6 @@ contract("BondRedemptionByIssuerByPayingCash", async (accounts) => {
     console.log("Issuer Account ether balance after redeeming Via-EUR bonds with Via-EUR cash:", await web3.eth.getBalance(accounts[0]));
   });
 
-  const getFirstEvent = (_event) => {
-    return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
-    });
-  }
-
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('Request timed out'));
-    }, 200000);
-  })
-
 });
 
 contract("BondRedemptionByPurchasersWithIssuingCollateral", async (accounts) => {
@@ -739,17 +666,5 @@ contract("BondRedemptionByPurchasersWithIssuingCollateral", async (accounts) => 
 
     console.log("Account Via-USD cash token balance after redeeming Via-EUR bonds:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
   });
-
-  const getFirstEvent = (_event) => {
-    return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
-    });
-  }
-
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('Request timed out'));
-    }, 200000);
-  })
 
 });
