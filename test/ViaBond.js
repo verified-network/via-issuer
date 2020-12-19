@@ -53,10 +53,10 @@ contract("IssuingViaUSDBond", async (accounts) => {
         console.log("Via oracle ether balance before query:", await web3.eth.getBalance(oracle.address));
         
         await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
-        let txObj = await getFirstEvent(factory.TokenCreated({fromBlock:'latest'}));
-        //let txObj = await truffleAssert.createTransactionResult(bond, txHash);
-        console.log("tx is on the way : ", txObj);
-        var viausdBondToken = truffleAssert.eventEmitted(txObj, 'TokenCreated', (ev) => {
+        let txObj = await getFirstEventOne(bond.ViaBondIssued({fromBlock:'latest'}));
+        var bondTx = truffleEvent.formTxObject('Factory', 1, txObj);
+        console.log("1 tx is on the way : ",bondTx);
+        var viausdBondToken = truffleAssert.eventEmitted(bondTx, 'TokenCreated', (ev) => {
           return Token.at(ev._address);
         });
 
@@ -77,7 +77,7 @@ contract("IssuingViaUSDBond", async (accounts) => {
         
     });
 
-    const getFirstEvent = (_event) => {
+    const getFirstEventOne = (_event) => {
       return new Promise((resolve, reject) => {
         _event.once('data', resolve).once('error', reject)
       });
@@ -202,10 +202,10 @@ contract("ViaEURBondIssue", async (accounts) => {
     } finally {
       clearTimeout(vebi);
     }*/
-    let txObj = await getFirstEvent(bond.ViaBondIssued({fromBlock:'latest'}));
-    var viaeurBondToken = truffleAssert.eventEmitted(txObj, 'ViaBondIssued', (ev) => {
-      viaeurBondToken = Token.at(ev.token);
-    });
+    //let txObj = await getFirstEvent(bond.ViaBondIssued({fromBlock:'latest'}));
+    //var viaeurBondToken = truffleAssert.eventEmitted(txObj, 'ViaBondIssued', (ev) => {
+    //  viaeurBondToken = Token.at(ev.token);
+    //});
 
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
         
