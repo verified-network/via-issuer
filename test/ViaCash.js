@@ -68,18 +68,6 @@ contract("IssuingViaUSD", async (accounts) => {
         
     });
 
-    const getFirstEvent = (_event) => {
-      return new Promise((resolve, reject) => {
-        _event.once('data', resolve).once('error', reject)
-      });
-    }
-
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new Error('Request timed out'));
-      }, 200000);
-    })
-
 });
 
 contract("IssuingViaEUR", async (accounts) => {
@@ -133,18 +121,6 @@ contract("IssuingViaEUR", async (accounts) => {
       console.log("Account Via-EUR cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
 
   });
-
-  const getFirstEvent = (_event) => {
-    return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
-    });
-  }
-
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('Request timed out'));
-    }, 200000);
-  })
 
 });
 
@@ -223,18 +199,6 @@ contract("ViaUSDExchange", async (accounts) => {
     console.log("Account Via-EUR cash token balance after sending Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
   });
 
-  const getFirstEvent = (_event) => {
-    return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
-    });
-  }
-
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('Request timed out'));
-    }, 200000);
-  })
-
 });
 
 contract("ViaUSDRedemption", async (accounts) => {
@@ -294,18 +258,6 @@ contract("ViaUSDRedemption", async (accounts) => {
     console.log("Account Via-USD cash token balance after sending Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
   });
 
-  const getFirstEvent = (_event) => {
-    return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
-    });
-  }
-
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('Request timed out'));
-    }, 200000);
-  })
-
 });
 
 contract("ViaEURRedemption", async (accounts) => {
@@ -362,18 +314,6 @@ contract("ViaEURRedemption", async (accounts) => {
       console.log("Account Via-EUR cash token balance after sending Via-EUR:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
   });
 
-  const getFirstEvent = (_event) => {
-    return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
-    });
-  }
-
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('Request timed out'));
-    }, 200000);
-  })
-  
 });
 
 contract("ViaUSDRedemptionAfterTransfer", async (accounts) => {
@@ -442,18 +382,6 @@ contract("ViaUSDRedemptionAfterTransfer", async (accounts) => {
     console.log("Account Via-USD cash token balance after redeeming Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
   });
 
-  const getFirstEvent = (_event) => {
-    return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
-    });
-  }
-
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('Request timed out'));
-    }, 200000);
-  })
-
 });
 
 contract("TransferViaUSD", async (accounts) => {
@@ -506,18 +434,6 @@ contract("TransferViaUSD", async (accounts) => {
     console.log("Receiver ether balance after Via-USD is sent by sender:", await web3.eth.getBalance(accounts[1]));
     console.log("Receiver Via-USD cash token balance after receiving Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
   });
-
-  const getFirstEvent = (_event) => {
-    return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
-    });
-  }
-
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('Request timed out'));
-    }, 200000);
-  })
 
 });
 
@@ -626,17 +542,5 @@ contract("ViaUSDRedemptionAfterEURExchangeTransferAndRedemption", async (account
     console.log("Account ether balance after sending Via-USD obtained after redeeming Via-EUR:", await web3.eth.getBalance(accounts[1]));
     console.log("Account Via-USD cash token balance after sending Via-USD obtained after redeeming Via-EUR:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
   });
-
-  const getFirstEvent = (_event) => {
-    return new Promise((resolve, reject) => {
-      _event.once('data', resolve).once('error', reject)
-    });
-  }
-
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('Request timed out'));
-    }, 200000);
-  })
 
 });
