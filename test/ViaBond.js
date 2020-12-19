@@ -18,11 +18,11 @@ const getFirstEvent = (_event) => {
   });
 }
 
-const timeoutPromise = new Promise((_, reject) => {
+/*const timeoutPromise = new Promise((_, reject) => {
   setTimeout(() => {
     reject(new Error('Request timed out'));
   }, 200000);
-})
+})*/
 
 contract("BondContractSize", function(accounts) {
     it("get the size of the Bond contract", function() {
@@ -63,7 +63,6 @@ contract("IssuingViaUSDBond", async (accounts) => {
         console.log();
 
         console.log("Via oracle ether balance before query:", await web3.eth.getBalance(oracle.address));
-        
         await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
         console.log("Via-USD bond contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
         console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
@@ -77,7 +76,8 @@ contract("IssuingViaUSDBond", async (accounts) => {
           clearTimeout(ivub);
         }*/
         
-        let txObj = await getFirstEvent(factory.TokenCreated({fromBlock:'latest'}));
+        let txObj = getFirstEvent(factory.TokenCreated({fromBlock:'latest'}));
+        await txObj;
         console.log("tx 1 is on the way : ", txObj);
         var viausdBondToken = truffleAssert.eventEmitted(txObj, 'TokenCreated', (ev) => {
           return Token.at(ev._address);
