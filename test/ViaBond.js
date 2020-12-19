@@ -53,7 +53,7 @@ contract("IssuingViaUSDBond", async (accounts) => {
         console.log("Via oracle ether balance before query:", await web3.eth.getBalance(oracle.address));
         
         await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
-        let txObj = await getFirstEvent(Factory.TokenCreated({fromBlock:'latest'}));
+        let txObj = await getFirstEvent(factory.TokenCreated({fromBlock:'latest'}));
         //let txObj = await truffleAssert.createTransactionResult(bond, txHash);
         console.log("tx is on the way : ", txObj);
         var viausdBondToken = truffleAssert.eventEmitted(txObj, 'TokenCreated', (ev) => {
@@ -115,8 +115,9 @@ contract("TransferViaUSDBond", async (accounts) => {
       //console.log("Account Via-USD bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[0]))));
       console.log();
 
-      let tx = await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
-      var bondTx = truffleEvent.formTxObject('Bond', 1, tx);
+      await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
+      let txObj = await getFirstEvent(bond.ViaBondIssued({fromBlock:'latest'}));
+      var bondTx = truffleEvent.formTxObject('Factory', 1, txObj);
       console.log("tx is on the way : ",bondTx);
       console.log("Via-USD bond contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
       console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
@@ -131,8 +132,8 @@ contract("TransferViaUSDBond", async (accounts) => {
       }*/
 
       var viausdBondToken;
-      truffleAssert.eventEmitted(bondTx, 'ViaBondIssued', (ev) => {
-        viausdBondToken = Token.at(ev.token);
+      truffleAssert.eventEmitted(bondTx, 'TokenCreated', (ev) => {
+        viausdBondToken = Token.at(ev._address);
       });
 
       console.log("Sender Via-USD bond token balance after sending ether and before transferring Via-USD bond:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[0]))));
@@ -189,7 +190,7 @@ contract("ViaEURBondIssue", async (accounts) => {
     //console.log("Account Via-EUR bond issuer balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
     console.log();
 
-    let tx = await web3.eth.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
+    await web3.eth.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
     console.log("Via-EUR bond contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
@@ -201,8 +202,8 @@ contract("ViaEURBondIssue", async (accounts) => {
     } finally {
       clearTimeout(vebi);
     }*/
-
-    var viaeurBondToken = truffleAssert.eventEmitted(tx, 'ViaBondIssued', (ev) => {
+    let txObj = await getFirstEvent(bond.ViaBondIssued({fromBlock:'latest'}));
+    var viaeurBondToken = truffleAssert.eventEmitted(txObj, 'ViaBondIssued', (ev) => {
       viaeurBondToken = Token.at(ev.token);
     });
 
@@ -258,9 +259,7 @@ contract("BondPurchaseWithCashTokensOfDifferentCurrency", async (accounts) => {
     //console.log("Account Via-EUR bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
     console.log();
 
-    let tx = await viaeurBond.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
-    console.log("tx is on the way : ",tx);
-    var factoryTx = truffleEvent.formTxObject('Factory', 1, tx);
+    await viaeurBond.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
     console.log("Via-EUR bond contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
@@ -271,14 +270,14 @@ contract("BondPurchaseWithCashTokensOfDifferentCurrency", async (accounts) => {
       console.log(error);
     } finally {
       clearTimeout(bpdca);
-    }*/
+    }
 
     var viaeurBondToken;
     var viaeurBondTokenAddress;
     truffleAssert.eventEmitted(factoryTx, 'TokenCreated', (ev) => {
       viaeurBondTokenAddress = ev._address;
       return viaeurBondToken = Token.at(ev._address);
-    });
+    })*/
 
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
 
@@ -368,9 +367,7 @@ contract("BondPurchaseWithCashTokensOfSameCurrency", async (accounts) => {
     //console.log("Account Via-EUR bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
     console.log();
 
-    let tx = await web3.eth.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
-    console.log("tx is on the way : ",tx);
-    var factoryTx = truffleEvent.formTxObject('Factory', 1, tx);
+    await web3.eth.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
     console.log("Via-EUR bond token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
@@ -382,13 +379,6 @@ contract("BondPurchaseWithCashTokensOfSameCurrency", async (accounts) => {
     } finally {
       clearTimeout(bpsca);
     }*/
-
-    var viaeurBondToken;
-    var viaeurBondTokenAddress;
-    truffleAssert.eventEmitted(factoryTx, 'TokenCreated', (ev) => {
-      viaeurBondTokenAddress = ev._addresss;
-      return viaeurBondToken = Token.at(ev._address);
-    });
 
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
 
@@ -470,7 +460,7 @@ contract("BondRedemptionByIssuerByReturningBonds", async (accounts) => {
     //console.log("Account Via-USD bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBond.balanceOf(accounts[0]))));
     console.log();
 
-    let tx = await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
+    await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
     console.log("Via-USD bond token contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
@@ -482,13 +472,6 @@ contract("BondRedemptionByIssuerByReturningBonds", async (accounts) => {
     } finally {
       clearTimeout(brrba);
     }*/
-
-    var viausdBondToken;
-    var viausdBondTokenAddress;
-    truffleAssert.eventEmitted(tx, 'TokenCreated', (ev) => {
-      viausdBondTokenAddress = ev._address;
-      return viausdBondToken = Token.at(ev._address);
-    });
 
     console.log("Account Via-USD bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[0]))));
     
@@ -563,7 +546,7 @@ contract("BondRedemptionByIssuerByPayingCash", async (accounts) => {
     //console.log("Account Via-EUR bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
     console.log();
 
-    let tx = await viaeurBond.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
+    await viaeurBond.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
     console.log("Via-EUR bond token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
     
@@ -575,13 +558,6 @@ contract("BondRedemptionByIssuerByPayingCash", async (accounts) => {
     } finally {
       clearTimeout(brpca);
     }*/
-
-    var viaeurBondToken;
-    var viaeurBondTokenAddress;
-    truffleAssert.eventEmitted(tx, 'TokenCreated', (ev) => {
-      viaeurBondTokenAddress = ev._address;
-      return viaeurBondToken = Token.at(ev._address);
-    });
 
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
 
@@ -712,13 +688,6 @@ contract("BondRedemptionByPurchasersWithIssuingCollateral", async (accounts) => 
     } finally {
       clearTimeout(brpia);
     }*/
-
-    var viaeurBondToken;
-    var viaeurBondTokenAddress;
-    truffleAssert.eventEmitted(tx, 'TokenCreated', (ev) => {
-      viaeurBondTokenAddress = ev._address;
-      return viaeurBondToken = Token.at(ev._address);
-    });
 
     console.log("Account Via-EUR bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBondToken.balanceOf(accounts[0]))));
 
