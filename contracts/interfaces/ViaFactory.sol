@@ -20,6 +20,8 @@ interface ViaFactory{
 
     function getIssuer(bytes32 tokenType, bytes32 tokenName) external view returns(address);
 
+    function getAddressAndType(bytes32 tokenName) external view returns (address, bytes32);
+
     function createToken(address _target, bytes32 tokenName, bytes32 tokenProduct, bytes32 tokenSymbol) external returns(address);
 
 }

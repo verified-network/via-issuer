@@ -65,6 +65,21 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         return issuers[tokenType][tokenName];
     }
 
+    //retrieves address and type of token for name specified
+    function getAddressAndType(bytes32 tokenName) external view returns (address, bytes32){
+        bool found = false;
+        for(int i=0; i<tokens.size(); i++){
+            if(token[tokens[i]].name==tokenName){
+                found == true;
+                break;
+            }
+        }
+        if(found)
+            return (token[tokens[i]], token[tokens[i]].tokenType);
+        else
+            return (address(0x0), "");
+    }
+
     //token issuer factory 
     //function createIssuer(uint256 salt, address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token) external{
     function createIssuer(address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token) external{
