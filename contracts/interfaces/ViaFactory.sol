@@ -22,6 +22,14 @@ interface ViaFactory{
 
     function getAddressAndType(bytes32 tokenName) external view returns (address, bytes32);
 
+    function getFee(bytes32 feeType) external view returns(bytes16);
+
     function createToken(address _target, bytes32 tokenName, bytes32 tokenProduct, bytes32 tokenSymbol) external returns(address);
+
+    function setFeeTo(address feeTo, bytes16 fee, bytes32 feeType) external;
+
+    function setFeeToSetter(address _feeToSetter) external;
+
+    function getFeeToSetter() external returns(address);
 
 }

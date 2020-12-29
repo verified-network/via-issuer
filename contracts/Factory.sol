@@ -17,6 +17,27 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         bytes32 name;
     }
 
+    //fee structure for payments
+    struct payments{
+        bytes16 acceptance;
+        bytes16 remittance;
+        bytes16 redemption;
+    }
+
+    mapping(address => payments) private paymentFees;
+
+    //fee structure for bond issuing
+    struct issues{
+        bytes16 issuing;
+        bytes16 purchasing;
+        bytes16 selling;
+    }
+
+    mapping(address => issues) private issuingFees;
+
+    //address of who gets Via fees
+    address feeToSetter;
+
     //addresses of all Via proxies
     mapping(address => via) public token;
 
@@ -33,6 +54,7 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
 
     function initialize() public initializer{
         Ownable.initialize(msg.sender);
+        feeToSetter = msg.sender;
     }
 
     function getTokenCount() external view returns(uint tokenCount) {
@@ -81,6 +103,33 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
             return (address(0x0), "");
     }
 
+    function getFee(bytes32 feeType) external view returns(bytes16){
+        require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Via: FORBIDDEN');
+        if(feeType=="issuing"){
+            return (issuingFees[msg.sender].issuing);
+        }
+        else if(feeType=="purchasing"){
+            return (issuingFees[msg.sender].purchasing);
+        }
+        else if(feeType=="selling"){
+            return (issuingFees[msg.sender].selling);
+        }
+        else if(feeType=="acceptance"){
+            return (paymentFees[msg.sender].acceptance);
+        }
+        else if(feeType=="remittance"){
+            return (paymentFees[msg.sender].remittance);
+        }
+        else if(feeType=="redemption"){
+            return (paymentFees[msg.sender].redemption);
+        }
+    }
+
+    function getFeeToSetter() external returns(address){
+        require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Via: FORBIDDEN');
+        return feeToSetter;
+    }
+
     //token issuer factory 
     //function createIssuer(uint256 salt, address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token) external{
     function createIssuer(address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token) external{
@@ -120,6 +169,34 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         emit TokenCreated(_token, tokenName, tokenProduct);
         return _token;
     }
+
+    function setFeeTo(address feeTo, bytes16 fee, bytes32 feeType) external {
+        require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
+        if(feeType=="issuing"){
+            issuingFees[feeTo].issuing = fee;
+        }
+        else if(feeType=="purchasing"){
+            issuingFees[feeTo].purchasing = fee;
+        }
+        else if(feeType=="selling"){
+            issuingFees[feeTo].selling = fee;
+        }
+        else if(feeType=="acceptance"){
+            paymentFees[feeTo].acceptance = fee;
+        }
+        else if(feeType=="remittance"){
+            paymentFees[feeTo].remittance = fee;
+        }
+        else if(feeType=="redemption"){
+            paymentFees[feeTo].redemption = fee;
+        }
+    }
+
+    function setFeeToSetter(address _feeToSetter) external {
+        require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
+        feeToSetter = _feeToSetter;
+    }
+
 }
 
 

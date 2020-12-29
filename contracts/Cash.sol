@@ -372,6 +372,15 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                 if(operation=="redeem"){
                     //adjust total supply
                     totalSupply_ = ABDKMathQuad.sub(totalSupply_, amount);
+                    //check if any fee is payable on redemption and pay it if that is the case
+                    bytes16 fee = factory.getFee("redemption");
+                    if(ABDKMathQuad.toUInt(fee)!=0){
+                        address feeTo = factory.getFeeToSetter();
+                        if(feeTo!=address(0x0)){
+                            address(uint160(feeTo)).transfer(ABDKMathQuad.toUInt(ABDKMathQuad.mul(fee, value)));
+                            value = ABDKMathQuad.sub(value, ABDKMathQuad.mul(fee, value));
+                        }
+                    }
                     //send redeemed ether to party
                     address(uint160(party)).transfer(ABDKMathQuad.toUInt(value));
                     //generate event

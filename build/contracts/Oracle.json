@@ -62,14 +62,14 @@
     "absolutePath": "/D/verified/via-issuer/contracts/interfaces/Oracle.sol",
     "exportedSymbols": {
       "Oracle": [
-        13867
+        14166
       ]
     },
-    "id": 13868,
+    "id": 14167,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 13846,
+        "id": 14145,
         "literals": [
           "solidity",
           "0.5",
@@ -84,9 +84,9 @@
         "contractKind": "interface",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 13867,
+        "id": 14166,
         "linearizedBaseContracts": [
-          13867
+          14166
         ],
         "name": "Oracle",
         "nodeType": "ContractDefinition",
@@ -94,22 +94,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 13859,
+            "id": 14158,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "request",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 13855,
+              "id": 14154,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 13848,
+                  "id": 14147,
                   "name": "_currency",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13859,
+                  "scope": 14158,
                   "src": "165:17:8",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -118,7 +118,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 13847,
+                    "id": 14146,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "165:7:8",
@@ -132,10 +132,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 13850,
+                  "id": 14149,
                   "name": "_ratetype",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13859,
+                  "scope": 14158,
                   "src": "184:17:8",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -144,7 +144,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 13849,
+                    "id": 14148,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "184:7:8",
@@ -158,10 +158,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 13852,
+                  "id": 14151,
                   "name": "_tokenType",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13859,
+                  "scope": 14158,
                   "src": "203:18:8",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -170,7 +170,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 13851,
+                    "id": 14150,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "203:7:8",
@@ -184,10 +184,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 13854,
+                  "id": 14153,
                   "name": "_tokenContract",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13859,
+                  "scope": 14158,
                   "src": "223:30:8",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -196,7 +196,7 @@
                     "typeString": "address payable"
                   },
                   "typeName": {
-                    "id": 13853,
+                    "id": 14152,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "223:15:8",
@@ -213,15 +213,15 @@
               "src": "164:90:8"
             },
             "returnParameters": {
-              "id": 13858,
+              "id": 14157,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 13857,
+                  "id": 14156,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13859,
+                  "scope": 14158,
                   "src": "308:7:8",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -230,7 +230,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 13856,
+                    "id": 14155,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "308:7:8",
@@ -245,7 +245,7 @@
               ],
               "src": "307:9:8"
             },
-            "scope": 13867,
+            "scope": 14166,
             "src": "148:169:8",
             "stateMutability": "payable",
             "superFunction": null,
@@ -254,22 +254,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 13866,
+            "id": 14165,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "setCallbackId",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 13864,
+              "id": 14163,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 13861,
+                  "id": 14160,
                   "name": "_queryId",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13866,
+                  "scope": 14165,
                   "src": "352:16:8",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -278,7 +278,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 13860,
+                    "id": 14159,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "352:7:8",
@@ -292,10 +292,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 13863,
+                  "id": 14162,
                   "name": "_callbackId",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13866,
+                  "scope": 14165,
                   "src": "370:19:8",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -304,7 +304,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 13862,
+                    "id": 14161,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "370:7:8",
@@ -320,19 +320,19 @@
               "src": "351:39:8"
             },
             "returnParameters": {
-              "id": 13865,
+              "id": 14164,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "399:0:8"
             },
-            "scope": 13867,
+            "scope": 14166,
             "src": "329:71:8",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 13868,
+        "scope": 14167,
         "src": "123:282:8"
       }
     ],
@@ -342,14 +342,14 @@
     "absolutePath": "/D/verified/via-issuer/contracts/interfaces/Oracle.sol",
     "exportedSymbols": {
       "Oracle": [
-        13867
+        14166
       ]
     },
-    "id": 13868,
+    "id": 14167,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 13846,
+        "id": 14145,
         "literals": [
           "solidity",
           "0.5",
@@ -364,9 +364,9 @@
         "contractKind": "interface",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 13867,
+        "id": 14166,
         "linearizedBaseContracts": [
-          13867
+          14166
         ],
         "name": "Oracle",
         "nodeType": "ContractDefinition",
@@ -374,22 +374,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 13859,
+            "id": 14158,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "request",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 13855,
+              "id": 14154,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 13848,
+                  "id": 14147,
                   "name": "_currency",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13859,
+                  "scope": 14158,
                   "src": "165:17:8",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -398,7 +398,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 13847,
+                    "id": 14146,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "165:7:8",
@@ -412,10 +412,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 13850,
+                  "id": 14149,
                   "name": "_ratetype",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13859,
+                  "scope": 14158,
                   "src": "184:17:8",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -424,7 +424,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 13849,
+                    "id": 14148,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "184:7:8",
@@ -438,10 +438,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 13852,
+                  "id": 14151,
                   "name": "_tokenType",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13859,
+                  "scope": 14158,
                   "src": "203:18:8",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -450,7 +450,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 13851,
+                    "id": 14150,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "203:7:8",
@@ -464,10 +464,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 13854,
+                  "id": 14153,
                   "name": "_tokenContract",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13859,
+                  "scope": 14158,
                   "src": "223:30:8",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -476,7 +476,7 @@
                     "typeString": "address payable"
                   },
                   "typeName": {
-                    "id": 13853,
+                    "id": 14152,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "223:15:8",
@@ -493,15 +493,15 @@
               "src": "164:90:8"
             },
             "returnParameters": {
-              "id": 13858,
+              "id": 14157,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 13857,
+                  "id": 14156,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13859,
+                  "scope": 14158,
                   "src": "308:7:8",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -510,7 +510,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 13856,
+                    "id": 14155,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "308:7:8",
@@ -525,7 +525,7 @@
               ],
               "src": "307:9:8"
             },
-            "scope": 13867,
+            "scope": 14166,
             "src": "148:169:8",
             "stateMutability": "payable",
             "superFunction": null,
@@ -534,22 +534,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 13866,
+            "id": 14165,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "setCallbackId",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 13864,
+              "id": 14163,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 13861,
+                  "id": 14160,
                   "name": "_queryId",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13866,
+                  "scope": 14165,
                   "src": "352:16:8",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -558,7 +558,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 13860,
+                    "id": 14159,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "352:7:8",
@@ -572,10 +572,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 13863,
+                  "id": 14162,
                   "name": "_callbackId",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13866,
+                  "scope": 14165,
                   "src": "370:19:8",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -584,7 +584,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 13862,
+                    "id": 14161,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "370:7:8",
@@ -600,19 +600,19 @@
               "src": "351:39:8"
             },
             "returnParameters": {
-              "id": 13865,
+              "id": 14164,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "399:0:8"
             },
-            "scope": 13867,
+            "scope": 14166,
             "src": "329:71:8",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 13868,
+        "scope": 14167,
         "src": "123:282:8"
       }
     ],
@@ -624,7 +624,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.2",
-  "updatedAt": "2020-12-19T09:19:45.997Z",
+  "updatedAt": "2020-12-29T06:44:45.735Z",
   "devdoc": {
     "methods": {}
   },
