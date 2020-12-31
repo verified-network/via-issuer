@@ -84,7 +84,6 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     //events to capture and report to Via oracle
     event ViaBondIssued(address indexed token, bytes32 currency, uint256 value, uint256 price, uint256 tenure);
     event ViaBondRedeemed(bytes32 currency, uint256 value, uint256 price, uint256 tenure);
-    event Log(bytes32 message);
     
     //mutex
     bool lock;
@@ -178,6 +177,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 return false;
         //call Via Oracle to fetch data for bond pricing
         if(currency=="ether"){
+            amount = payIssuingFee(amount);
             //if ether is paid into a non Via-USD bond contract, the bond contract will issue bond tokens of an equivalent face value.
             //To derive the bond's face value, the exchange rate of ether to Via-USD and then to the currency paid in is applied.
             if(bondName!="Via_USD"){
@@ -195,7 +195,6 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.EthXvalue = ABDKMathQuad.fromUInt(0);
                 c.bond_currency = bondName;
                 c.ViaXvalue =ABDKMathQuad.fromUInt(0);
-                //emit Log("calling convert");
                 convert("22",ABDKMathQuad.fromUInt("1.2".stringToUint()),"ver");
                 convert("22",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
             }
@@ -213,7 +212,6 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.EthXvalue = ABDKMathQuad.fromUInt(0);
                 c.bond_currency = bondName;
                 c.ViaXvalue =ABDKMathQuad.fromUInt(1);
-                //emit Log("calling convert");
                 convert("11",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
             }
         }
@@ -222,6 +220,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             //if the via cash token paid in is different from the denomination of this bond, 
             //tokens of this bond need to be transferred from an issuers' account after pricing the bond with applicable coupon rates
             if(currency!=bondName){
+                amount = payTradingFee(amount, cashContract);
                 //bytes32 ViaXid = oracle.request(string(abi.encodePacked(currency, "_to_", bondName)).stringToBytes32(),"er","Bond", address(this));                
                 //bytes32 ViaRateId;
                 //if(currency!="Via_USD"){
@@ -242,7 +241,6 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 c.ViaXvalue =ABDKMathQuad.fromUInt(0);
                 c.ViaRateId = ViaRateId; 
                 c.ViaRateValue = ABDKMathQuad.fromUInt(0);
-                //emit Log("calling convert");
                 convert("33",ABDKMathQuad.fromUInt("7.6".stringToUint()),"er");
                 convert("33",ABDKMathQuad.fromUInt("1.5".stringToUint()),"ir");
             }
@@ -260,6 +258,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                 //if the paying in is not for repayment of a bond already issued, then
                 //tokens of this bond need to be transferred from an issuer's account after pricing the bond with the domestic (paid in currency) coupon rates
                 else{
+                    amount = payTradingFee(amount, cashContract);
                     //bytes32 ViaRateId = oracle.request(currency, "ir","Bond",address(this));
                     bytes32 ViaRateId = "44";
                     conversion storage c = conversionQ[ViaRateId];
@@ -272,12 +271,35 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     c.ViaXvalue =ABDKMathQuad.fromUInt(1);
                     c.ViaRateId = ViaRateId; 
                     c.ViaRateValue = ABDKMathQuad.fromUInt(0);
-                    //emit Log("calling convert");
                     convert("44",ABDKMathQuad.fromUInt("1.5".stringToUint()),"ir");
                 }                
             }
         }
         return true;
+    }
+
+    function payIssuingFee(bytes16 value) private returns (bytes16){
+        bytes16 fee = factory.getFee("issuing");
+        if(ABDKMathQuad.toUInt(fee)!=0){
+            address feeTo = factory.getFeeToSetter();
+            if(feeTo!=address(0x0)){
+                address(uint160(feeTo)).transfer(ABDKMathQuad.toUInt(ABDKMathQuad.mul(fee, value)));
+                value = ABDKMathQuad.sub(value, ABDKMathQuad.mul(fee, value));
+            }
+        }
+        return value;
+    }
+
+    function payTradingFee(bytes16 value, address cashContract) private returns (bytes16){
+        bytes16 fee = ABDKMathQuad.add(factory.getFee("purchasing"),factory.getFee("selling"));
+        if(ABDKMathQuad.toUInt(fee)!=0){
+            address feeTo = factory.getFeeToSetter();
+            if(feeTo!=address(0x0)){
+                ViaCash(address(uint160(cashContract))).transferFrom(cashContract, feeTo, ABDKMathQuad.toUInt(ABDKMathQuad.mul(fee, value)));
+                value = ABDKMathQuad.sub(value, ABDKMathQuad.mul(fee, value));
+            }
+        }
+        return value;
     }
 
     //requesting redemption of Via bonds and transfer of ether or via cash collateral to issuer 
@@ -441,7 +463,6 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
         //check if bond needs to be issued
         if(conversionQ[txId].operation=="issue"){
             if(rtype == "ethusd" || rtype == "ver"){
-                //emit Log("converted");
                 if(ABDKMathQuad.cmp(conversionQ[txId].EthXvalue, ABDKMathQuad.fromUInt(0))!=0 &&
                     ABDKMathQuad.cmp(conversionQ[txId].ViaXvalue, ABDKMathQuad.fromUInt(0))!=0){
                     //calculate par value of via bond by applying exchange rates from via oracle    
@@ -481,7 +502,6 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             ViaToken(issuedBond).addTotalSupply(parValue);
             //first, add bond balance
             ViaToken(issuedBond).addBalance(issuedBond, parValue);
-            emit Log("finally issuing");
             //issue bond to payer if ether is paid in as collateral
             if(ViaToken(issuedBond).requestTransfer(payer, ABDKMathQuad.toUInt(parValue))){    
                 //keep track of issues
