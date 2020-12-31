@@ -373,20 +373,15 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                     //adjust total supply
                     totalSupply_ = ABDKMathQuad.sub(totalSupply_, amount);
                     //check if any fee is payable on redemption and pay it if that is the case
-                    bytes16 fee = factory.getFee("redemption");
-                    if(ABDKMathQuad.toUInt(fee)!=0){
-                        address feeTo = factory.getFeeToSetter();
-                        if(feeTo!=address(0x0)){
-                            address(uint160(feeTo)).transfer(ABDKMathQuad.toUInt(ABDKMathQuad.mul(fee, value)));
-                            value = ABDKMathQuad.sub(value, ABDKMathQuad.mul(fee, value));
-                        }
-                    }
+                    value = payRedemptionFee(value);
                     //send redeemed ether to party
                     address(uint160(party)).transfer(ABDKMathQuad.toUInt(value));
                     //generate event
                     emit ViaCashRedeemed(currency, value);
                 }
                 else if(operation=="transfer"){
+                    //check if any fee is payable on remittance and acceptance and pay it if that is the case
+                    (amount, value) = payTransferFee(amount, value, "ether");
                     //transfer balances
                     balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
                     //transfer deposits
@@ -409,15 +404,19 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                     lock = true;
                     //adjust total supply
                     totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.mul(amount, proportionRedeemed));
-                    // send redeemed ether to party which is all of the ether in deposit with this user (party)
+                    //check if any fee is payable on redemption and pay it if that is the case
+                    amtSend = payRedemptionFee(amtSend);
+                    //send redeemed ether to party which is all of the ether in deposit with this user (party)
                     address(uint160(party)).transfer(ABDKMathQuad.toUInt(amtSend));
                     //generate event
                     emit ViaCashRedeemed(currency, deposits[party]["ether"]);
                     lock = false;
                 }
                 else if(operation=="transfer"){
+                    //check if any fee is payable on remittance and acceptance and pay it if that is the case
+                    (amount, amtSend) = payTransferFee(ABDKMathQuad.mul(amount, proportionRedeemed), amtSend, "ether");
                     //transfer balances
-                    balances[receiver] = ABDKMathQuad.add(balances[receiver], ABDKMathQuad.mul(amount, proportionRedeemed));
+                    balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
                     //transfer deposits
                     deposits[receiver]["ether"] = ABDKMathQuad.add(deposits[receiver]["ether"], amtSend);
                 }
@@ -437,12 +436,16 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                         if(operation=="redeem"){
                             //adjust total supply
                             totalSupply_ = ABDKMathQuad.sub(totalSupply_, amount);
+                            //check if any fee is payable on redemption and pay it if that is the case
+                            value = payRedemptionFee(value);
                             //send redeemed currency to party
                             address(uint160(party)).transfer(ABDKMathQuad.toUInt(value));
                             //generate event
                             emit ViaCashRedeemed(currency, value);
                         }
                         else if(operation=="transfer"){
+                            //check if any fee is payable on remittance and acceptance and pay it if that is the case
+                            (amount, value) = payTransferFee(amount, value, currency);
                             //transfer balances
                             balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
                             //transfer deposits
@@ -465,6 +468,8 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                             lock = true;
                             //adjust total supply
                             totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.mul(amount, proportionRedeemed));
+                            //check if any fee is payable on redemption and pay it if that is the case
+                            amtSend = payRedemptionFee(amtSend);
                             // send redeemed currency to party which is all of the currency in deposit with this user (party)
                             address(uint160(party)).transfer(ABDKMathQuad.toUInt(amtSend));
                             //generate event
@@ -472,8 +477,10 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                             lock = false;
                         }
                         else if(operation=="transfer"){
+                            //check if any fee is payable on remittance and acceptance and pay it if that is the case
+                            (amount, amtSend) = payTransferFee(ABDKMathQuad.mul(amount, proportionRedeemed), amtSend, currency);
                             //transfer balances
-                            balances[receiver] = ABDKMathQuad.add(balances[receiver], ABDKMathQuad.mul(amount, proportionRedeemed));
+                            balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
                             //transfer deposits
                             deposits[receiver][currency] = ABDKMathQuad.add(deposits[receiver][currency], amtSend);
                         }
@@ -482,6 +489,32 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                 }
             }
         }
+    }
+
+    function payRedemptionFee(bytes16 value) private returns (bytes16){
+        bytes16 fee = factory.getFee("redemption");
+        if(ABDKMathQuad.toUInt(fee)!=0){
+            address feeTo = factory.getFeeToSetter();
+            if(feeTo!=address(0x0)){
+                address(uint160(feeTo)).transfer(ABDKMathQuad.toUInt(ABDKMathQuad.mul(fee, value)));
+                value = ABDKMathQuad.sub(value, ABDKMathQuad.mul(fee, value));
+            }
+        }
+        return value;
+    }
+
+    function payTransferFee(bytes16 amount, bytes16 value, bytes32 currency) private returns (bytes16, bytes16){
+        bytes16 fee = ABDKMathQuad.add(factory.getFee("remittance"),factory.getFee("acceptance"));
+        if(ABDKMathQuad.toUInt(fee)!=0){
+            address feeTo = factory.getFeeToSetter();
+            if(feeTo!=address(0x0)){
+                balances[feeTo] = ABDKMathQuad.add(balances[feeTo], ABDKMathQuad.mul(fee, amount));
+                amount = ABDKMathQuad.sub(amount, ABDKMathQuad.mul(fee, amount));
+                deposits[feeTo][currency] = ABDKMathQuad.add(deposits[feeTo][currency], ABDKMathQuad.mul(fee, value)); 
+                value = ABDKMathQuad.sub(value, ABDKMathQuad.mul(fee, value));
+            }
+        }
+        return (amount, value);
     }
     
     //get Via exchange rates from oracle and convert given currency and amount to via cash token
