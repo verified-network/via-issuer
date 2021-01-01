@@ -185,6 +185,15 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
         }
     }
 
+    //handles fiat pay in for issue of cash tokens
+    function payIn(uint256 tokens, address sender) external returns(bool){
+        require(factory.getFeeToSetter()==msg.sender);
+        if(issue(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName))
+            return true;
+        else
+            return false;
+    }
+
     //accessor for issue function
     function requestIssue(bytes16 amount, address buyer, bytes32 currency) public returns(bool){
         require(factory.getType(msg.sender) == "ViaCash");

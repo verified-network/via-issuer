@@ -26,6 +26,7 @@ contract("Bond contract testing", async (accounts) => {
     }, 200000);
   })
 
+  //test 1
   it("get the size of the Bond contract", function() {
     return Bond.deployed().then(function(instance) {
       var bytecode = instance.constructor._json.bytecode;
@@ -39,6 +40,7 @@ contract("Bond contract testing", async (accounts) => {
   
   });
 
+  //test 2
   it("should send ether to Via-USD bond contract and then get some Via-USD bond tokens to sender (issuer)", async () => {
       var abdkMathQuad = await ABDKMathQuad.deployed();
       await Bond.link(abdkMathQuad);
@@ -93,6 +95,7 @@ contract("Bond contract testing", async (accounts) => {
       
   });    
 
+  //test 3
   it("should transfer Via-USD bond to another account", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
     await Bond.link(abdkMathQuad);
@@ -119,6 +122,11 @@ contract("Bond contract testing", async (accounts) => {
     await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
     console.log("Via-USD bond contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
+
+    var viausdBondToken = await getFirstEvent(factory.TokenCreated({fromBlock:'latest'}), (ev) => {
+      console.log("Token created !");
+      return Token.at(ev._address);
+    });
     
     /*let tvub = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
     try{
@@ -144,6 +152,7 @@ contract("Bond contract testing", async (accounts) => {
   
   });
 
+  //test 4
   it("should send ether to Via-EUR bond contract and issue Via-EUR bonds to sender (issuer)", async () => {
     //this case is similar to the Via-USD Bond issue above
     //only difference is that this test requires two calls to the oracle instead of one in the Via-USD case
@@ -172,6 +181,11 @@ contract("Bond contract testing", async (accounts) => {
     await web3.eth.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
     console.log("Via-EUR bond contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
+
+    var viaeurBondToken = await getFirstEvent(factory.TokenCreated({fromBlock:'latest'}), (ev) => {
+      console.log("Token created !");
+      return Token.at(ev._address);
+    });
     
     /*let vebi = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
     try{
@@ -186,6 +200,7 @@ contract("Bond contract testing", async (accounts) => {
         
   });
 
+  // test 5
   it("should send Via-USD cash tokens to Via-EUR bond contract and issue Via-EUR bonds to sender (purchaser)", async () => {
     //in this test cases, first ether should be sent from account[0] to Via-EUR bond contract to issue Via-EUR bonds to issuer
     //then, Via-USD cash tokens should be sent from account[1] to the Via-EUR bond contract which will transfer the issued Via-EUR bonds to the sender of the Via-USD cash tokens(purchaser)
@@ -222,6 +237,13 @@ contract("Bond contract testing", async (accounts) => {
     await viaeurBond.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
     console.log("Via-EUR bond contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
+
+    var viaeurBondTokenAddress;
+    var viaeurBondToken = await getFirstEvent(factory.TokenCreated({fromBlock:'latest'}), (ev) => {
+      console.log("Token created !");
+      viaeurBondTokenAddress = ev._address;
+      return Token.at(ev._address);
+    });
     
     /*let bpdca = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
     try{
@@ -279,6 +301,7 @@ contract("Bond contract testing", async (accounts) => {
         
   });
 
+  // test 6
   it("should send Via-EUR cash tokens to Via-EUR bond contract and issue Via-EUR to sender (purchaser)", async () => {
     //in this test cases, first ether should be sent from account[0] to Via-EUR bond contract to issue Via-EUR bonds to issuer
     //then, Via-EUR cash tokens should be sent from account[1] to the Via-EUR bond contract which will transfer the issued Via-EUR bonds to the sender of the Via-EUR cash tokens(purchaser)
@@ -315,6 +338,13 @@ contract("Bond contract testing", async (accounts) => {
     await web3.eth.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
     console.log("Via-EUR bond token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
+
+    var viaeurBondTokenAddress;
+    var viaeurBondToken = await getFirstEvent(factory.TokenCreated({fromBlock:'latest'}), (ev) => {
+      console.log("Token created !");
+      viaeurBondTokenAddress = ev._address;
+      return Token.at(ev._address);
+    });
     
     /*let bpsca = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
     try{
@@ -365,6 +395,7 @@ contract("Bond contract testing", async (accounts) => {
         
   });
 
+  // test 7
   it("should send Via-USD bond tokens to Via-USD bond contract and get back ether paid in earlier", async () => {
     //in this test cases, first ether should be sent from account[0] to Via-USD bond contract to issue Via-USD bonds to issuer
     //then, the same Via-USD bond tokens should be sent from account[0] to the Via-USD bond contract which will transfer the ether paid in earlier to the sender of Via-USD bond tokens (issuer)
@@ -393,6 +424,13 @@ contract("Bond contract testing", async (accounts) => {
     await viausdBond.sendTransaction({from:accounts[0], to:viausdBondAddress, value:1e18});
     console.log("Via-USD bond token contract ether balance after sending ether:", await web3.eth.getBalance(viausdBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
+
+    var viausdBondTokenAddress;
+    var viausdBondToken = await getFirstEvent(factory.TokenCreated({fromBlock:'latest'}), (ev) => {
+      console.log("Token created !");
+      viausdBondTokenAddress = ev._address;
+      return Token.at(ev._address);
+    });
     
     /*let brrba = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
     try{
@@ -421,6 +459,7 @@ contract("Bond contract testing", async (accounts) => {
 
   });
 
+  // test 8
   it("should send Via-EUR cash tokens to Via-EUR bond contract and pay out paid in ether and cash tokens by bond purchasers", async () => {
     //in this test cases, first ether should be sent from account[0] to Via-EUR bond contract to issue Via-EUR bonds to issuer
     //then, Via-USD cash tokens should be sent from account[1] to the Via-EUR bond contract to purchase Via-EUR bond tokens issued
@@ -464,6 +503,13 @@ contract("Bond contract testing", async (accounts) => {
     await viaeurBond.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
     console.log("Via-EUR bond token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
+
+    var viaeurBondTokenAddress;
+    var viaeurBondToken = await getFirstEvent(factory.TokenCreated({fromBlock:'latest'}), (ev) => {
+      console.log("Token created !");
+      viaeurBondTokenAddress = ev._address;
+      return Token.at(ev._address);
+    });
     
     /*let brpca = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
     try{
@@ -543,6 +589,7 @@ contract("Bond contract testing", async (accounts) => {
   
   });
 
+  // test 9
   it("should send collateral for issuing bonds to purchasers if bond redemption is not done by issuer", async () => {
     //in this test case, first ether should be sent from account[0] to Via-EUR bond contract to issue Via-EUR bonds to issuer
     //then, account[1] should send Via-USD cash tokens to the Via-EUR bond contract to purchase the issued Via-EUR bonds
@@ -577,9 +624,16 @@ contract("Bond contract testing", async (accounts) => {
     //console.log("Account Via-EUR bond token balance before sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurBond.balanceOf(accounts[0]))));
     console.log();
 
-    let tx = await viaeurBond.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
+    await viaeurBond.sendTransaction({from:accounts[0], to:viaeurBondAddress, value:1e18});
     console.log("Via-EUR bond token contract ether balance after sending ether:", await web3.eth.getBalance(viaeurBondAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
+
+    var viaeurBondTokenAddress;
+    var viaeurBondToken = await getFirstEvent(factory.TokenCreated({fromBlock:'latest'}), (ev) => {
+      console.log("Token created !");
+      viaeurBondTokenAddress = ev._address;
+      return Token.at(ev._address);
+    });
     
     /*let brpia = Promise.race([getFirstEvent(oracle.LogResult({fromBlock:'latest'})), timeoutPromise]);
     try{
