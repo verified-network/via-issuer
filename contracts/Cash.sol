@@ -448,7 +448,12 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                             //check if any fee is payable on redemption and pay it if that is the case
                             value = payRedemptionFee(value);
                             //send redeemed currency to party
-                            address(uint160(party)).transfer(ABDKMathQuad.toUInt(value));
+                            if(cashtokenName.substring(5,7).stringToBytes32()==currency){
+                                //if currency to redeem is fiat counterpart of this cash token, request oracle to pay out fiat
+                                oracle.payOut(currency, value);
+                            }
+                            else
+                                address(uint160(party)).transfer(ABDKMathQuad.toUInt(value));
                             //generate event
                             emit ViaCashRedeemed(currency, value);
                         }
@@ -480,7 +485,12 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
                             //check if any fee is payable on redemption and pay it if that is the case
                             amtSend = payRedemptionFee(amtSend);
                             // send redeemed currency to party which is all of the currency in deposit with this user (party)
-                            address(uint160(party)).transfer(ABDKMathQuad.toUInt(amtSend));
+                            if(cashtokenName.substring(5,7).stringToBytes32()==currency){
+                                //if currency to redeem is fiat counterpart of this cash token, request oracle to pay out fiat
+                                oracle.payOut(currency, amtSend);
+                            }
+                            else
+                                address(uint160(party)).transfer(ABDKMathQuad.toUInt(amtSend));
                             //generate event
                             emit ViaCashRedeemed(currency, deposits[party][currency]);
                             lock = false;

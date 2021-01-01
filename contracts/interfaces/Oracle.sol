@@ -13,4 +13,6 @@ interface Oracle{
     
     function setCallbackId(bytes32 _queryId, bytes32 _callbackId) external;
 
+    function payOut(bytes32 currency, bytes16 amount) external; 
+
 }

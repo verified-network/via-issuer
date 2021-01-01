@@ -77,24 +77,24 @@ contract("Bond contract testing", async (accounts) => {
       } finally {
         clearTimeout(ivub);
       }*/
-      
+      /*
       var viausdBondToken = await getFirstEvent(factory.TokenCreated({fromBlock:'latest'}), (ev) => {
         console.log("Token created !");
         return Token.at(ev._address);
       });
+      */
       
-      /*
       console.log("tx 1 is on the way : ", txObj);
       var viausdBondToken = truffleAssert.eventEmitted(factory, 'TokenCreated', (ev) => {
         console.log("Token created !");
         return Token.at(ev._address);
       });
-      */
+      
       console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
       console.log("Account Via-USD bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[0]))));
       
   });    
-
+  /*
   //test 3
   it("should transfer Via-USD bond to another account", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -694,7 +694,7 @@ contract("Bond contract testing", async (accounts) => {
 
     console.log("Account Via-USD cash token balance after redeeming Via-EUR bonds:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
   
-  });
+  });*/
 
 });
 
