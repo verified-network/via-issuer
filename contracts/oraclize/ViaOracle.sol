@@ -11,7 +11,7 @@ import "../interfaces/ViaFactory.sol";
 import "../interfaces/ViaCash.sol";
 import "../interfaces/ViaBond.sol";
 import "../interfaces/ViaCash.sol";
-import "../abdk-libraries-solidity/ABDKMathQuad.sol";
+import "abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 
 contract ViaOracle is Oracle, usingProvable, Initializable {

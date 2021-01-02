@@ -6,7 +6,7 @@ pragma solidity 0.5.7;
 
 import "./erc/ERC20.sol";
 import "./interfaces/Oracle.sol";
-import "./abdk-libraries-solidity/ABDKMathQuad.sol";
+import "abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "./interfaces/ViaFactory.sol";

@@ -10,7 +10,7 @@ import "./interfaces/ViaFactory.sol";
 import "./interfaces/ViaCash.sol";
 import "./interfaces/ViaBond.sol";
 import "./interfaces/ViaToken.sol";
-import "./abdk-libraries-solidity/ABDKMathQuad.sol";
+import "abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "./utilities/StringUtils.sol";

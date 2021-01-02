@@ -10,7 +10,7 @@ import "./interfaces/ViaToken.sol";
 import "./interfaces/ViaFactory.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
-import "./abdk-libraries-solidity/ABDKMathQuad.sol";
+import "abdk-libraries-solidity/ABDKMathQuad.sol";
 import "./utilities/StringUtils.sol";
 
 contract Token is ViaToken, ERC20, Initializable, Ownable {
