@@ -32,4 +32,8 @@ interface ViaFactory{
 
     function getFeeToSetter() external returns(address);
 
+    function getViaOracleUrl() external returns(bytes32);
+
+    function setViaOracleUrl(bytes32 _url) external;
+
 }

@@ -38,6 +38,10 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     //address of who gets Via fees
     address feeToSetter;
 
+    //Via oracle url address
+    address ViaOracle;
+    bytes32 ViaOracleUrl;
+
     //addresses of all Via proxies
     mapping(address => via) public token;
 
@@ -130,11 +134,16 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         return feeToSetter;
     }
 
+    function getViaOracleUrl() external returns(bytes32){
+        require(msg.sender == ViaOracle);
+        return ViaOracleUrl;
+    }
+
     //token issuer factory 
     //function createIssuer(uint256 salt, address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token) external{
     function createIssuer(address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token) external{
         address _owner = address(this);
-
+        ViaOracle = _oracle;
         bytes memory _payload = abi.encodeWithSignature("initialize(bytes32,bytes32,address,address,address)", tokenName, tokenType, _owner, _oracle, _token);
 
         // Deploy proxy
@@ -195,6 +204,11 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     function setFeeToSetter(address _feeToSetter) external {
         require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
         feeToSetter = _feeToSetter;
+    }
+
+    function setViaOracleUrl(bytes32 _url) external {
+        require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
+        ViaOracleUrl = _url;
     }
 
 }

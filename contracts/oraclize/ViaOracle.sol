@@ -97,15 +97,15 @@ contract ViaOracle is Oracle, usingProvable, Initializable {
             emit LogNewProvableQuery("Provable query was NOT sent, please add some ETH to cover for the query fee!");
         } else {
             string memory currency = _currency.bytes32ToString();
+            string memory url = factory.getViaOracleUrl().bytes32ToString();
             if(_ratetype == "er" || _ratetype == "ver"){
-                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/er/",currency,").rate")),CUSTOM_GASLIMIT);  
-                //bytes32 queryId = provable_query("URL", "json(https://via-oracle.azurewebsites.net/rates/er/Via_USD_to_Via_EUR).rate",CUSTOM_GASLIMIT);
+                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(",url,"/rates/er/",currency,").rate")),CUSTOM_GASLIMIT);  
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype,"");
                 emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via exchange rates for ",_currency)));
                 return queryId;
             }
             else if(_ratetype == "ir"){
-                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/rates/ir/",_currency,").rate")),CUSTOM_GASLIMIT);
+                bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(",url,"/rates/ir/",currency,").rate")),CUSTOM_GASLIMIT);
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype,"");
                 emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via interest rates for ",_currency)));
                 return queryId;
@@ -132,7 +132,9 @@ contract ViaOracle is Oracle, usingProvable, Initializable {
             emit LogNewProvableQuery("Provable query was NOT sent, please add some ETH to cover for the query fee!");
         } else {
             string memory currency = _currency.bytes32ToString();
-            bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(https://via-oracle.azurewebsites.net/payout/",currency,").pay")),CUSTOM_GASLIMIT);  
+            string memory url = factory.getViaOracleUrl().bytes32ToString();
+            string memory amount = bytes32(_amount).bytes32ToString();
+            bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(",url,"/payout/",currency,"/",amount,").pay")),CUSTOM_GASLIMIT);  
             emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for paying out ",_currency)));
         }      
     }
