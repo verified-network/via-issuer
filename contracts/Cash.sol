@@ -58,7 +58,6 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
     event ViaCashIssued(address issuedTo, bytes32 currency, bytes16 value);
     event ViaCashRedeemed(address redeemedBy, bytes32 currency, bytes16 value);
     event ViaCashDeposits(address depositor, bytes32 currency, bytes16 amount);
-    event LogCallback(bytes32 EthXid, bytes16 EthXvalue, bytes32 txId, bytes16 ViaXvalue);
 
     //mutex
     bool lock;
@@ -309,7 +308,6 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable {
         //check if cash needs to be issued or redeemed
         if(conversionQ[txId].operation=="issue"){
             if(rtype == "ethusd" || rtype == "ver"){
-                emit LogCallback(conversionQ[txId].EthXid, conversionQ[txId].EthXvalue, txId, conversionQ[txId].ViaXvalue);
                 //for issuing to happen when ether is paid in,
                 //value of ethX (ie ether exchange rate to USD) has to be non-zero 
                 //and viaX (ie via exchange) should be non-zero if cash token to be issued is not Via-USD. We store 1 for ViaXvalue if Via-USD has to be issued

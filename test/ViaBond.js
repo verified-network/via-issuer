@@ -84,7 +84,6 @@ contract("Bond contract testing", async (accounts) => {
       });
       */
       
-      console.log("tx 1 is on the way : ", txObj);
       var viausdBondToken = truffleAssert.eventEmitted(factory, 'TokenCreated', (ev) => {
         console.log("Token created !");
         return Token.at(ev._address);

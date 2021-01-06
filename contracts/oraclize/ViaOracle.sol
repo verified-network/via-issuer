@@ -134,7 +134,7 @@ contract ViaOracle is Oracle, usingProvable, Initializable {
             string memory currency = _currency.bytes32ToString();
             string memory url = factory.getViaOracleUrl().bytes32ToString();
             string memory amount = bytes32(_amount).bytes32ToString();
-            bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(",url,"/payout/",currency,"/",amount,").pay")),CUSTOM_GASLIMIT);  
+            provable_query("URL", string(abi.encodePacked("json(",url,"/payout/",currency,"/",amount,").pay")),CUSTOM_GASLIMIT);  
             emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for paying out ",_currency)));
         }      
     }

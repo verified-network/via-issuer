@@ -82,8 +82,9 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     mapping(bytes32 => conversion) private conversionQ;
 
     //events to capture and report to Via oracle
-    event ViaBondIssued(address indexed token, bytes32 currency, uint256 value, uint256 price, uint256 tenure);
-    event ViaBondRedeemed(bytes32 currency, uint256 value, uint256 price, uint256 tenure);
+    event ViaBondIssued(address indexed token, address issuer, bytes32 bondName, bytes32 currency, uint256 value, uint256 price, uint256 issuedAmount, uint256 tenure);
+    event ViaBondRedeemed(address indexed token, address redeemedBy, bytes32 bondName, bytes32 currency, uint256 redemptionAmount, uint256 daysSubscribed);
+    event ViaBondPurchased(address indexed token, address purchaser, bytes32 bondName, bytes32 currency, uint256 value, uint256 price, uint256 purchasedAmount, uint256 tenure);
     
     //mutex
     bool lock;
@@ -327,7 +328,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     //reduce payer's balance of bond held
                     ViaToken(tokenContract).reduceBalance(payer, amount);
                     //generate event
-                    emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(redemptionAmount), ABDKMathQuad.toUInt(purchases[payer][tokenContract].purchasedIssueAmount), subscribedDays);
+                    emit ViaBondRedeemed(tokenContract, payer, bondName, tokenName, ABDKMathQuad.toUInt(redemptionAmount), subscribedDays);
                     delete(purchases[payer][tokenContract]);
                     //delete(issues[payer][tokenContract].counterParties[p]);
                     lock = false;
@@ -351,7 +352,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     //send redeemed ether to payer
                     address(uint160(payer)).transfer(ABDKMathQuad.toUInt(uncumberedAmount));
                     //generate event
-                    emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(uncumberedAmount), ABDKMathQuad.toUInt(amount), issuedDays);
+                    emit ViaBondRedeemed(tokenContract, payer, bondName, tokenName, ABDKMathQuad.toUInt(amount), issuedDays);
                     status = true;
                     lock = false;
                 }
@@ -405,14 +406,14 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                                     //adjust amount available for redemption 
                                     amount = ABDKMathQuad.sub(amount, redemptionAmount);
                                     //generate event
-                                    emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(redemptionAmount), ABDKMathQuad.toUInt(purchases[cp][tokenContract].purchasedIssueAmount), subscribedDays);
+                                    emit ViaBondRedeemed(tokenContract, payer, bondName, tokenName, ABDKMathQuad.toUInt(redemptionAmount), subscribedDays);
                                     status = true; 
                                 }
                                 else{
                                     //adjust amount available for redemption 
                                     amount = ABDKMathQuad.sub(amount, ABDKMathQuad.sub(redemptionAmount, balanceToRedeem));
                                     //generate event
-                                    emit ViaBondRedeemed(tokenName, ABDKMathQuad.toUInt(balanceToRedeem), ABDKMathQuad.toUInt(purchases[cp][tokenContract].purchasedIssueAmount), subscribedDays);
+                                    emit ViaBondRedeemed(tokenContract, payer, bondName, tokenName, ABDKMathQuad.toUInt(balanceToRedeem), subscribedDays);
                                 }
                             }
                             lock = false;
@@ -518,7 +519,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     issuers.push(payer);
             }
             //generate event
-            emit ViaBondIssued(issuedBond, bondName, ABDKMathQuad.toUInt(parValue), ABDKMathQuad.toUInt(paidInAmount), 1);
+            emit ViaBondIssued(issuedBond, payer, bondName, paidInCashToken, ABDKMathQuad.toUInt(parValue), ABDKMathQuad.toUInt(bondPrice), ABDKMathQuad.toUInt(paidInAmount), 1);
         }
         //paid in amount is Via cash with which via bond tokens are purchased
         else{
@@ -574,6 +575,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
                     lock = false;
             }    
             //emit bond purchased event    
+            emit ViaBondPurchased(tokenContract, payer, bondName, paidInCashToken, ABDKMathQuad.toUInt(parValue), ABDKMathQuad.toUInt(bondPrice), ABDKMathQuad.toUInt(paidInAmount), 1);
         }
     }
 
