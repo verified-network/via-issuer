@@ -77,18 +77,18 @@ contract("Bond contract testing", async (accounts) => {
       } finally {
         clearTimeout(ivub);
       }*/
-      /*
-      var viausdBondToken = await getFirstEvent(factory.TokenCreated({fromBlock:'latest'}), (ev) => {
+      
+      var viausdBondToken = getFirstEvent(factory.TokenCreated({fromBlock:'latest'}), (ev) => {
         console.log("Token created !");
         return Token.at(ev._address);
       });
-      */
       
+      /*
       var viausdBondToken = truffleAssert.eventEmitted(factory, 'TokenCreated', (ev) => {
         console.log("Token created !");
         return Token.at(ev._address);
       });
-      
+      */
       console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
       console.log("Account Via-USD bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[0]))));
       
