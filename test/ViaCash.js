@@ -10,7 +10,6 @@ const Token = artifacts.require('Token');
 
 web3.setProvider("http://localhost:8545");
 
-
 contract("Cash contract testing", async (accounts) => {
 
   const getFirstEvent = (_event) => {

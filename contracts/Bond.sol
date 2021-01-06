@@ -14,8 +14,9 @@ import "./interfaces/ViaCash.sol";
 import "./interfaces/ViaBond.sol";
 import "./interfaces/ViaToken.sol";
 import "./utilities/StringUtils.sol";
+import "./utilities/Pausable.sol";
 
-contract Bond is ViaBond, ERC20, Initializable, Ownable {
+contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
 
     using stringutils for *;
 
@@ -92,7 +93,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
     //initiliaze proxies
     function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token) public initializer {
         Ownable.initialize(_owner);
-        factory = ViaFactory(_owner);
+        factory = ViaFactory(msg.sender);
         oracle = Oracle(_oracle);
         viaoracle = _oracle;
         name = string(abi.encodePacked(_name));
@@ -109,6 +110,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
         require(msg.value !=0);
         //only to pay in ether
         require(msg.data.length==0);
+        // contract must not be paused
+        require(paused == false);
         //issue via bond tokens
         issue(ABDKMathQuad.fromUInt(msg.value), msg.sender, "ether", address(this), address(0x0));
     }
@@ -124,6 +127,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
 
     //overriding this function of ERC20 standard
     function transferFrom(address sender, address receiver, uint256 tokens, address forwarder, bytes32 bondSymbol) public returns (bool){
+        // contract must not be paused
+        require(paused == false);
         //check if tokens are being transferred to this bond contract
         if(receiver == address(this) || receiver == forwarder){
             //if token name is the same, this transfer has to be redeemed
@@ -629,6 +634,15 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable {
             purchases[_payer][_issuedBond].paidInCurrency = _paidInCashToken;
             purchases[_payer][_issuedBond].timeIssuedOrSubscribed = _timeIssued;
         }
+    }
+
+    function pause() public {
+        require(msg.sender == owner() || msg.sender == address(factory));
+        _pause();
+    }
+    function unpause() public {
+        require(msg.sender == owner() || msg.sender == address(factory));
+        _unpause();
     }
 
 }
