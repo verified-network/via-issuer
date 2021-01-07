@@ -12,4 +12,6 @@ mythril_bond_analysis.txt
 mythril_cash_analysis.txt
 
 build/
+api/
+flattened/
 node_modules
