@@ -1,4 +1,4 @@
 *.js linguist-detectable=true
-*.sol linguist-detectable=true
-*.sol linguist-language=Solidity
+*.ts linguist-detectable=true
+*.ts linguist-language=Typescript
 *.js linguist-language=Javascript

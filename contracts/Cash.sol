@@ -99,7 +99,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
         //check if tokens are being transferred to this cash contract
         if(receiver == address(this)){
             //if token name is the same, this transfer has to be redeemed
-            if(redeem(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName, "redeem", address(this)))
+            if(redeem(ABDKMathQuad.mul(ABDKMathQuad.fromUInt(tokens),ABDKMathQuad.add(ABDKMathQuad.fromUInt(1),ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),factory.getMargin(address(this))))), sender, cashtokenName, "redeem", address(this)))
                 return true;
             else
                 return false;
@@ -362,15 +362,16 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
             deposits[party][currency] = ABDKMathQuad.add(deposits[party][currency], amount);
         }
         emit ViaCashDeposits(party, currency, deposits[party][currency]);
+        bytes16 margin = factory.getMargin(address(this));
         //add via to this contract's balance first (ie issue them first)
-        balances[address(this)] = ABDKMathQuad.add(balances[address(this)], via);
+        balances[address(this)] = ABDKMathQuad.add(balances[address(this)], ABDKMathQuad.mul(margin,via));
         //transfer amount to buyer 
-        transfer(party, ABDKMathQuad.toUInt(via));
+        transfer(party, ABDKMathQuad.toUInt(ABDKMathQuad.mul(margin,via)));
         //adjust total supply
-        totalSupply_ = ABDKMathQuad.add(totalSupply_, via);
+        totalSupply_ = ABDKMathQuad.add(totalSupply_, ABDKMathQuad.mul(margin,via));
        //generate event
-        emit Transfer(address(this), party, ABDKMathQuad.toUInt(via));
-        emit ViaCashIssued(party, cashtokenName, via);
+        emit Transfer(address(this), party, ABDKMathQuad.toUInt(ABDKMathQuad.mul(margin,via)));
+        emit ViaCashIssued(party, cashtokenName, ABDKMathQuad.mul(margin,via));
     }
 
     //value is the redeemable amount in the currency to pay out

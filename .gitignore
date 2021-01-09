@@ -14,4 +14,4 @@ mythril_cash_analysis.txt
 build/
 api/
 flattened/
-node_modules
+node_modules/

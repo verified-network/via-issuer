@@ -5,16 +5,22 @@
 pragma solidity 0.5.7;
 
 import "./interfaces/ViaFactory.sol";
+import "abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/upgrades/contracts/upgradeability/ProxyFactory.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 
 contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
 
+    using ABDKMathQuad for uint256;
+    using ABDKMathQuad for int256;
+    using ABDKMathQuad for bytes16;
+
     //data structure for token proxies
     struct via{
         bytes32 tokenType;
         bytes32 name;
+        bytes16 margin;
     }
 
     //fee structure for payments
@@ -75,6 +81,10 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
 
     function getType(address viaAddress) external view returns(bytes32) {
         return token[viaAddress].tokenType;
+    }
+
+    function getMargin(address viaAddress) external view returns(bytes16) {
+        return token[viaAddress].margin;
     }
 
     function getNameAndType(address viaAddress) external view returns(bytes32, bytes32){
@@ -151,12 +161,12 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         emit IssuerCreated(_issuer, tokenName, tokenType);
 
         if(tokenType == "Cash"){
-                token[_issuer] = via("ViaCash", tokenName);
+                token[_issuer] = via("ViaCash", tokenName, ABDKMathQuad.fromUInt(1));
                 tokens.push(_issuer);
                 issuers["ViaCash"][tokenName] = _issuer;
         }
         else if(tokenType == "Bond"){
-                token[_issuer] = via("ViaBond", tokenName);
+                token[_issuer] = via("ViaBond", tokenName, ABDKMathQuad.fromUInt(1));
                 tokens.push(_issuer);
                 issuers["ViaBond"][tokenName] = _issuer;
         }
@@ -172,32 +182,32 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         // Deploy proxy
         address _token = deployMinimal(_target, _payload);
         
-        token[_token] = via("ViaBondToken", tokenName);
+        token[_token] = via("ViaBondToken", tokenName, token[msg.sender].margin);
         tokens.push(_token);
         products[tokenSymbol] = _token;       
         emit TokenCreated(_token, tokenName, tokenProduct);
         return _token;
     }
 
-    function setFeeTo(address feeTo, bytes16 fee, bytes32 feeType) external {
+    function setFeeTo(address feeTo, uint256 fee, bytes32 feeType) external {
         require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
         if(feeType=="issuing"){
-            issuingFees[feeTo].issuing = fee;
+            issuingFees[feeTo].issuing = ABDKMathQuad.fromUInt(fee);
         }
         else if(feeType=="purchasing"){
-            issuingFees[feeTo].purchasing = fee;
+            issuingFees[feeTo].purchasing = ABDKMathQuad.fromUInt(fee);
         }
         else if(feeType=="selling"){
-            issuingFees[feeTo].selling = fee;
+            issuingFees[feeTo].selling = ABDKMathQuad.fromUInt(fee);
         }
         else if(feeType=="acceptance"){
-            paymentFees[feeTo].acceptance = fee;
+            paymentFees[feeTo].acceptance = ABDKMathQuad.fromUInt(fee);
         }
         else if(feeType=="remittance"){
-            paymentFees[feeTo].remittance = fee;
+            paymentFees[feeTo].remittance = ABDKMathQuad.fromUInt(fee);
         }
         else if(feeType=="redemption"){
-            paymentFees[feeTo].redemption = fee;
+            paymentFees[feeTo].redemption = ABDKMathQuad.fromUInt(fee);
         }
     }
 
@@ -209,6 +219,11 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     function setViaOracleUrl(bytes32 _url) external {
         require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
         ViaOracleUrl = _url;
+    }
+
+    function setMargin(uint256 _margin, address _token) external {
+        require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
+        token[_token].margin = ABDKMathQuad.fromUInt(_margin);
     }
 
 }

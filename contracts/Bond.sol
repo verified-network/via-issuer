@@ -66,16 +66,16 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
 
     //data structure holding details of currency conversion requests pending on oraclize
     struct conversion{
-        bytes32 operation;
         address token;
         address party;
-        bytes16 amount;
+        bytes32 operation;
         bytes32 paid_in_currency;
-        bytes32 EthXid;
-        bytes16 EthXvalue;
         bytes32 bond_currency;
-        bytes16 ViaXvalue;
+        bytes32 EthXid;
         bytes32 ViaRateId;
+        bytes16 amount;
+        bytes16 EthXvalue;
+        bytes16 ViaXvalue;
         bytes16 ViaRateValue;
     }
 
@@ -159,6 +159,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
     }
 
     function requestIssue(bytes16 amount, address payer, bytes32 currency, address cashContract) external returns(bool){
+        // contract must not be paused
+        require(paused == false);
         require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBondToken");
         if(factory.getType(msg.sender) == "ViaCash")
             return(issue(amount, payer, currency, cashContract, address(0x0)));
@@ -504,14 +506,16 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
             uint256 issueTime = now;
             //issue bond which initializes a token with the attributes of the bond
             issuedBond = factory.createToken(token, bondName, "ViaBond", string(abi.encodePacked(address(this),issueTime)).stringToBytes32());
+            //find margin on collateral paid in to be issued as bonds
+            bytes16 margin = ABDKMathQuad.mul(factory.getMargin(address(this)),parValue);
             //adjust issued bonds to total supply first
-            ViaToken(issuedBond).addTotalSupply(parValue);
+            ViaToken(issuedBond).addTotalSupply(margin);
             //first, add bond balance
-            ViaToken(issuedBond).addBalance(issuedBond, parValue);
+            ViaToken(issuedBond).addBalance(issuedBond, margin);
             //issue bond to payer if ether is paid in as collateral
-            if(ViaToken(issuedBond).requestTransfer(payer, ABDKMathQuad.toUInt(parValue))){    
+            if(ViaToken(issuedBond).requestTransfer(payer, ABDKMathQuad.toUInt(margin))){    
                 //keep track of issues
-                storeBond("issue", payer, payer, parValue, bondPrice, ABDKMathQuad.fromUInt(0), paidInAmount, paidInCashToken, issueTime, issuedBond);
+                storeBond("issue", payer, payer, margin, bondPrice, ABDKMathQuad.fromUInt(0), paidInAmount, paidInCashToken, issueTime, issuedBond);
                 bondsIssued.push(issuedBond);
                 //keep track of issuers
                 for(uint256 i=0; i<issuers.length; i++){
@@ -524,7 +528,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
                     issuers.push(payer);
             }
             //generate event
-            emit ViaBondIssued(issuedBond, payer, bondName, paidInCashToken, ABDKMathQuad.toUInt(parValue), ABDKMathQuad.toUInt(bondPrice), ABDKMathQuad.toUInt(paidInAmount), 1);
+            emit ViaBondIssued(issuedBond, payer, bondName, paidInCashToken, ABDKMathQuad.toUInt(margin), ABDKMathQuad.toUInt(bondPrice), ABDKMathQuad.toUInt(paidInAmount), 1);
         }
         //paid in amount is Via cash with which via bond tokens are purchased
         else{
