@@ -11,5 +11,4 @@ mythril_factory_analysis.txt
 mythril_bond_analysis.txt
 mythril_cash_analysis.txt
 
-build/
 flattened/
