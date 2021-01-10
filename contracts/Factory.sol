@@ -44,6 +44,12 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     //address of who gets Via fees
     address feeToSetter;
 
+    //address of treasury manager
+    address treasury;
+
+    //address of custodian
+    address custodian;
+
     //Via oracle url address
     address ViaOracle;
     bytes32 ViaOracleUrl;
@@ -65,6 +71,8 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     function initialize() public initializer{
         Ownable.initialize(msg.sender);
         feeToSetter = msg.sender;
+        treasury = msg.sender;
+        custodian = msg.sender;
     }
 
     function getTokenCount() external view returns(uint tokenCount) {
@@ -142,6 +150,16 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     function getFeeToSetter() external returns(address){
         require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Via: FORBIDDEN');
         return feeToSetter;
+    }
+
+    function getTreasury() external returns(address){
+        require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Via: FORBIDDEN');
+        return treasury;
+    }
+
+    function getCustodian() external returns(address){
+        require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Via: FORBIDDEN');
+        return custodian;
     }
 
     function getViaOracleUrl() external returns(bytes32){
@@ -224,6 +242,16 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     function setMargin(uint256 _margin, address _token) external {
         require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
         token[_token].margin = ABDKMathQuad.fromUInt(_margin);
+    }
+
+    function setTreasury(address _treasury) external {
+        require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
+        treasury = _treasury;
+    }
+
+    function setCustodian(address _custodian) external {
+        require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
+        custodian = _custodian;
     }
 
 }

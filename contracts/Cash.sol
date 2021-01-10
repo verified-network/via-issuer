@@ -193,7 +193,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
 
     //handles fiat pay in for issue of cash tokens
     function payIn(uint256 tokens, address sender) external returns(bool){
-        require(factory.getFeeToSetter()==msg.sender);
+        require(factory.getTreasury()==msg.sender);
         if(issue(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName))
             return true;
         else
@@ -589,7 +589,19 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
             return ABDKMathQuad.mul(viarate, amount);
         }
     }
-    
+
+    //transfer ether balances to custodian
+    function transferToCustody(uint percent) external returns(bool){
+        require(factory.getTreasury()==msg.sender);
+        address custodian = factory.getCustodian();
+        if(custodian!=address(0x0)){
+            address(uint160(custodian)).transfer(ABDKMathQuad.toUInt(ABDKMathQuad.mul(ABDKMathQuad.fromUInt(balanceOf(address(this))),ABDKMathQuad.fromUInt(percent))));
+            return true;
+        }
+        else
+            return false;
+    }
+
     function pause() public {
         require(msg.sender == owner() || msg.sender == address(factory));
         _pause();
@@ -598,4 +610,5 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
         require(msg.sender == owner() || msg.sender == address(factory));
         _unpause();
     }
+    
 }

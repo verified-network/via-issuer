@@ -26,18 +26,28 @@ interface ViaFactory{
 
     function getFee(bytes32 feeType) external view returns(bytes16);
 
-    function createToken(address _target, bytes32 tokenName, bytes32 tokenProduct, bytes32 tokenSymbol) external returns(address);
-
-    function setFeeTo(address feeTo, bytes16 fee, bytes32 feeType) external;
-
-    function setFeeToSetter(address _feeToSetter) external;
-
     function getFeeToSetter() external returns(address);
 
+    function getTreasury() external returns(address);
+
+    function getCustodian() external returns(address);
+
     function getViaOracleUrl() external returns(bytes32);
+
+    function createIssuer(address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token) external;
+
+    function createToken(address _target, bytes32 tokenName, bytes32 tokenProduct, bytes32 tokenSymbol) external returns(address);
+
+    function setFeeTo(address feeTo, uint256 fee, bytes32 feeType) external;
+
+    function setFeeToSetter(address _feeToSetter) external;
 
     function setViaOracleUrl(bytes32 _url) external;
 
     function setMargin(uint256 _margin, address _token) external;
+
+    function setTreasury(address _treasury) external;
+
+    function setCustodian(address _custodian) external;
 
 }

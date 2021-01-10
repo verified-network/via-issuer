@@ -17,7 +17,7 @@ module.exports = function(deployer, network, accounts) {
     deployer.link(stringutils, [Bond, Cash, ViaOracle]);
 
     deployer.deploy(ABDKMathQuad);
-    deployer.link(ABDKMathQuad,[Cash, Bond, ViaOracle, ERC20, Token]);
+    deployer.link(ABDKMathQuad,[Factory, Cash, Bond, ViaOracle, ERC20, Token]);
 
     deployer.deploy(ViaOracle, {from: accounts[0], gas:6721975, value: 0.25e18});
     deployer.deploy(Cash);

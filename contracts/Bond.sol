@@ -640,6 +640,18 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
         }
     }
 
+    //transfer ether balances to custodian
+    /*function transferToCustody(uint percent) external returns(bool){
+        require(factory.getTreasury()==msg.sender);
+        address custodian = factory.getCustodian();
+        if(custodian!=address(0x0)){
+            address(uint160(custodian)).transfer(ABDKMathQuad.toUInt(ABDKMathQuad.mul(ABDKMathQuad.fromUInt(balanceOf(address(this))),ABDKMathQuad.fromUInt(percent))));
+            return true;
+        }
+        else
+            return false;
+    }*/
+
     function pause() public {
         require(msg.sender == owner() || msg.sender == address(factory));
         _pause();
