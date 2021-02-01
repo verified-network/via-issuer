@@ -1,5 +1,5 @@
 // (c) Kallol Borah, 2020
-// Implementation of the Via cash and bond factory.
+// Implementation of the Via cash and bond factory
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.5.7;
@@ -52,7 +52,7 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
 
     //Via oracle url address
     address ViaOracle;
-    bytes32 ViaOracleUrl;
+    string ViaOracleUrl;
 
     //addresses of all Via proxies
     mapping(address => via) public token;
@@ -162,7 +162,7 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         return custodian;
     }
 
-    function getViaOracleUrl() external returns(bytes32){
+    function getViaOracleUrl() external returns(string memory){
         require(msg.sender == ViaOracle);
         return ViaOracleUrl;
     }
@@ -234,8 +234,8 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         feeToSetter = _feeToSetter;
     }
 
-    function setViaOracleUrl(bytes32 _url) external {
-        require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
+    function setViaOracleUrl(string calldata _url) external {
+        //require(msg.sender == feeToSetter, 'FORBIDDEN : Setting Via oracle url');
         ViaOracleUrl = _url;
     }
 

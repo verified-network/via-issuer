@@ -6,7 +6,7 @@ const ABDKMathQuad = artifacts.require('ABDKMathQuad');
 const Factory = artifacts.require('Factory');
 const Bond = artifacts.require('Bond');
 const Cash = artifacts.require('Cash');
-const ViaOracle = artifacts.require('ViaOracle');
+const Oracle = artifacts.require('Oracle');
 const usingProvable = artifacts.require('usingProvable');
 const ERC20 = artifacts.require('ERC20');
 const Token = artifacts.require('Token');
@@ -14,12 +14,12 @@ const Token = artifacts.require('Token');
 module.exports = function(deployer, network, accounts) {
     
     deployer.deploy(stringutils);
-    deployer.link(stringutils, [Bond, Cash, ViaOracle]);
+    deployer.link(stringutils, [Bond, Cash, Oracle]);
 
     deployer.deploy(ABDKMathQuad);
-    deployer.link(ABDKMathQuad,[Factory, Cash, Bond, ViaOracle, ERC20, Token]);
+    deployer.link(ABDKMathQuad,[Factory, Cash, Bond, Oracle, ERC20, Token]);
 
-    deployer.deploy(ViaOracle, {from: accounts[0], gas:6721975, value: 0.25e18});
+    deployer.deploy(Oracle, {from: accounts[0], gas:6721975, value: 0.25e18});
     deployer.deploy(Cash);
     deployer.deploy(Bond);
     deployer.deploy(Token);
@@ -28,18 +28,10 @@ module.exports = function(deployer, network, accounts) {
         const factory = await Factory.deployed();
         const cash = await Cash.deployed();
         const bond = await Bond.deployed();
-        const oracle = await ViaOracle.deployed();
+        const oracle = await Oracle.deployed();
         const token = await Token.deployed();
 
         await oracle.initialize(factory.address);
-
-        //await factory.createIssuer(Math.floor(Math.random() * (1000 - 1) + 1), cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
-        //await factory.createIssuer(Math.floor(Math.random() * (1000 - 1) + 1), cash.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
-        //await factory.createIssuer(Math.floor(Math.random() * (1000 - 1) + 1), cash.address, web3.utils.utf8ToHex("Via_INR"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
-
-        //await factory.createIssuer(Math.floor(Math.random() * (1000 - 1) + 1), bond.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
-        //await factory.createIssuer(Math.floor(Math.random() * (1000 - 1) + 1), bond.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
-        //await factory.createIssuer(Math.floor(Math.random() * (1000 - 1) + 1), bond.address, web3.utils.utf8ToHex("Via_INR"), web3.utils.utf8ToHex("Bond"), oracle.address, token.address);
 
         await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
         await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_EUR"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
@@ -56,6 +48,8 @@ module.exports = function(deployer, network, accounts) {
             console.log("Token type:", web3.utils.hexToUtf8(await factory.getType(factoryTokenAddress)));
             console.log();
         }       
+
+        await factory.setViaOracleUrl(web3.utils.utf8ToHex("https://via-oracle.azurewebsites.net"));
     });
     
 }

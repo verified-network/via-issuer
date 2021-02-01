@@ -5,7 +5,7 @@
 pragma solidity 0.5.7;
 
 import "./erc/ERC20.sol";
-import "./interfaces/Oracle.sol";
+import "./interfaces/ViaOracle.sol";
 import "abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
@@ -28,7 +28,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
     ViaFactory private factory;
 
     //via oracle
-    Oracle private oracle;
+    ViaOracle private oracle;
     address viaoracle;
 
     //name of Via token (eg, Via-USD)
@@ -94,7 +94,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
     function initialize(bytes32 _name, bytes32 _type, address _owner, address _oracle, address _token) public initializer {
         Ownable.initialize(_owner);
         factory = ViaFactory(msg.sender);
-        oracle = Oracle(_oracle);
+        oracle = ViaOracle(_oracle);
         viaoracle = _oracle;
         name = string(abi.encodePacked(_name));
         symbol = string(abi.encodePacked(_type));

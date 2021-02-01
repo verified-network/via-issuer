@@ -32,7 +32,7 @@ interface ViaFactory{
 
     function getCustodian() external returns(address);
 
-    function getViaOracleUrl() external returns(bytes32);
+    function getViaOracleUrl() external returns(string memory);
 
     function createIssuer(address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token) external;
 
@@ -42,7 +42,7 @@ interface ViaFactory{
 
     function setFeeToSetter(address _feeToSetter) external;
 
-    function setViaOracleUrl(bytes32 _url) external;
+    function setViaOracleUrl(string calldata _url) external;
 
     function setMargin(uint256 _margin, address _token) external;
 

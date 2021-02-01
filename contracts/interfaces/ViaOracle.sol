@@ -4,7 +4,7 @@
 
 pragma solidity 0.5.7;
 
-interface Oracle{
+interface ViaOracle{
 
     function request(bytes32 _currency, bytes32 _ratetype, bytes32 _tokenType, address payable _tokenContract)
         external

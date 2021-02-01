@@ -5,7 +5,7 @@
 pragma solidity 0.5.7;
 
 import "./provableAPI.sol";
-import "../interfaces/Oracle.sol";
+import "../interfaces/ViaOracle.sol";
 import "../utilities/StringUtils.sol";
 import "../interfaces/ViaFactory.sol";
 import "../interfaces/ViaCash.sol";
@@ -14,7 +14,7 @@ import "../interfaces/ViaCash.sol";
 import "abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 
-contract ViaOracle is Oracle, usingProvable, Initializable {
+contract Oracle is ViaOracle, usingProvable, Initializable {
 
     using stringutils for *;
 
@@ -97,7 +97,7 @@ contract ViaOracle is Oracle, usingProvable, Initializable {
             emit LogNewProvableQuery("Provable query was NOT sent, please add some ETH to cover for the query fee!");
         } else {
             string memory currency = _currency.bytes32ToString();
-            string memory url = factory.getViaOracleUrl().bytes32ToString();
+            string memory url = factory.getViaOracleUrl();
             if(_ratetype == "er" || _ratetype == "ver"){
                 bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(",url,"/rates/er/",currency,").rate")),CUSTOM_GASLIMIT);  
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype,"");
@@ -132,7 +132,7 @@ contract ViaOracle is Oracle, usingProvable, Initializable {
             emit LogNewProvableQuery("Provable query was NOT sent, please add some ETH to cover for the query fee!");
         } else {
             string memory currency = _currency.bytes32ToString();
-            string memory url = factory.getViaOracleUrl().bytes32ToString();
+            string memory url = factory.getViaOracleUrl();
             string memory amount = bytes32(_amount).bytes32ToString();
             provable_query("URL", string(abi.encodePacked("json(",url,"/payout/",currency,"/",amount,").pay")),CUSTOM_GASLIMIT);  
             emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for paying out ",_currency)));
