@@ -34,7 +34,7 @@ interface ViaFactory{
 
     function getViaOracleUrl() external returns(string memory);
 
-    function createIssuer(address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token) external;
+    function createIssuer(address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token, address _fee) external;
 
     function createToken(address _target, bytes32 tokenName, bytes32 tokenProduct, bytes32 tokenSymbol) external returns(address);
 
