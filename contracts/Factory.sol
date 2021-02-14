@@ -99,6 +99,13 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         return (token[viaAddress].name, token[viaAddress].tokenType);
     }
 
+    function getTokenByNameType(bytes32 tokenName, bytes32 tokenType) external view returns(address){
+        for(uint256 q=0; q<tokens.length; q++){
+            if(token[tokens[q]].name == tokenName && token[tokens[q]].tokenType == tokenType)
+                return tokens[q];
+        }
+    }
+
     //retrieve token product address for given identifier (symbol)
     function getProduct(bytes32 symbol) external view returns(address){
         return products[symbol];
@@ -147,22 +154,22 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         }
     }
 
-    function getFeeToSetter() external returns(address){
+    function getFeeToSetter() external view returns(address){
         require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Via: FORBIDDEN');
         return feeToSetter;
     }
 
-    function getTreasury() external returns(address){
+    function getTreasury() external view returns(address){
         require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Via: FORBIDDEN');
         return treasury;
     }
 
-    function getCustodian() external returns(address){
+    function getCustodian() external view returns(address){
         require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Via: FORBIDDEN');
         return custodian;
     }
 
-    function getViaOracleUrl() external returns(string memory){
+    function getViaOracleUrl() external view returns(string memory){
         require(msg.sender == ViaOracle);
         return ViaOracleUrl;
     }
@@ -235,7 +242,7 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     }
 
     function setViaOracleUrl(string calldata _url) external {
-        //require(msg.sender == feeToSetter, 'FORBIDDEN : Setting Via oracle url');
+        require(msg.sender == feeToSetter, 'FORBIDDEN : Setting Via oracle url');
         ViaOracleUrl = _url;
     }
 

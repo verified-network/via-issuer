@@ -38,7 +38,6 @@ contract Fees is Initializable{
 
     //transfer ether balances to custodian
     function transferToCustody(uint percent, address transferFrom) external returns(bool){
-        require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
         require(factory.getTreasury()==msg.sender);
         address custodian = factory.getCustodian();
         if(custodian!=address(0x0)){
@@ -75,21 +74,6 @@ contract Fees is Initializable{
             }
         }
         return returnValue;
-    }
-
-    function payTransferFee(bytes16 amount, bytes16 value, bytes32 currency) external returns (bytes16, bytes16){
-        require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
-        bytes16 fees = ABDKMathQuad.add(factory.getFee("remittance"),factory.getFee("acceptance"));
-        if(ABDKMathQuad.toUInt(fees)!=0){
-            address feeTo = factory.getFeeToSetter();
-            /*if(feeTo!=address(0x0)){
-                balances[feeTo] = ABDKMathQuad.add(balances[feeTo], ABDKMathQuad.mul(fees, amount));
-                amount = ABDKMathQuad.sub(amount, ABDKMathQuad.mul(fees, amount));
-                deposits[feeTo][currency] = ABDKMathQuad.add(deposits[feeTo][currency], ABDKMathQuad.mul(fees, value)); 
-                value = ABDKMathQuad.sub(value, ABDKMathQuad.mul(fees, value));
-            }*/
-        }
-        return (amount, value);
     }
 
 }

@@ -98,14 +98,14 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
 
     //overriding this function of ERC20 standard for transfer of via cash tokens to other users or to this contract for redemption
     function transferFrom(address sender, address receiver, uint256 tokens) external returns (bool){
-        // contract must not be paused
+        //contract must not be paused
         require(paused == false);
         //ensure sender has enough tokens in balance before transferring or redeeming them
         require(ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))!=-1);
         //check if tokens are being transferred to this cash contract
         if(receiver == address(this)){
             //if token name is the same, this transfer has to be redeemed
-            if(redeem(ABDKMathQuad.mul(ABDKMathQuad.fromUInt(tokens),ABDKMathQuad.add(ABDKMathQuad.fromUInt(1),ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),factory.getMargin(address(this))))), sender, cashtokenName, "redeem", address(this)))
+            if(redeem(ABDKMathQuad.div(ABDKMathQuad.fromUInt(tokens),ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),factory.getMargin(address(this)))), sender, cashtokenName, "redeem", address(this)))
                 return true;
             else
                 return false;
@@ -144,8 +144,6 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
         else{
             //else, tokens are being sent to another user's account
             //sending contract should be allowed by token owner to make this transfer
-            //allowed[sender][msg.sender] = ABDKMathQuad.sub(allowed[sender][msg.sender], ABDKMathQuad.fromUInt(tokens));
-            //if(transferToken(sender, receiver, tokens)){
             if(redeem(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName, "transfer", receiver)){
                 emit Transfer(sender, receiver, tokens);
                 return true;
@@ -370,14 +368,13 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
         emit ViaCashDeposits(party, currency, deposits[party][currency]);
         bytes16 margin = factory.getMargin(address(this));
         //add via to this contract's balance first (ie issue them first)
-        balances[address(this)] = ABDKMathQuad.add(balances[address(this)], ABDKMathQuad.mul(margin,via));
+        balances[address(this)] = ABDKMathQuad.add(balances[address(this)], ABDKMathQuad.mul(ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),margin),via));
         //transfer amount to buyer 
-        transfer(party, ABDKMathQuad.toUInt(ABDKMathQuad.mul(margin,via)));
+        transfer(party, ABDKMathQuad.toUInt(ABDKMathQuad.mul(ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),margin),via)));
         //adjust total supply
-        totalSupply_ = ABDKMathQuad.add(totalSupply_, ABDKMathQuad.mul(margin,via));
-       //generate event
-        emit Transfer(address(this), party, ABDKMathQuad.toUInt(ABDKMathQuad.mul(margin,via)));
-        emit ViaCashIssued(party, cashtokenName, ABDKMathQuad.mul(margin,via));
+        totalSupply_ = ABDKMathQuad.add(totalSupply_, ABDKMathQuad.mul(ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),margin),via));
+        //generate event        
+        emit ViaCashIssued(party, cashtokenName, ABDKMathQuad.mul(ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),margin),via));
     }
 
     //value is the redeemable amount in the currency to pay out
@@ -387,29 +384,29 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
     function finallyRedeem(bytes16 value, bytes32 currency, address party, bytes16 amount, bytes32 operation, address receiver) private {
         //check if currency in which redemption is to be done has sufficient balance
         if(currency=="ether"){
-            if(ABDKMathQuad.cmp(deposits[party]["ether"], value)==1 || ABDKMathQuad.cmp(deposits[party]["ether"], value)==0){
+            if(ABDKMathQuad.cmp(deposits[party]["ether"], value)!=-1){
                 deposits[party]["ether"] = ABDKMathQuad.sub(deposits[party]["ether"], value);
-                emit ViaCashDeposits(party, "ether", deposits[party]["ether"]);
                 //reduces balances
                 balances[party] = ABDKMathQuad.sub(balances[party], amount);
                 if(operation=="redeem"){
                     //adjust total supply
                     totalSupply_ = ABDKMathQuad.sub(totalSupply_, amount);
                     //check if any fee is payable on redemption and pay it if that is the case
-                    //value = fee.payRedemptionFee(value);
+                    value = fee.payRedemptionFee(value);
                     //send redeemed ether to party
                     address(uint160(party)).transfer(ABDKMathQuad.toUInt(value));
                     //generate event
-                    emit ViaCashRedeemed(party, currency, value);
+                    emit ViaCashRedeemed(party, currency, amount);
                 }
                 else if(operation=="transfer"){
                     //check if any fee is payable on remittance and acceptance and pay it if that is the case
-                    //(amount, value) = fee.payTransferFee(amount, value, "ether");
+                    (amount, value) = payTransferFee(amount, value, "ether");
                     //transfer balances
                     balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
                     //transfer deposits
                     deposits[receiver]["ether"] = ABDKMathQuad.add(deposits[receiver]["ether"], value);                    
-                    emit ViaCashDeposits(receiver, "ether", deposits[receiver]["ether"]);
+                    //emit ViaCashDeposits(receiver, "ether", value);
+                    emit Transfer(address(this), receiver, ABDKMathQuad.toUInt(amount));
                 }
             }
             //amount to redeem is more than what is in deposit, so we need to remove deposit after redemption,
@@ -421,7 +418,6 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
                 bytes16 amtSend = deposits[party]["ether"];
                 // set deposit to 0 as security measure
                 deposits[party]["ether"] = 0;
-                emit ViaCashDeposits(party, "ether", deposits[party]["ether"]);
                 //reduces balances
                 balances[party] = ABDKMathQuad.sub(balances[party], ABDKMathQuad.mul(amount, proportionRedeemed));
                 if(operation=="redeem"){
@@ -430,106 +426,116 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
                     //adjust total supply
                     totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.mul(amount, proportionRedeemed));
                     //check if any fee is payable on redemption and pay it if that is the case
-                    //amtSend = fee.payRedemptionFee(amtSend);
+                    amtSend = fee.payRedemptionFee(amtSend);
                     //send redeemed ether to party which is all of the ether in deposit with this user (party)
                     address(uint160(party)).transfer(ABDKMathQuad.toUInt(amtSend));
                     //generate event
-                    emit ViaCashRedeemed(party, currency, amtSend);
+                    emit ViaCashRedeemed(party, currency, ABDKMathQuad.mul(amount, proportionRedeemed));
                     lock = false;
                 }
                 else if(operation=="transfer"){
                     //check if any fee is payable on remittance and acceptance and pay it if that is the case
-                    //(amount, amtSend) = fee.payTransferFee(ABDKMathQuad.mul(amount, proportionRedeemed), amtSend, "ether");
+                    (amount, amtSend) = payTransferFee(ABDKMathQuad.mul(amount, proportionRedeemed), amtSend, "ether");
                     //transfer balances
                     balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
                     //transfer deposits
                     deposits[receiver]["ether"] = ABDKMathQuad.add(deposits[receiver]["ether"], amtSend);
-                    emit ViaCashDeposits(receiver, "ether", deposits[receiver]["ether"]);
+                    //emit ViaCashDeposits(receiver, "ether", amtSend);
+                    emit Transfer(address(this), receiver, ABDKMathQuad.toUInt(amount));
                 }
                 redeem(balanceToRedeem, party, cashtokenName, operation, receiver);
             }
         }
         //else currency to redeem is not ether
         else{
-            for(uint256 q=0; q<factory.getTokenCount(); q++){
-                address viaAddress = factory.getToken(q);
-                (bytes32 tname, bytes32 ttype) = factory.getNameAndType(viaAddress);
-                if(tname == currency && ttype == "ViaCash"){
-                    if(ABDKMathQuad.cmp(Cash(address(uint160(viaAddress))).requestDeductFromBalance(value, party),0)==1){
-                        deposits[party][currency] = ABDKMathQuad.sub(deposits[party][currency], value);
-                        emit ViaCashDeposits(party, currency, deposits[party][currency]);
-                        //reduces balances
-                        balances[party] = ABDKMathQuad.sub(balances[party], amount);
-                        if(operation=="redeem"){
-                            //adjust total supply
-                            totalSupply_ = ABDKMathQuad.sub(totalSupply_, amount);
-                            //check if any fee is payable on redemption and pay it if that is the case
-                            //value = fee.payRedemptionFee(value);
-                            //send redeemed currency to party
-                            if(cashtokenName.substring(5,7).stringToBytes32()==currency){
-                                //if currency to redeem is fiat counterpart of this cash token, request oracle to pay out fiat
-                                oracle.payOut(currency, value);
-                            }
-                            else
-                                address(uint160(party)).transfer(ABDKMathQuad.toUInt(value));
-                            //generate event
-                            emit ViaCashRedeemed(party, currency, value);
-                        }
-                        else if(operation=="transfer"){
-                            //check if any fee is payable on remittance and acceptance and pay it if that is the case
-                            //(amount, value) = fee.payTransferFee(amount, value, currency);
-                            //transfer balances
-                            balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
-                            //transfer deposits
-                            deposits[receiver][currency] = ABDKMathQuad.add(deposits[receiver][currency], value);
-                            emit ViaCashDeposits(receiver, currency, deposits[receiver][currency]);
-                        }
+            address viaAddress = factory.getTokenByNameType(currency, "ViaCash");
+            if(ABDKMathQuad.cmp(Cash(address(uint160(viaAddress))).requestDeductFromBalance(value, party),0)==1){
+                deposits[party][currency] = ABDKMathQuad.sub(deposits[party][currency], value);
+                //reduces balances
+                balances[party] = ABDKMathQuad.sub(balances[party], amount);
+                if(operation=="redeem"){
+                    //adjust total supply
+                    totalSupply_ = ABDKMathQuad.sub(totalSupply_, amount);
+                    //check if any fee is payable on redemption and pay it if that is the case
+                    value = fee.payRedemptionFee(value);
+                    //send redeemed currency to party
+                    if(cashtokenName.substring(5,7).stringToBytes32()==currency){
+                        //if currency to redeem is fiat counterpart of this cash token, request oracle to pay out fiat
+                        oracle.payOut(currency, value);
                     }
-                    //amount to redeem is more than what is in deposit, so we need to remove deposit after redemption,
-                    //and call the redeem function again for the balance amount that is not yet redeemed
-                    else{
-                        bytes16 proportionRedeemed = ABDKMathQuad.div(deposits[party][currency], value);
-                        bytes16 balanceToRedeem = ABDKMathQuad.mul(amount, ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1), proportionRedeemed));
-                        // get amount to send
-                        bytes16 amtSend = deposits[party][currency];
-                        //deposit of the currency with the user (party) becomes zero
-                        deposits[party][currency] = 0;
-                        emit ViaCashDeposits(party, currency, 0);
-                        //reduces balances
-                        balances[party] = ABDKMathQuad.sub(balances[party], ABDKMathQuad.mul(amount, proportionRedeemed));
-                        if(operation=="redeem"){
-                            require(!lock);
-                            lock = true;
-                            //adjust total supply
-                            totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.mul(amount, proportionRedeemed));
-                            //check if any fee is payable on redemption and pay it if that is the case
-                            //amtSend = fee.payRedemptionFee(amtSend);
-                            // send redeemed currency to party which is all of the currency in deposit with this user (party)
-                            if(cashtokenName.substring(5,7).stringToBytes32()==currency){
-                                //if currency to redeem is fiat counterpart of this cash token, request oracle to pay out fiat
-                                oracle.payOut(currency, amtSend);
-                            }
-                            else
-                                address(uint160(party)).transfer(ABDKMathQuad.toUInt(amtSend));
-                            //generate event
-                            emit ViaCashRedeemed(party, currency, amtSend);
-                            lock = false;
-                        }
-                        else if(operation=="transfer"){
-                            //check if any fee is payable on remittance and acceptance and pay it if that is the case
-                            //(amount, amtSend) = fee.payTransferFee(ABDKMathQuad.mul(amount, proportionRedeemed), amtSend, currency);
-                            //transfer balances
-                            balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
-                            //transfer deposits
-                            deposits[receiver][currency] = ABDKMathQuad.add(deposits[receiver][currency], amtSend);
-                            bytes16 redeemedAmount = deposits[receiver][currency];
-                            emit ViaCashDeposits(receiver, currency, redeemedAmount);
-                        }
-                        redeem(balanceToRedeem, party, cashtokenName, operation, receiver);
-                    }
+                    else
+                        address(uint160(party)).transfer(ABDKMathQuad.toUInt(value));
+                    //generate event
+                    emit ViaCashRedeemed(party, currency, amount);
+                }
+                else if(operation=="transfer"){
+                    //check if any fee is payable on remittance and acceptance and pay it if that is the case
+                    (amount, value) = payTransferFee(amount, value, currency);
+                    //transfer balances
+                    balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
+                    //transfer deposits
+                    deposits[receiver][currency] = ABDKMathQuad.add(deposits[receiver][currency], value);
+                    //emit ViaCashDeposits(receiver, currency, deposits[receiver][currency]);
+                    emit Transfer(address(this), receiver, ABDKMathQuad.toUInt(amount));
                 }
             }
+            //amount to redeem is more than what is in deposit, so we need to remove deposit after redemption,
+            //and call the redeem function again for the balance amount that is not yet redeemed
+            else{
+                bytes16 proportionRedeemed = ABDKMathQuad.div(deposits[party][currency], value);
+                bytes16 balanceToRedeem = ABDKMathQuad.mul(amount, ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1), proportionRedeemed));
+                // get amount to send
+                bytes16 amtSend = deposits[party][currency];
+                //deposit of the currency with the user (party) becomes zero
+                deposits[party][currency] = 0;
+                //reduces balances
+                balances[party] = ABDKMathQuad.sub(balances[party], ABDKMathQuad.mul(amount, proportionRedeemed));
+                if(operation=="redeem"){
+                    require(!lock);
+                    lock = true;
+                    //adjust total supply
+                    totalSupply_ = ABDKMathQuad.sub(totalSupply_, ABDKMathQuad.mul(amount, proportionRedeemed));
+                    //check if any fee is payable on redemption and pay it if that is the case
+                    amtSend = fee.payRedemptionFee(amtSend);
+                    // send redeemed currency to party which is all of the currency in deposit with this user (party)
+                    if(cashtokenName.substring(5,7).stringToBytes32()==currency){
+                        //if currency to redeem is fiat counterpart of this cash token, request oracle to pay out fiat
+                        oracle.payOut(currency, amtSend);
+                    }
+                    else
+                        address(uint160(party)).transfer(ABDKMathQuad.toUInt(amtSend));
+                    //generate event
+                    emit ViaCashRedeemed(party, currency, ABDKMathQuad.mul(amount, proportionRedeemed));
+                    lock = false;
+                }
+                else if(operation=="transfer"){
+                    //check if any fee is payable on remittance and acceptance and pay it if that is the case
+                    (amount, amtSend) = payTransferFee(ABDKMathQuad.mul(amount, proportionRedeemed), amtSend, currency);
+                    //transfer balances
+                    balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
+                    //transfer deposits
+                    deposits[receiver][currency] = ABDKMathQuad.add(deposits[receiver][currency], amtSend);
+                    //bytes16 redeemedAmount = deposits[receiver][currency];
+                    //emit ViaCashDeposits(receiver, currency, redeemedAmount);
+                    emit Transfer(address(this), receiver, ABDKMathQuad.toUInt(amount));
+                }
+                redeem(balanceToRedeem, party, cashtokenName, operation, receiver);
+            }
         }
+    }
+
+    function payTransferFee(bytes16 amount, bytes16 value, bytes32 currency) private returns (bytes16, bytes16){
+        bytes16 fees = factory.getFee("remittance");
+        if(ABDKMathQuad.toUInt(fees)!=0){
+            address feeTo = factory.getFeeToSetter();
+            if(feeTo!=address(0x0)){
+                balances[feeTo] = ABDKMathQuad.add(balances[feeTo], ABDKMathQuad.mul(fees, amount));
+                amount = ABDKMathQuad.sub(amount, ABDKMathQuad.mul(fees, amount));
+                deposits[feeTo][currency] = ABDKMathQuad.add(deposits[feeTo][currency], ABDKMathQuad.mul(fees, value)); 
+                value = ABDKMathQuad.sub(value, ABDKMathQuad.mul(fees, value));
+            }
+        }
+        return (amount, value);
     }
 
     function pause() public {

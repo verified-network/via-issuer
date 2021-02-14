@@ -14,6 +14,4 @@ interface ViaFees{
 
     function payTradingFee(bytes16 value, address cashContract) external returns (bytes16);
 
-    function payTransferFee(bytes16 amount, bytes16 value, bytes32 currency) external returns (bytes16, bytes16);
-    
 }

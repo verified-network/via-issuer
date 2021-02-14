@@ -37,6 +37,7 @@ module.exports = function(deployer, network, accounts) {
         const token = await Token.deployed();
         const fee = await Fees.deployed();
 
+        await factory.initialize();
         await oracle.initialize(factory.address);
         await fee.initialize(factory.address);
 

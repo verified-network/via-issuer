@@ -24,15 +24,17 @@ interface ViaFactory{
 
     function getAddressAndType(bytes32 tokenName) external view returns (address, bytes32);
 
+    function getTokenByNameType(bytes32 tokenName, bytes32 tokenType) external view returns(address);
+
     function getFee(bytes32 feeType) external view returns(bytes16);
 
-    function getFeeToSetter() external returns(address);
+    function getFeeToSetter() external view returns(address);
 
-    function getTreasury() external returns(address);
+    function getTreasury() external view returns(address);
 
-    function getCustodian() external returns(address);
+    function getCustodian() external view returns(address);
 
-    function getViaOracleUrl() external returns(string memory);
+    function getViaOracleUrl() external view returns(string memory);
 
     function createIssuer(address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token, address _fee) external;
 

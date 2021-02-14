@@ -6,7 +6,7 @@ const truffleAssert = require('truffle-assertions');
 
 const Factory = artifacts.require('Factory');
 const Cash = artifacts.require('Cash');
-const stringutils = artifacts.require('stringutils');
+const Fees = artifacts.require('Fees');
 const ABDKMathQuad = artifacts.require('ABDKMathQuad');
 const Oracle = artifacts.require('Oracle');
 const Token = artifacts.require('Token');
@@ -39,7 +39,7 @@ contract("Cash contract testing", async (accounts) => {
     });  
   });
 
-  it("should send ether to Via-USD cash contract and then get some Via-USD cash tokens", async () => {
+  /*it("should send ether to Via-USD cash contract and then get some Via-USD cash tokens", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
     await Cash.link(abdkMathQuad);
 
@@ -47,9 +47,10 @@ contract("Cash contract testing", async (accounts) => {
     var cash = await Cash.deployed();
     var oracle = await Oracle.deployed(); 
     var token = await Token.deployed();   
+    const fee = await Fees.deployed();
     
     //await factory.createIssuer(Math.floor(Math.random() * (1000 - 1) + 1), cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
-    await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address);
+    await factory.createIssuer(cash.address, web3.utils.utf8ToHex("Via_USD"), web3.utils.utf8ToHex("Cash"), oracle.address, token.address, fee.address);
     
     var viausdCashAddress = await factory.tokens(0);
     var viausdCashName = await web3.utils.hexToUtf8(await factory.getName(viausdCashAddress));
@@ -80,7 +81,7 @@ contract("Cash contract testing", async (accounts) => {
     console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
     console.log("Account Via-USD cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
     
-  });
+  });*/
   /*
   it("should send ether to Via-EUR cash contract and then get some Via-EUR cash tokens", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
