@@ -64,7 +64,7 @@ contract Fees is Initializable{
 
     function payTradingFee(bytes16 value, address cashContract) external returns (bytes16){
         require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
-        bytes16 fee = ABDKMathQuad.add(factory.getFee("purchasing"),factory.getFee("selling"));
+        bytes16 fee = factory.getFee("trading");
         bytes16 returnValue;
         if(ABDKMathQuad.toUInt(fee)!=0){
             address feeTo = factory.getFeeToSetter();

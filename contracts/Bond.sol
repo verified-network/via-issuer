@@ -17,6 +17,7 @@ import "./utilities/StringUtils.sol";
 import "./utilities/PaymentUtils.sol";
 import "./utilities/Pausable.sol";
 import "./interfaces/ViaFees.sol";
+import "./interfaces/VerifiedClient.sol";
 
 contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
 
@@ -36,6 +37,9 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
     //via oracle
     ViaOracle private oracle;
     address viaoracle;
+
+    //verified client
+    address private client;
 
     //name of Via token (eg, Via-USD)
     string public name;
@@ -119,6 +123,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
         require(msg.data.length==0);
         // contract must not be paused
         require(paused == false);
+        //check aml status
+        require(amlCheck(msg.sender)==true); 
         //issue via bond tokens
         issue(ABDKMathQuad.fromUInt(msg.value), msg.sender, "ether", address(this), address(0x0));
     }
@@ -136,6 +142,9 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
     function transferFrom(address sender, address receiver, uint256 tokens, address forwarder, bytes32 bondSymbol) public returns (bool){
         // contract must not be paused
         require(paused == false);
+        //check aml status
+        require(amlCheck(sender)==true);
+        require(amlCheck(receiver)==true);
         //check if tokens are being transferred to this bond contract
         if(receiver == address(this) || receiver == forwarder){
             //if token name is the same, this transfer has to be redeemed
@@ -168,6 +177,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
     function requestIssue(bytes16 amount, address payer, bytes32 currency, address cashContract) external returns(bool){
         // contract must not be paused
         require(paused == false);
+        //check aml status
+        require(amlCheck(payer)==true);
         require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBondToken");
         if(factory.getType(msg.sender) == "ViaCash")
             return(issue(amount, payer, currency, cashContract, address(0x0)));
@@ -609,6 +620,19 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
     function unpause() public {
         require(msg.sender == owner() || msg.sender == address(factory));
         _unpause();
+    }
+
+    //check AML status for account address
+    function amlCheck(address account) private returns(bool){
+        if(client==address(0x0)){
+            client = factory.getClient();
+            if(client==address(0x0))
+                return true;
+        }
+        if(VerifiedClient(client).getAMLStatus(account))
+            return true;
+        else
+            return false;
     }
 
 }

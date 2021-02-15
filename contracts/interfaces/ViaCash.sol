@@ -16,6 +16,4 @@ interface ViaCash{
 
     function payIn(uint256 tokens, address payer, bytes32 currency, address sender) external returns(bool);
 
-    //function transferToCustody(uint percent) external returns(bool);
-
 }

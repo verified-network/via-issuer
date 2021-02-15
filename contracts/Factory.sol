@@ -25,7 +25,6 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
 
     //fee structure for payments
     struct payments{
-        bytes16 acceptance;
         bytes16 remittance;
         bytes16 redemption;
     }
@@ -35,8 +34,7 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     //fee structure for bond issuing
     struct issues{
         bytes16 issuing;
-        bytes16 purchasing;
-        bytes16 selling;
+        bytes16 trading;
     }
 
     mapping(address => issues) private issuingFees;
@@ -49,6 +47,9 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
 
     //address of custodian
     address custodian;
+
+    //address of client contract
+    address client;
 
     //Via oracle url address
     address ViaOracle;
@@ -137,14 +138,8 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         if(feeType=="issuing"){
             return (issuingFees[msg.sender].issuing);
         }
-        else if(feeType=="purchasing"){
-            return (issuingFees[msg.sender].purchasing);
-        }
-        else if(feeType=="selling"){
-            return (issuingFees[msg.sender].selling);
-        }
-        else if(feeType=="acceptance"){
-            return (paymentFees[msg.sender].acceptance);
+        else if(feeType=="trading"){
+            return (issuingFees[msg.sender].trading);
         }
         else if(feeType=="remittance"){
             return (paymentFees[msg.sender].remittance);
@@ -167,6 +162,11 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     function getCustodian() external view returns(address){
         require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Via: FORBIDDEN');
         return custodian;
+    }
+
+    function getClient() external view returns(address){
+        require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Via: FORBIDDEN');
+        return client;
     }
 
     function getViaOracleUrl() external view returns(string memory){
@@ -219,14 +219,8 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         if(feeType=="issuing"){
             issuingFees[feeTo].issuing = ABDKMathQuad.fromUInt(fee);
         }
-        else if(feeType=="purchasing"){
-            issuingFees[feeTo].purchasing = ABDKMathQuad.fromUInt(fee);
-        }
-        else if(feeType=="selling"){
-            issuingFees[feeTo].selling = ABDKMathQuad.fromUInt(fee);
-        }
-        else if(feeType=="acceptance"){
-            paymentFees[feeTo].acceptance = ABDKMathQuad.fromUInt(fee);
+        else if(feeType=="trading"){
+            issuingFees[feeTo].trading = ABDKMathQuad.fromUInt(fee);
         }
         else if(feeType=="remittance"){
             paymentFees[feeTo].remittance = ABDKMathQuad.fromUInt(fee);
@@ -259,6 +253,11 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     function setCustodian(address _custodian) external {
         require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
         custodian = _custodian;
+    }
+
+    function setClient(address _client) external {
+        require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
+        client = _client;
     }
 
 }

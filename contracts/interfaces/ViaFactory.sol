@@ -34,6 +34,8 @@ interface ViaFactory{
 
     function getCustodian() external view returns(address);
 
+    function getClient() external view returns(address);
+
     function getViaOracleUrl() external view returns(string memory);
 
     function createIssuer(address _target, bytes32 tokenName, bytes32 tokenType, address _oracle, address _token, address _fee) external;
@@ -51,5 +53,7 @@ interface ViaFactory{
     function setTreasury(address _treasury) external;
 
     function setCustodian(address _custodian) external;
+
+    function setClient(address _client) external;
 
 }

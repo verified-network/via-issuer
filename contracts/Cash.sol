@@ -17,6 +17,7 @@ import "./utilities/StringUtils.sol";
 import "./utilities/PaymentUtils.sol";
 import "./utilities/Pausable.sol";
 import "./interfaces/ViaFees.sol";
+import "./interfaces/VerifiedClient.sol";
 
 contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
 
@@ -32,6 +33,9 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
 
     //via fee payer address
     ViaFees private fee;
+
+    //verified client
+    address private client;
 
     //via oracle
     ViaOracle private oracle;
@@ -90,8 +94,10 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
         require(msg.value !=0);
         //only to pay in ether
         require(msg.data.length==0);
-        // contract must not be paused
+        //contract must not be paused
         require(paused == false);
+        //check aml status
+        //require(amlCheck(msg.sender)==true);        
         //issue via cash tokens
         issue(ABDKMathQuad.fromUInt(msg.value), msg.sender, "ether");
     }
@@ -100,6 +106,9 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
     function transferFrom(address sender, address receiver, uint256 tokens) external returns (bool){
         //contract must not be paused
         require(paused == false);
+        //check aml status
+        //require(amlCheck(sender)==true);
+        //require(amlCheck(receiver)==true);
         //ensure sender has enough tokens in balance before transferring or redeeming them
         require(ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))!=-1);
         //check if tokens are being transferred to this cash contract
@@ -515,8 +524,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
                     balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
                     //transfer deposits
                     deposits[receiver][currency] = ABDKMathQuad.add(deposits[receiver][currency], amtSend);
-                    //bytes16 redeemedAmount = deposits[receiver][currency];
-                    //emit ViaCashDeposits(receiver, currency, redeemedAmount);
+                    //emit ViaCashDeposits(receiver, currency, deposits[receiver][currency]);
                     emit Transfer(address(this), receiver, ABDKMathQuad.toUInt(amount));
                 }
                 redeem(balanceToRedeem, party, cashtokenName, operation, receiver);
@@ -545,6 +553,19 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
     function unpause() public {
         require(msg.sender == owner() || msg.sender == address(factory));
         _unpause();
+    }
+
+    //check AML status for account address
+    function amlCheck(address account) private returns(bool){
+        if(client==address(0x0)){
+            client = factory.getClient();
+            if(client==address(0x0))
+                return true;
+        }
+        if(VerifiedClient(client).getAMLStatus(account))
+            return true;
+        else
+            return false;
     }
     
 }
