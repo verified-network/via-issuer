@@ -67,9 +67,9 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
     mapping(bytes32 => conversion) private conversionQ;
 
     //events to capture and report to Via oracle
-    event ViaCashIssued(address issuedTo, bytes32 currency, bytes16 value);
-    event ViaCashRedeemed(address redeemedBy, bytes32 currency, bytes16 value);
-    event ViaCashDeposits(address depositor, bytes32 currency, bytes16 amount);
+    event ViaCashIssued(address indexed _party, bytes32 currency, bytes16 value);
+    event ViaCashRedeemed(address indexed _party, bytes32 currency, bytes16 value);
+    event ViaCashDeposits(address indexed depositor, bytes32 currency, bytes16 amount);
 
     //mutex
     bool lock;

@@ -124,7 +124,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
         // contract must not be paused
         require(paused == false);
         //check aml status
-        require(amlCheck(msg.sender)==true); 
+        //require(amlCheck(msg.sender)==true); 
         //issue via bond tokens
         issue(ABDKMathQuad.fromUInt(msg.value), msg.sender, "ether", address(this), address(0x0));
     }
@@ -143,8 +143,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
         // contract must not be paused
         require(paused == false);
         //check aml status
-        require(amlCheck(sender)==true);
-        require(amlCheck(receiver)==true);
+        //require(amlCheck(sender)==true);
+        //require(amlCheck(receiver)==true);
         //check if tokens are being transferred to this bond contract
         if(receiver == address(this) || receiver == forwarder){
             //if token name is the same, this transfer has to be redeemed
@@ -178,7 +178,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
         // contract must not be paused
         require(paused == false);
         //check aml status
-        require(amlCheck(payer)==true);
+        //require(amlCheck(payer)==true);
         require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBondToken");
         if(factory.getType(msg.sender) == "ViaCash")
             return(issue(amount, payer, currency, cashContract, address(0x0)));
@@ -203,15 +203,15 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
                 return false;
         //call Via Oracle to fetch data for bond pricing
         if(currency=="ether"){
-            amount = fee.payIssuingFee(amount);
+            //amount = fee.payIssuingFee(amount);
             //if ether is paid into a non Via-USD bond contract, the bond contract will issue bond tokens of an equivalent face value.
             //To derive the bond's face value, the exchange rate of ether to Via-USD and then to the currency paid in is applied.
             if(bondName!="Via_USD"){
-                //bytes32 EthXid = oracle.request("eth","ethusd","EthBond", address(this));
-                //bytes32 ViaXid = oracle.request(string(abi.encodePacked("Via_USD_to_", bondName)).stringToBytes32(),"ver","EthBond", address(this));
-                //oracle.setCallbackId(EthXid,ViaXid);
-                bytes32 EthXid = "11";
-                bytes32 ViaXid = "22";
+                bytes32 EthXid = oracle.request("eth","ethusd","EthBond", address(this));
+                bytes32 ViaXid = oracle.request(string(abi.encodePacked("Via_USD_to_", bondName)).stringToBytes32(),"ver","EthBond", address(this));
+                oracle.setCallbackId(EthXid,ViaXid);
+                //bytes32 EthXid = "11";
+                //bytes32 ViaXid = "22";
                 conversion storage c = conversionQ[ViaXid];
                 c.operation = "issue";
                 c.party = payer;
@@ -221,13 +221,13 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
                 c.EthXvalue = ABDKMathQuad.fromUInt(0);
                 c.bond_currency = bondName;
                 c.ViaXvalue =ABDKMathQuad.fromUInt(0);
-                convert("22",ABDKMathQuad.fromUInt("1.2".stringToUint()),"ver");
-                convert("22",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
+                //convert("22",ABDKMathQuad.fromUInt("1.2".stringToUint()),"ver");
+                //convert("22",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
             }
             //if ether is paid into a Via-USD bond contract, issuing the bond token will only require the ether to Via-USD exchange rate. 
             else{
-                //bytes32 EthXid = oracle.request("eth","ethusd","EthBond", address(this));
-                bytes32 EthXid = "11";
+                bytes32 EthXid = oracle.request("eth","ethusd","EthBond", address(this));
+                //bytes32 EthXid = "11";
                 //conversionQ[EthXid]=conversion("issue",address(0x0),payer,amount,currency,EthXid,ABDKMathQuad.fromUInt(0),bondName,ABDKMathQuad.fromUInt(1),"null",ABDKMathQuad.fromUInt(0));
                 conversion storage c = conversionQ[EthXid];
                 c.operation = "issue";
@@ -238,7 +238,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
                 c.EthXvalue = ABDKMathQuad.fromUInt(0);
                 c.bond_currency = bondName;
                 c.ViaXvalue =ABDKMathQuad.fromUInt(1);
-                convert("11",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
+                //convert("11",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
             }
         }
         //if a via cash token is paid into this bond contract
@@ -246,17 +246,17 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
             //if the via cash token paid in is different from the denomination of this bond, 
             //tokens of this bond need to be transferred from an issuers' account after pricing the bond with applicable coupon rates
             if(currency!=bondName){
-                amount = fee.payTradingFee(amount, cashContract);
-                //bytes32 ViaXid = oracle.request(string(abi.encodePacked(currency, "_to_", bondName)).stringToBytes32(),"er","Bond", address(this));                
-                //bytes32 ViaRateId;
-                //if(currency!="Via_USD"){
-                //    ViaRateId = oracle.request(string(abi.encodePacked("Via_USD_to_", currency)).stringToBytes32(), "ir","Bond",address(this));
-                //}
-                //else{
-                //    ViaRateId = oracle.request("USD", "ir","Bond",address(this));
-                //}
-                bytes32 ViaXid = "33";
-                bytes32 ViaRateId = "44";
+                //amount = fee.payTradingFee(amount, cashContract);
+                bytes32 ViaXid = oracle.request(string(abi.encodePacked(currency, "_to_", bondName)).stringToBytes32(),"er","Bond", address(this));                
+                bytes32 ViaRateId;
+                if(currency!="Via_USD"){
+                    ViaRateId = oracle.request(string(abi.encodePacked("Via_USD_to_", currency)).stringToBytes32(), "ir","Bond",address(this));
+                }
+                else{
+                    ViaRateId = oracle.request("USD", "ir","Bond",address(this));
+                }
+                //bytes32 ViaXid = "33";
+                //bytes32 ViaRateId = "44";
                 conversion storage c = conversionQ[ViaXid];
                 c.operation = "purchase";
                 c.token = tokenContract;
@@ -267,8 +267,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
                 c.ViaXvalue =ABDKMathQuad.fromUInt(0);
                 c.ViaRateId = ViaRateId; 
                 c.ViaRateValue = ABDKMathQuad.fromUInt(0);
-                convert("33",ABDKMathQuad.fromUInt("7.6".stringToUint()),"er");
-                convert("33",ABDKMathQuad.fromUInt("1.5".stringToUint()),"ir");
+                //convert("33",ABDKMathQuad.fromUInt("7.6".stringToUint()),"er");
+                //convert("33",ABDKMathQuad.fromUInt("1.5".stringToUint()),"ir");
             }
             //if the via cash token paid in is the same denomination of this bond, we need to first find out if the pay in is for a purchase of bonds or repayment of an earlier issue
             else{
@@ -284,9 +284,9 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
                 //if the paying in is not for repayment of a bond already issued, then
                 //tokens of this bond need to be transferred from an issuer's account after pricing the bond with the domestic (paid in currency) coupon rates
                 else{
-                    amount = fee.payTradingFee(amount, cashContract);
-                    //bytes32 ViaRateId = oracle.request(currency, "ir","Bond",address(this));
-                    bytes32 ViaRateId = "44";
+                    //amount = fee.payTradingFee(amount, cashContract);
+                    bytes32 ViaRateId = oracle.request(currency, "ir","Bond",address(this));
+                    //bytes32 ViaRateId = "44";
                     conversion storage c = conversionQ[ViaRateId];
                     c.operation = "purchase";
                     c.token = tokenContract;
@@ -297,7 +297,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
                     c.ViaXvalue =ABDKMathQuad.fromUInt(1);
                     c.ViaRateId = ViaRateId; 
                     c.ViaRateValue = ABDKMathQuad.fromUInt(0);
-                    convert("44",ABDKMathQuad.fromUInt("1.5".stringToUint()),"ir");
+                    //convert("44",ABDKMathQuad.fromUInt("1.5".stringToUint()),"ir");
                 }                
             }
         }
@@ -447,8 +447,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
     }
 
     //function called back from Oraclize
-    function convert(bytes32 txId, bytes16 result, bytes32 rtype) public {
-        //require(viaoracle == msg.sender);
+    function convert(bytes32 txId, bytes16 result, bytes32 rtype) external {
+        require(viaoracle == msg.sender);
         //check type of result returned
         if(rtype =="ethusd"){
             conversionQ[txId].EthXvalue = result;
@@ -623,7 +623,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
     }
 
     //check AML status for account address
-    function amlCheck(address account) private returns(bool){
+    /*function amlCheck(address account) private returns(bool){
         if(client==address(0x0)){
             client = factory.getClient();
             if(client==address(0x0))
@@ -633,6 +633,6 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
             return true;
         else
             return false;
-    }
+    }*/
 
 }

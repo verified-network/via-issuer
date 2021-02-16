@@ -134,7 +134,7 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     }
 
     function getFee(bytes32 feeType) external view returns(bytes16){
-        require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Via: FORBIDDEN');
+        //require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Get fee : FORBIDDEN');
         if(feeType=="issuing"){
             return (issuingFees[msg.sender].issuing);
         }
@@ -150,22 +150,22 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     }
 
     function getFeeToSetter() external view returns(address){
-        require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Via: FORBIDDEN');
+        require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Get fee setter : FORBIDDEN');
         return feeToSetter;
     }
 
     function getTreasury() external view returns(address){
-        require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Via: FORBIDDEN');
+        require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Get treasury : FORBIDDEN');
         return treasury;
     }
 
     function getCustodian() external view returns(address){
-        require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Via: FORBIDDEN');
+        require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Get custodian : FORBIDDEN');
         return custodian;
     }
 
     function getClient() external view returns(address){
-        require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Via: FORBIDDEN');
+        require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Get client : FORBIDDEN');
         return client;
     }
 
@@ -186,12 +186,12 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         emit IssuerCreated(_issuer, tokenName, tokenType);
 
         if(tokenType == "Cash"){
-                token[_issuer] = via("ViaCash", tokenName, ABDKMathQuad.fromUInt(1));
+                token[_issuer] = via("ViaCash", tokenName, ABDKMathQuad.fromUInt(0));
                 tokens.push(_issuer);
                 issuers["ViaCash"][tokenName] = _issuer;
         }
         else if(tokenType == "Bond"){
-                token[_issuer] = via("ViaBond", tokenName, ABDKMathQuad.fromUInt(1));
+                token[_issuer] = via("ViaBond", tokenName, ABDKMathQuad.fromUInt(0));
                 tokens.push(_issuer);
                 issuers["ViaBond"][tokenName] = _issuer;
         }
@@ -231,7 +231,7 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     }
 
     function setFeeToSetter(address _feeToSetter) external {
-        require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
+        require(msg.sender == feeToSetter, 'Set fee to setter: FORBIDDEN');
         feeToSetter = _feeToSetter;
     }
 
@@ -241,22 +241,22 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     }
 
     function setMargin(uint256 _margin, address _token) external {
-        require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
+        require(msg.sender == feeToSetter, 'Set margin : FORBIDDEN');
         token[_token].margin = ABDKMathQuad.fromUInt(_margin);
     }
 
     function setTreasury(address _treasury) external {
-        require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
+        require(msg.sender == feeToSetter, 'Set treasury : FORBIDDEN');
         treasury = _treasury;
     }
 
     function setCustodian(address _custodian) external {
-        require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
+        require(msg.sender == feeToSetter, 'Set custodian : FORBIDDEN');
         custodian = _custodian;
     }
 
     function setClient(address _client) external {
-        require(msg.sender == feeToSetter, 'Via: FORBIDDEN');
+        require(msg.sender == feeToSetter, 'Set client : FORBIDDEN');
         client = _client;
     }
 
