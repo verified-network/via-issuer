@@ -203,12 +203,13 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
                 return false;
         //call Via Oracle to fetch data for bond pricing
         if(currency=="ether"){
+            //emit ViaComment("In issue");
             //amount = fee.payIssuingFee(amount);
             //if ether is paid into a non Via-USD bond contract, the bond contract will issue bond tokens of an equivalent face value.
             //To derive the bond's face value, the exchange rate of ether to Via-USD and then to the currency paid in is applied.
             if(bondName!="Via_USD"){
                 bytes32 EthXid = oracle.request("eth","ethusd","EthBond", address(this));
-                bytes32 ViaXid = oracle.request(string(abi.encodePacked("Via_USD_to_", bondName)).stringToBytes32(),"ver","EthBond", address(this));
+                bytes32 ViaXid = oracle.request(string(abi.encodePacked("Via_USD_to_", bondName)).stringToBytes32(),"ver","Bond", address(this));
                 oracle.setCallbackId(EthXid,ViaXid);
                 //bytes32 EthXid = "11";
                 //bytes32 ViaXid = "22";
@@ -447,8 +448,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
     }
 
     //function called back from Oraclize
-    function convert(bytes32 txId, bytes16 result, bytes32 rtype) external {
-        require(viaoracle == msg.sender);
+    function convert(bytes32 txId, bytes16 result, bytes32 rtype) public {
+        //require(viaoracle == msg.sender);
         //check type of result returned
         if(rtype =="ethusd"){
             conversionQ[txId].EthXvalue = result;
@@ -522,7 +523,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
                     issuers.push(payer);
             }
             //generate event
-            emit ViaBondIssued(issuedBond, payer, bondName, paidInCashToken, ABDKMathQuad.toUInt(margin), ABDKMathQuad.toUInt(bondPrice), ABDKMathQuad.toUInt(paidInAmount), 1);
+            //emit ViaBondIssued(issuedBond, payer, bondName, paidInCashToken, ABDKMathQuad.toUInt(margin), ABDKMathQuad.toUInt(bondPrice), ABDKMathQuad.toUInt(paidInAmount), 1);
         }
         //paid in amount is Via cash with which via bond tokens are purchased
         else{

@@ -32,7 +32,7 @@ contract("Cash contract testing", async (accounts) => {
       console.log("initialisation and constructor code in bytes = ", sizeOfB - sizeOfD);
     });  
   });
-  
+  /*
   it("should send ether to Via-USD cash contract and then get some Via-USD cash tokens", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
     await Cash.link(abdkMathQuad);
@@ -331,7 +331,7 @@ contract("Cash contract testing", async (accounts) => {
     console.log("Via-USD cash token contract ether balance after sending Via-USD obtained after redeeming Via-EUR:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Account ether balance after sending Via-USD obtained after redeeming Via-EUR:", await web3.eth.getBalance(accounts[1]));
     console.log("Account Via-USD cash token balance after sending Via-USD obtained after redeeming Via-EUR:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
-  });
+  });*/
 
 });
 
