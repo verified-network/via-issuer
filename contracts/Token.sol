@@ -86,8 +86,10 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
 
     function requestTransfer(address receiver, uint tokens) external returns (bool){
         require(issuer==msg.sender);
-        transfer(receiver, tokens);
-        emit Transfer(address(this), receiver, tokens);
+        if(transfer(receiver, tokens))
+            return true;
+        else
+            return false;
     }  
 
     function requestIssue(bytes16 amount, address payer, bytes32 currency, address cashContract) external returns(bool){

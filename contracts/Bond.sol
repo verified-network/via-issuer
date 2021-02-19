@@ -96,7 +96,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
     event ViaBondIssued(address indexed token, address issuer, bytes32 bondName, bytes32 currency, uint256 value, uint256 price, uint256 issuedAmount, uint256 tenure);
     event ViaBondRedeemed(address indexed token, address redeemedBy, bytes32 bondName, bytes32 currency, uint256 redemptionAmount, uint256 daysSubscribed);
     event ViaBondPurchased(address indexed token, address purchaser, bytes32 bondName, bytes32 currency, uint256 value, uint256 price, uint256 purchasedAmount, uint256 tenure);
-    
+
     //mutex
     bool lock;
 
@@ -124,7 +124,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
         // contract must not be paused
         require(paused == false);
         //check aml status
-        //require(amlCheck(msg.sender)==true); 
+        require(amlCheck(msg.sender)==true); 
         //issue via bond tokens
         issue(ABDKMathQuad.fromUInt(msg.value), msg.sender, "ether", address(this), address(0x0));
     }
@@ -143,8 +143,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
         // contract must not be paused
         require(paused == false);
         //check aml status
-        //require(amlCheck(sender)==true);
-        //require(amlCheck(receiver)==true);
+        require(amlCheck(sender)==true);
+        require(amlCheck(receiver)==true);
         //check if tokens are being transferred to this bond contract
         if(receiver == address(this) || receiver == forwarder){
             //if token name is the same, this transfer has to be redeemed
@@ -178,7 +178,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
         // contract must not be paused
         require(paused == false);
         //check aml status
-        //require(amlCheck(payer)==true);
+        require(amlCheck(payer)==true);
         require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBondToken");
         if(factory.getType(msg.sender) == "ViaCash")
             return(issue(amount, payer, currency, cashContract, address(0x0)));
@@ -203,7 +203,6 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
                 return false;
         //call Via Oracle to fetch data for bond pricing
         if(currency=="ether"){
-            //emit ViaComment("In issue");
             //amount = fee.payIssuingFee(amount);
             //if ether is paid into a non Via-USD bond contract, the bond contract will issue bond tokens of an equivalent face value.
             //To derive the bond's face value, the exchange rate of ether to Via-USD and then to the currency paid in is applied.
@@ -229,7 +228,6 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
             else{
                 bytes32 EthXid = oracle.request("eth","ethusd","EthBond", address(this));
                 //bytes32 EthXid = "11";
-                //conversionQ[EthXid]=conversion("issue",address(0x0),payer,amount,currency,EthXid,ABDKMathQuad.fromUInt(0),bondName,ABDKMathQuad.fromUInt(1),"null",ABDKMathQuad.fromUInt(0));
                 conversion storage c = conversionQ[EthXid];
                 c.operation = "issue";
                 c.party = payer;
@@ -448,8 +446,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
     }
 
     //function called back from Oraclize
-    function convert(bytes32 txId, bytes16 result, bytes32 rtype) public {
-        //require(viaoracle == msg.sender);
+    function convert(bytes32 txId, bytes16 result, bytes32 rtype) external {
+        require(viaoracle == msg.sender);
         //check type of result returned
         if(rtype =="ethusd"){
             conversionQ[txId].EthXvalue = result;
@@ -502,7 +500,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
             //issue bond which initializes a token with the attributes of the bond
             issuedBond = factory.createToken(token, bondName, "ViaBond", string(abi.encodePacked(address(this),issueTime)).stringToBytes32());
             //find margin on collateral paid in to be issued as bonds
-            bytes16 margin = ABDKMathQuad.mul(factory.getMargin(address(this)),parValue);
+            bytes16 margin = ABDKMathQuad.mul(ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),factory.getMargin(address(this))),parValue);
             //adjust issued bonds to total supply first
             ViaToken(issuedBond).addTotalSupply(margin);
             //first, add bond balance
@@ -624,7 +622,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
     }
 
     //check AML status for account address
-    /*function amlCheck(address account) private returns(bool){
+    function amlCheck(address account) private returns(bool){
         if(client==address(0x0)){
             client = factory.getClient();
             if(client==address(0x0))
@@ -634,6 +632,6 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
             return true;
         else
             return false;
-    }*/
+    }
 
 }

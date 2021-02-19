@@ -17,6 +17,7 @@ library paymentutils {
         if(paid_in_currency=="ether"){
             //to first convert amount of ether passed to this function to USD
             bytes16 amountInUSD = ABDKMathQuad.div(ABDKMathQuad.mul(amount, ethusd), ABDKMathQuad.fromUInt(1000000000000000000));
+            //bytes16 amountInUSD = ABDKMathQuad.mul(ABDKMathQuad.div(amount, ABDKMathQuad.fromUInt(1000000000000000000)), ethusd);
             //to then convert USD to Via-currency if currency of this contract is not USD itself
             if(tokenName!="Via_USD"){
                 bytes16 inVia = ABDKMathQuad.mul(amountInUSD, viarate);

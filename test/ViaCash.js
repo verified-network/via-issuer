@@ -21,6 +21,7 @@ contract("Cash contract testing", async (accounts) => {
     });
   }
   
+  //test 1
   it("get the size of the Cash contract", function() {
     return Cash.deployed().then(function(instance) {
       var bytecode = instance.constructor._json.bytecode;
@@ -32,7 +33,8 @@ contract("Cash contract testing", async (accounts) => {
       console.log("initialisation and constructor code in bytes = ", sizeOfB - sizeOfD);
     });  
   });
-  /*
+  
+  //test 2
   it("should send ether to Via-USD cash contract and then get some Via-USD cash tokens", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
     await Cash.link(abdkMathQuad);
@@ -72,6 +74,7 @@ contract("Cash contract testing", async (accounts) => {
     console.log("Account Via-USD cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
   });
   
+  //test 3
   it("should send ether to Via-EUR cash contract and then get some Via-EUR cash tokens", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
     await Cash.link(abdkMathQuad);
@@ -112,6 +115,7 @@ contract("Cash contract testing", async (accounts) => {
 
   });
   
+  //test 4
   it("should send Via-USD to Via-USD cash contract and then get ether sent during issuing process", async () => {
 
     var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -148,6 +152,7 @@ contract("Cash contract testing", async (accounts) => {
     console.log("Account Via-USD cash token balance after sending Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
   });
 
+  //test 5
   it("should send Via-EUR tokens to Via-EUR contract and get back ether paid in earlier", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
       await Cash.link(abdkMathQuad);
@@ -184,6 +189,7 @@ contract("Cash contract testing", async (accounts) => {
       console.log("Account Via-EUR cash token balance after sending Via-EUR:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
   });
 
+  //test 6
   it("should send Via-USD tokens to Via-USD contract after transfer of Via-USD tokens from one user account to another", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
     await Cash.link(abdkMathQuad);
@@ -228,6 +234,7 @@ contract("Cash contract testing", async (accounts) => {
   
   });
 
+  //test 7
   it("should transfer Via-USD to another account", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
     await Cash.link(abdkMathQuad);
@@ -259,6 +266,7 @@ contract("Cash contract testing", async (accounts) => {
     console.log("Receiver Via-USD cash token balance after receiving Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
   });
 
+  //test 8
   it("should send Via-USD to Via-EUR cash contract, get some Via-EUR cash tokens which it should transfer to another account which will redeem Via-EUR to get Via-USD which it will again redeem to get ether", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
     await Cash.link(abdkMathQuad);
@@ -331,7 +339,7 @@ contract("Cash contract testing", async (accounts) => {
     console.log("Via-USD cash token contract ether balance after sending Via-USD obtained after redeeming Via-EUR:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Account ether balance after sending Via-USD obtained after redeeming Via-EUR:", await web3.eth.getBalance(accounts[1]));
     console.log("Account Via-USD cash token balance after sending Via-USD obtained after redeeming Via-EUR:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
-  });*/
+  });
 
 });
 
