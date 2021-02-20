@@ -124,7 +124,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
         // contract must not be paused
         require(paused == false);
         //check aml status
-        require(amlCheck(msg.sender)==true); 
+        require(fee.amlCheck(msg.sender)==true); 
         //issue via bond tokens
         issue(ABDKMathQuad.fromUInt(msg.value), msg.sender, "ether", address(this), address(0x0));
     }
@@ -143,8 +143,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
         // contract must not be paused
         require(paused == false);
         //check aml status
-        require(amlCheck(sender)==true);
-        require(amlCheck(receiver)==true);
+        require(fee.amlCheck(sender)==true);
+        require(fee.amlCheck(receiver)==true);
         //check if tokens are being transferred to this bond contract
         if(receiver == address(this) || receiver == forwarder){
             //if token name is the same, this transfer has to be redeemed
@@ -178,7 +178,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
         // contract must not be paused
         require(paused == false);
         //check aml status
-        require(amlCheck(payer)==true);
+        require(fee.amlCheck(payer)==true);
         require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBondToken");
         if(factory.getType(msg.sender) == "ViaCash")
             return(issue(amount, payer, currency, cashContract, address(0x0)));
@@ -620,18 +620,5 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
         require(msg.sender == owner() || msg.sender == address(factory));
         _unpause();
     }
-
-    //check AML status for account address
-    function amlCheck(address account) private returns(bool){
-        if(client==address(0x0)){
-            client = factory.getClient();
-            if(client==address(0x0))
-                return true;
-        }
-        if(VerifiedClient(client).getAMLStatus(account))
-            return true;
-        else
-            return false;
-    }
-
+    
 }

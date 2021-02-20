@@ -33,10 +33,10 @@ contract("Bond contract testing", async (accounts) => {
       console.log("size of bytecode in bytes = ", sizeOfB);
       console.log("size of deployed in bytes = ", sizeOfD);
       console.log("initialisation and constructor code in bytes = ", sizeOfB - sizeOfD);
-    });  
-  
+    });    
   });
-    
+
+  /*  
   //test 2
   it("should send ether to Via-USD bond contract and then get some Via-USD bond tokens to sender (issuer)", async () => {
       var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -532,7 +532,7 @@ contract("Bond contract testing", async (accounts) => {
     await getFirstEvent(bond.ViaBondRedeemed({fromBlock:'latest'}));
     console.log("Account Via-USD cash token balance after redeeming Via-EUR bonds:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
   
-  });
+  });*/
 
 });
 

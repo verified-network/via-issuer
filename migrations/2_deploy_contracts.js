@@ -57,7 +57,7 @@ module.exports = function(deployer, network, accounts) {
             console.log();
         }       
 
-        await factory.setViaOracleUrl(web3.utils.utf8ToHex("https://via-oracle.azurewebsites.net"));
+        await factory.setViaOracleUrl("https://via-oracle.azurewebsites.net");
     });
     
 }

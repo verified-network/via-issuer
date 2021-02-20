@@ -8,6 +8,7 @@ import "../interfaces/ViaFactory.sol";
 import "../interfaces/ViaCash.sol";
 import "abdk-libraries-solidity/ABDKMathQuad.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "../interfaces/VerifiedClient.sol";
 
 contract Fees is Initializable{
 
@@ -16,6 +17,9 @@ contract Fees is Initializable{
     using ABDKMathQuad for bytes16;
 
     ViaFactory private factory;
+
+    //verified client
+    address private client;
 
     function initialize(address _factory) external initializer{
         require(address(factory)==address(0x0));
@@ -74,6 +78,19 @@ contract Fees is Initializable{
             }
         }
         return returnValue;
+    }
+
+    //check AML status for account address
+    function amlCheck(address account) external returns(bool){
+        if(client==address(0x0)){
+            client = factory.getClient();
+            if(client==address(0x0))
+                return true;
+        }
+        if(VerifiedClient(client).getAMLStatus(account))
+            return true;
+        else
+            return false;
     }
 
 }

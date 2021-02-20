@@ -48,6 +48,6 @@ library paymentutils {
         else{
             return ABDKMathQuad.mul(viarate, amount);
         }
-    }
+    }   
 
 }

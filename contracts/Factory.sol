@@ -165,7 +165,7 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     }
 
     function getClient() external view returns(address){
-        require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Get client : FORBIDDEN');
+        //require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Get client : FORBIDDEN');
         return client;
     }
 

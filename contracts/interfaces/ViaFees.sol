@@ -14,4 +14,6 @@ interface ViaFees{
 
     function payTradingFee(bytes16 value, address cashContract) external returns (bytes16);
 
+    function amlCheck(address account) external returns(bool);
+
 }

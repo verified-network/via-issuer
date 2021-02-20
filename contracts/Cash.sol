@@ -67,7 +67,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
     mapping(bytes32 => conversion) private conversionQ;
 
     //events to capture and report to Via oracle
-    event ViaCashIssued(address indexed _party, bytes32 currency, bytes16 value);
+    event ViaCashIssued(address indexed _party, bytes32 currency, uint256 value);
     event ViaCashRedeemed(address indexed _party, bytes32 currency, bytes16 value);
     event ViaCashDeposits(address indexed depositor, bytes32 currency, bytes16 amount);
 
@@ -97,7 +97,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
         //contract must not be paused
         require(paused == false);
         //check aml status
-        //require(amlCheck(msg.sender)==true);        
+        require(fee.amlCheck(msg.sender)==true);        
         //issue via cash tokens
         issue(ABDKMathQuad.fromUInt(msg.value), msg.sender, "ether");
     }
@@ -107,14 +107,15 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
         //contract must not be paused
         require(paused == false);
         //check aml status
-        //require(amlCheck(sender)==true);
-        //require(amlCheck(receiver)==true);
+        require(fee.amlCheck(sender)==true);
+        require(fee.amlCheck(receiver)==true);
         //ensure sender has enough tokens in balance before transferring or redeeming them
         require(ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))!=-1);
         //check if tokens are being transferred to this cash contract
         if(receiver == address(this)){
             //if token name is the same, this transfer has to be redeemed
-            if(redeem(ABDKMathQuad.div(ABDKMathQuad.fromUInt(tokens),ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),factory.getMargin(address(this)))), sender, cashtokenName, "redeem", address(this)))
+            //if(redeem(ABDKMathQuad.div(ABDKMathQuad.fromUInt(tokens),ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),factory.getMargin(address(this)))), sender, cashtokenName, "redeem", address(this)))
+            if(redeem(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName, "redeem", address(this)))
                 return true;
             else
                 return false;
@@ -288,7 +289,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
                 //and then the exchange rate of this Via cash token to redeeem and the Via-USD
                 else{
                     bytes32 EthXid = oracle.request("eth","ethusd","EthCash", address(this)); 
-                    bytes32 ViaXid = oracle.request(string(abi.encodePacked(token, "_to_Via_USD")).stringToBytes32(),"ver","Cash", address(this)); 
+                    bytes32 ViaXid = oracle.request(string(abi.encodePacked(token,"_to_Via_USD")).stringToBytes32(),"ver","Cash", address(this)); 
                     oracle.setCallbackId(EthXid,ViaXid);
                     //bytes32 EthXid = "11";
                     //bytes32 ViaXid = "22";
@@ -300,7 +301,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
             //else if the currency this cash token can be redeemed is another Via cash token,
             //we just need the exchange rate of this Via cash token to redeem and the currency that is in deposit
             else{
-                bytes32 ViaXid = oracle.request(string(abi.encodePacked(token, "_to_", currency_in_deposit)).stringToBytes32(),"er","Cash", address(this)); //"1234"; //only for testing
+                bytes32 ViaXid = oracle.request(string(abi.encodePacked(token,"_to_",currency_in_deposit)).stringToBytes32(),"er","Cash", address(this)); //"1234"; //only for testing
                 //bytes32 ViaXid = "33";
                 conversionQ[ViaXid] = conversion(seller, receiver, operation, token, currency_in_deposit, ABDKMathQuad.fromUInt(0), amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(0));
                 //convert("33",ABDKMathQuad.fromUInt("7.6".stringToUint()),"er");
@@ -312,8 +313,8 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
     }    
 
     //function called back from Via oracle
-    function convert(bytes32 txId, bytes16 result, bytes32 rtype) external {
-        require(viaoracle == msg.sender);
+    function convert(bytes32 txId, bytes16 result, bytes32 rtype) public {//external {
+        //require(viaoracle == msg.sender);
         //check type of result returned
         if(rtype =="ethusd"){
             conversionQ[txId].EthXvalue = result;
@@ -374,16 +375,18 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
         else{
             deposits[party][currency] = ABDKMathQuad.add(deposits[party][currency], amount);
         }
-        emit ViaCashDeposits(party, currency, deposits[party][currency]);
+        //emit ViaCashDeposits(party, currency, deposits[party][currency]);
         bytes16 margin = factory.getMargin(address(this));
+        //calculate cash token amount to issue
+        bytes16 toIssue = ABDKMathQuad.mul(ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),margin),via);
         //add via to this contract's balance first (ie issue them first)
-        balances[address(this)] = ABDKMathQuad.add(balances[address(this)], ABDKMathQuad.mul(ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),margin),via));
+        balances[address(this)] = ABDKMathQuad.add(balances[address(this)], toIssue);
         //transfer amount to buyer 
-        transfer(party, ABDKMathQuad.toUInt(ABDKMathQuad.mul(ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),margin),via)));
+        transfer(party, ABDKMathQuad.toUInt(toIssue));
         //adjust total supply
-        totalSupply_ = ABDKMathQuad.add(totalSupply_, ABDKMathQuad.mul(ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),margin),via));
+        totalSupply_ = ABDKMathQuad.add(totalSupply_, toIssue);
         //generate event        
-        emit ViaCashIssued(party, cashtokenName, ABDKMathQuad.mul(ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),margin),via));
+        emit ViaCashIssued(party, cashtokenName, ABDKMathQuad.toUInt(toIssue));
     }
 
     //value is the redeemable amount in the currency to pay out
@@ -414,7 +417,6 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
                     balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
                     //transfer deposits
                     deposits[receiver]["ether"] = ABDKMathQuad.add(deposits[receiver]["ether"], value);                    
-                    //emit ViaCashDeposits(receiver, "ether", value);
                     emit Transfer(address(this), receiver, ABDKMathQuad.toUInt(amount));
                 }
             }
@@ -449,7 +451,6 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
                     balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
                     //transfer deposits
                     deposits[receiver]["ether"] = ABDKMathQuad.add(deposits[receiver]["ether"], amtSend);
-                    //emit ViaCashDeposits(receiver, "ether", amtSend);
                     emit Transfer(address(this), receiver, ABDKMathQuad.toUInt(amount));
                 }
                 redeem(balanceToRedeem, party, cashtokenName, operation, receiver);
@@ -484,7 +485,6 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
                     balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
                     //transfer deposits
                     deposits[receiver][currency] = ABDKMathQuad.add(deposits[receiver][currency], value);
-                    //emit ViaCashDeposits(receiver, currency, deposits[receiver][currency]);
                     emit Transfer(address(this), receiver, ABDKMathQuad.toUInt(amount));
                 }
             }
@@ -524,7 +524,6 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
                     balances[receiver] = ABDKMathQuad.add(balances[receiver], amount);
                     //transfer deposits
                     deposits[receiver][currency] = ABDKMathQuad.add(deposits[receiver][currency], amtSend);
-                    //emit ViaCashDeposits(receiver, currency, deposits[receiver][currency]);
                     emit Transfer(address(this), receiver, ABDKMathQuad.toUInt(amount));
                 }
                 redeem(balanceToRedeem, party, cashtokenName, operation, receiver);
@@ -555,17 +554,4 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
         _unpause();
     }
 
-    //check AML status for account address
-    function amlCheck(address account) private returns(bool){
-        if(client==address(0x0)){
-            client = factory.getClient();
-            if(client==address(0x0))
-                return true;
-        }
-        if(VerifiedClient(client).getAMLStatus(account))
-            return true;
-        else
-            return false;
-    }
-    
 }

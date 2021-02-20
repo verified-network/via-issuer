@@ -114,7 +114,7 @@ contract("Cash contract testing", async (accounts) => {
     console.log("Account Via-EUR cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
 
   });
-  
+  /*
   //test 4
   it("should send Via-USD to Via-USD cash contract and then get ether sent during issuing process", async () => {
 
@@ -151,7 +151,7 @@ contract("Cash contract testing", async (accounts) => {
     console.log("Account ether balance after sending Via-USD:", await web3.eth.getBalance(accounts[0]));
     console.log("Account Via-USD cash token balance after sending Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
   });
-
+  */
   //test 5
   it("should send Via-EUR tokens to Via-EUR contract and get back ether paid in earlier", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -188,7 +188,7 @@ contract("Cash contract testing", async (accounts) => {
       console.log("Account ether balance after sending Via-EUR:", await web3.eth.getBalance(accounts[0]));
       console.log("Account Via-EUR cash token balance after sending Via-EUR:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
   });
-
+  /*
   //test 6
   it("should send Via-USD tokens to Via-USD contract after transfer of Via-USD tokens from one user account to another", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -214,7 +214,8 @@ contract("Cash contract testing", async (accounts) => {
     console.log();
     
     await viausdCash.transferFrom(accounts[0], accounts[1], 100);
-    
+    await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+
     console.log("Sender ether balance after sending Via-USD:", await web3.eth.getBalance(accounts[0]));
     console.log("Sender Via-USD cash token balance after sending Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
     console.log("Receiver ether balance after Via-USD is sent by sender:", await web3.eth.getBalance(accounts[1]));
@@ -223,17 +224,17 @@ contract("Cash contract testing", async (accounts) => {
     await viausdCash.transferFrom(accounts[1], viausdCashAddress, 50);
     
     try{
-      await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
+      await getFirstEvent(cash.ViaCashRedeemed({fromBlock:'latest'}));
     }catch(error){
       console.log(error);
     }
 
     console.log("Via-USD cash token contract ether balance after redeeming Via-USD:", await web3.eth.getBalance(viausdCashAddress));
-    console.log("Account ether balance after redeeming Via-USD:", await web3.eth.getBalance(accounts[1]));
-    console.log("Account Via-USD cash token balance after redeeming Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
+    console.log("Receiver account ether balance after redeeming Via-USD:", await web3.eth.getBalance(accounts[1]));
+    console.log("Receiver account Via-USD cash token balance after redeeming Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
   
   });
-
+  
   //test 7
   it("should transfer Via-USD to another account", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -339,7 +340,7 @@ contract("Cash contract testing", async (accounts) => {
     console.log("Via-USD cash token contract ether balance after sending Via-USD obtained after redeeming Via-EUR:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Account ether balance after sending Via-USD obtained after redeeming Via-EUR:", await web3.eth.getBalance(accounts[1]));
     console.log("Account Via-USD cash token balance after sending Via-USD obtained after redeeming Via-EUR:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));
-  });
+  });*/
 
 });
 
