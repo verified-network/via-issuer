@@ -82,6 +82,7 @@ contract Fees is Initializable{
 
     //check AML status for account address
     function amlCheck(address account) external returns(bool){
+        require(factory.getType(msg.sender) == "ViaCash" || factory.getType(msg.sender) == "ViaBond");
         if(client==address(0x0)){
             client = factory.getClient();
             if(client==address(0x0))

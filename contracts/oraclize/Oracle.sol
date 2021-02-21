@@ -87,7 +87,7 @@ contract Oracle is ViaOracle, usingProvable, Initializable {
         }
     }
 
-    function request(bytes32 _currency, bytes32 _ratetype, bytes32 _tokenType, address payable _tokenContract)
+    function request(string calldata _currency, bytes32 _ratetype, bytes32 _tokenType, address payable _tokenContract)
         external
         payable
         returns (bytes32)
@@ -96,7 +96,7 @@ contract Oracle is ViaOracle, usingProvable, Initializable {
         if (provable_getPrice("URL", CUSTOM_GASLIMIT) > address(this).balance) {
             emit LogNewProvableQuery("Provable query was NOT sent, please add some ETH to cover for the query fee!");
         } else {
-            string memory currency = _currency.bytes32ToString();
+            string memory currency = _currency.stringToBytes32().substring(0,18);
             string memory url = factory.getViaOracleUrl();
             if(_ratetype == "er" || _ratetype == "ver"){
                 bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(",url,"/rates/er/",currency,").rate")),CUSTOM_GASLIMIT);  
