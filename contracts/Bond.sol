@@ -203,7 +203,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
                 return false;
         //call Via Oracle to fetch data for bond pricing
         if(currency=="ether"){
-            //amount = fee.payIssuingFee(amount);
+            amount = fee.payIssuingFee(amount);
             //if ether is paid into a non Via-USD bond contract, the bond contract will issue bond tokens of an equivalent face value.
             //To derive the bond's face value, the exchange rate of ether to Via-USD and then to the currency paid in is applied.
             if(bondName!="Via_USD"){
@@ -245,7 +245,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
             //if the via cash token paid in is different from the denomination of this bond, 
             //tokens of this bond need to be transferred from an issuers' account after pricing the bond with applicable coupon rates
             if(currency!=bondName){
-                //amount = fee.payTradingFee(amount, cashContract);
+                amount = fee.payTradingFee(amount, cashContract);
                 bytes32 ViaXid = oracle.request(string(abi.encodePacked(currency, "_to_", bondName)),"er","Bond", address(this));                
                 bytes32 ViaRateId;
                 if(currency!="Via_USD"){
@@ -283,7 +283,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
                 //if the paying in is not for repayment of a bond already issued, then
                 //tokens of this bond need to be transferred from an issuer's account after pricing the bond with the domestic (paid in currency) coupon rates
                 else{
-                    //amount = fee.payTradingFee(amount, cashContract);
+                    amount = fee.payTradingFee(amount, cashContract);
                     bytes32 ViaRateId = oracle.request(string(abi.encodePacked(currency)), "ir","Bond",address(this));
                     //bytes32 ViaRateId = "44";
                     conversion storage c = conversionQ[ViaRateId];

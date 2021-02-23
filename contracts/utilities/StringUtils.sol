@@ -26,12 +26,19 @@ library stringutils { // Only relevant functions
     }
 
     function substring(bytes32 strBytes, uint startIndex, uint endIndex) public pure returns (string memory) {
-        //bytes memory strBytes = bytes(str);
         bytes memory result = new bytes(endIndex-startIndex);
         for(uint i = startIndex; i < endIndex; i++) {
             result[i-startIndex] = strBytes[i];
         }
         return string(result);
+    }
+
+    function substringinbytes(bytes32 strBytes, uint startIndex, uint endIndex) public pure returns (bytes32) {
+        bytes32 result; 
+        for(uint i = startIndex; i < endIndex; i++) {
+            abi.encodePacked(result, strBytes[i]);
+        }
+        return result;
     }
 
     function append(string memory a, string memory b) public pure returns (string memory) {
