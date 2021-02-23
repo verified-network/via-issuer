@@ -42,7 +42,7 @@ contract Fees is Initializable{
 
     //transfer ether balances to custodian
     function transferToCustody(uint percent, address transferFrom) external returns(bool){
-        require(factory.getTreasury()==msg.sender);
+        require(factory.getTreasury(msg.sender)==true);
         address custodian = factory.getCustodian();
         if(custodian!=address(0x0)){
             address(uint160(custodian)).transfer(ABDKMathQuad.toUInt(ABDKMathQuad.mul(ABDKMathQuad.fromUInt(transferFrom.balance),ABDKMathQuad.fromUInt(percent))));

@@ -19,8 +19,7 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     //data structure for token proxies
     struct via{
         bytes32 tokenType;
-        bytes32 name;
-        bytes16 margin;
+        bytes32 name;        
     }
 
     //fee structure for payments
@@ -41,9 +40,6 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
 
     //address of who gets Via fees
     address feeToSetter;
-
-    //address of treasury manager
-    address treasury;
 
     //address of custodian
     address custodian;
@@ -66,13 +62,19 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
     //list of token product issuers
     mapping(bytes32 => mapping(bytes32 => address)) issuers;
 
+    //list of assets and their margins
+    mapping(bytes32 => bytes16) assets;
+
+    //list of treasury managers
+    address[] public managers;
+
     event IssuerCreated(address indexed _address, bytes32 tokenName, bytes32 tokenType);
     event TokenCreated(address indexed _address, bytes32 tokenName, bytes32 tokenType);
 
     function initialize() public initializer{
         Ownable.initialize(msg.sender);
         feeToSetter = msg.sender;
-        treasury = msg.sender;
+        managers.push(msg.sender);
         custodian = msg.sender;
     }
 
@@ -92,8 +94,9 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         return token[viaAddress].tokenType;
     }
 
-    function getMargin(address viaAddress) external view returns(bytes16) {
-        return token[viaAddress].margin;
+    //get margin for asset 
+    function getMargin(bytes32 asset) external view returns(bytes16) {
+        return assets[asset];
     }
 
     function getNameAndType(address viaAddress) external view returns(bytes32, bytes32){
@@ -133,8 +136,8 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
             return (address(0x0), "");
     }
 
+    //get fee for different services
     function getFee(bytes32 feeType) external view returns(bytes16){
-        //require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Get fee : FORBIDDEN');
         if(feeType=="issuing"){
             return (issuingFees[msg.sender].issuing);
         }
@@ -149,21 +152,33 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         }
     }
 
+    //gets address to which fee income has to be transferred
     function getFeeToSetter() external view returns(address){
         require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Get fee setter : FORBIDDEN');
         return feeToSetter;
     }
 
-    function getTreasury() external view returns(address){
+    //verifies if sender (who requests issue of cash tokens against fiat / bond tokens against non-ether assets) is a treasurer
+    function getTreasury(address sender) external view returns(bool){
         require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Get treasury : FORBIDDEN');
-        return treasury;
+        bool found = false;
+        uint256 i=0;
+        for(i=0; i<managers.length; i++){
+            if(managers[i]==sender){
+                found == true;
+                break;
+            }
+        }
+        return found;
     }
 
+    //get Custodian address for transferring (backing up) assets
     function getCustodian() external view returns(address){
         require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Get custodian : FORBIDDEN');
         return custodian;
     }
 
+    //get Verified client address for AML check
     function getClient() external view returns(address){
         //require(token[msg.sender].tokenType == "ViaCash" || token[msg.sender].tokenType == "ViaBond", 'Get client : FORBIDDEN');
         return client;
@@ -185,12 +200,12 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         emit IssuerCreated(_issuer, tokenName, tokenType);
 
         if(tokenType == "Cash"){
-                token[_issuer] = via("ViaCash", tokenName, ABDKMathQuad.fromUInt(0));
+                token[_issuer] = via("ViaCash", tokenName);
                 tokens.push(_issuer);
                 issuers["ViaCash"][tokenName] = _issuer;
         }
         else if(tokenType == "Bond"){
-                token[_issuer] = via("ViaBond", tokenName, ABDKMathQuad.fromUInt(0));
+                token[_issuer] = via("ViaBond", tokenName);
                 tokens.push(_issuer);
                 issuers["ViaBond"][tokenName] = _issuer;
         }
@@ -206,7 +221,7 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         // Deploy proxy
         address _token = deployMinimal(_target, _payload);
         
-        token[_token] = via("ViaBondToken", tokenName, token[msg.sender].margin);
+        token[_token] = via("ViaBondToken", tokenName);
         tokens.push(_token);
         products[tokenSymbol] = _token;       
         emit TokenCreated(_token, tokenName, tokenProduct);
@@ -239,14 +254,23 @@ contract Factory is ViaFactory, ProxyFactory, Initializable, Ownable {
         ViaOracleUrl = _url;
     }
 
-    function setMargin(uint256 _margin, address _token) external {
+    function setMargin(uint256 _margin, bytes32 _asset) external {
         require(msg.sender == feeToSetter, 'Set margin : FORBIDDEN');
-        token[_token].margin = ABDKMathQuad.fromUInt(_margin);
+        assets[_asset] = ABDKMathQuad.fromUInt(_margin);
     }
 
     function setTreasury(address _treasury) external {
         require(msg.sender == feeToSetter, 'Set treasury : FORBIDDEN');
-        treasury = _treasury;
+        bool found = false;
+        uint256 i=0;
+        for(i=0; i<managers.length; i++){
+            if(managers[i]==_treasury){
+                found == true;
+                break;
+            }
+        }
+        if(!found)
+            managers.push(_treasury);
     }
 
     function setCustodian(address _custodian) external {

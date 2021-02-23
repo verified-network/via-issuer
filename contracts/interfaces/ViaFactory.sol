@@ -14,7 +14,7 @@ interface ViaFactory{
 
     function getType(address viaAddress) external view returns(bytes32);
 
-    function getMargin(address viaAddress) external view returns(bytes16);
+    function getMargin(bytes32 asset) external view returns(bytes16);
 
     function getNameAndType(address viaAddress) external view returns(bytes32, bytes32);
 
@@ -30,7 +30,7 @@ interface ViaFactory{
 
     function getFeeToSetter() external view returns(address);
 
-    function getTreasury() external view returns(address);
+    function getTreasury(address sender) external view returns(bool);
 
     function getCustodian() external view returns(address);
 
@@ -48,7 +48,7 @@ interface ViaFactory{
 
     function setViaOracleUrl(string calldata _url) external;
 
-    function setMargin(uint256 _margin, address _token) external;
+    function setMargin(uint256 _margin, bytes32 _asset) external;
 
     function setTreasury(address _treasury) external;
 

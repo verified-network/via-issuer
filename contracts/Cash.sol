@@ -67,8 +67,8 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
     mapping(bytes32 => conversion) private conversionQ;
 
     //events to capture and report to Via oracle
-    event ViaCashIssued(address indexed _party, bytes32 currency, uint256 value);
-    event ViaCashRedeemed(address indexed _party, bytes32 currency, bytes16 value);
+    event ViaCashIssued(address indexed _party, bytes32 currency, uint256 amount);
+    event ViaCashRedeemed(address indexed _party, bytes32 currency, bytes16 amount);
     event ViaCashDeposits(address indexed depositor, bytes32 currency, bytes16 amount);
 
     //mutex
@@ -114,7 +114,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
         //check if tokens are being transferred to this cash contract
         if(receiver == address(this)){
             //if token name is the same, this transfer has to be redeemed
-            if(redeem(ABDKMathQuad.div(ABDKMathQuad.fromUInt(tokens),ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),factory.getMargin(address(this)))), sender, cashtokenName, "redeem", address(this)))
+            if(redeem(ABDKMathQuad.div(ABDKMathQuad.fromUInt(tokens),ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),factory.getMargin(cashtokenName))), sender, cashtokenName, "redeem", address(this)))
             //if(redeem(ABDKMathQuad.fromUInt(tokens), sender, cashtokenName, "redeem", address(this)))
                 return true;
             else
@@ -203,7 +203,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
 
     //handles fiat pay in for issue of cash tokens
     function payIn(uint256 tokens, address payer, bytes32 currency, address sender) external returns(bool){
-        require(factory.getTreasury()==sender);
+        require(factory.getTreasury(sender)==true);
         if(issue(ABDKMathQuad.fromUInt(tokens), payer, currency))
             return true;
         else
@@ -371,8 +371,8 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
         else{
             deposits[party][currency] = ABDKMathQuad.add(deposits[party][currency], amount);
         }
-        //emit ViaCashDeposits(party, currency, deposits[party][currency]);
-        bytes16 margin = factory.getMargin(address(this));
+        emit ViaCashDeposits(party, currency, deposits[party][currency]);
+        bytes16 margin = factory.getMargin(currency);
         //calculate cash token amount to issue
         bytes16 toIssue = ABDKMathQuad.mul(ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),margin),via);
         //add via to this contract's balance first (ie issue them first)
