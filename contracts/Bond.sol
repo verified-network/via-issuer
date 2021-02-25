@@ -94,7 +94,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
 
     //events to capture and report to Via oracle
     event ViaBondIssued(address indexed token, address issuer, uint256 issuedAmount);
-    //event ViaBondCollateral(address indexed token, bytes32 collateralCurrency, uint256 collateralValue);
+    event ViaBondCollateral(address indexed token, bytes32 collateralCurrency, uint256 collateralValue);
     event ViaBondRedeemed(address indexed token, address redeemedBy, uint256 redemptionAmount);
     event ViaBondPurchased(address indexed token, address purchaser, uint256 purchasedAmount);
 
@@ -447,8 +447,8 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
     }
 
     //function called back from Oraclize
-    function convert(bytes32 txId, bytes16 result, bytes32 rtype) external {
-        require(viaoracle == msg.sender);
+    function convert(bytes32 txId, bytes16 result, bytes32 rtype) public { //external {
+        //require(viaoracle == msg.sender);
         //check type of result returned
         if(rtype =="ethusd"){
             conversionQ[txId].EthXvalue = result;
@@ -503,11 +503,12 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
             //find margin on collateral paid in to be issued as bonds
             bytes16 margin = ABDKMathQuad.mul(ABDKMathQuad.sub(ABDKMathQuad.fromUInt(1),factory.getMargin(paidInCashToken)),parValue);
             //adjust issued bonds to total supply first
-            ViaToken(issuedBond).addTotalSupply(margin);
+            ViaToken vt = ViaToken(issuedBond);
+            vt.addTotalSupply(margin);
             //first, add bond balance
-            ViaToken(issuedBond).addBalance(issuedBond, margin);
+            vt.addBalance(issuedBond, margin);
             //issue bond to payer if ether is paid in as collateral
-            if(ViaToken(issuedBond).requestTransfer(payer, ABDKMathQuad.toUInt(margin))){    
+            if(vt.requestTransfer(payer, margin)){    
                 //keep track of issues
                 storeBond("issue", payer, payer, margin, bondPrice, ABDKMathQuad.fromUInt(0), paidInAmount, paidInCashToken, issueTime, issuedBond);
                 bondsIssued.push(issuedBond);

@@ -63,5 +63,20 @@ module.exports = {
                }
            }
         }
+    },
+    mocha: {
+        reporter: 'eth-gas-reporter',
+        reporterOptions : { 
+            currency : 'USD',
+            coinmarketcap : 'ffcb2325-818c-4d4d-9f38-ca5973a5f5ad',
+            //gasPrice : 5,
+            showTimeSpent : true,
+            excludeContracts : ['Migrations'],
+            src : 'contracts',
+            url : 'http://localhost:8545',
+            //outputFile : 'gas-report.txt'
+            showMethodSig : true,
+            onlyCalledMethods : true 
+        } 
     }
 };

@@ -84,9 +84,11 @@ contract Token is ViaToken, ERC20, Initializable, Ownable {
         return false;
     }   
 
-    function requestTransfer(address receiver, uint tokens) external returns (bool){
+    function requestTransfer(address receiver, bytes16 tokens) external returns (bool){
         require(issuer==msg.sender);
-        if(transfer(receiver, tokens))
+        //totalSupply_ = ABDKMathQuad.sub(totalSupply_, tokens);
+        //balances[address(this)] = ABDKMathQuad.add(balances[address(this)], tokens);
+        if(transfer(receiver, ABDKMathQuad.toUInt(tokens)))
             return true;
         else
             return false;
