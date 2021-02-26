@@ -31,15 +31,8 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
     //via factory address
     ViaFactory private factory;
 
-    //via fee payer address
-    ViaFees private fee;
-
-    //verified client
-    address private client;
-
     //via oracle
     ViaOracle private oracle;
-    address viaoracle;
 
     //name of Via cash token (eg, Via-USD)
     string public name;
@@ -79,8 +72,6 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
         Ownable.initialize(_owner);
         factory = ViaFactory(msg.sender);
         oracle = ViaOracle(_oracle);
-        viaoracle = _oracle;
-        fee = ViaFees(_fee);
         name = string(abi.encodePacked(_name));
         symbol = string(abi.encodePacked(_type));
         cashtokenName = _name;
@@ -97,7 +88,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
         //contract must not be paused
         require(paused == false);
         //check aml status
-        require(fee.amlCheck(msg.sender)==true);        
+        require(amlCheck(msg.sender)==true);        
         //issue via cash tokens
         issue(ABDKMathQuad.fromUInt(msg.value), msg.sender, "ether");
     }
@@ -107,8 +98,8 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
         //contract must not be paused
         require(paused == false);
         //check aml status
-        require(fee.amlCheck(sender)==true);
-        require(fee.amlCheck(receiver)==true);
+        require(amlCheck(sender)==true);
+        require(amlCheck(receiver)==true);
         //ensure sender has enough tokens in balance before transferring or redeeming them
         require(ABDKMathQuad.cmp(balances[sender],ABDKMathQuad.fromUInt(tokens))!=-1);
         //check if tokens are being transferred to this cash contract
@@ -228,28 +219,28 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
                 bytes32 EthXid = oracle.request("eth","ethusd","EthCash", address(this)); 
                 //bytes32 EthXid = "11";
                 conversionQ[EthXid] = conversion(buyer, address(0x0), "issue", currency, cashtokenName, EthXid, amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(1));
-                //convert("11",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
+                //convert("11","451.25".stringToBytes16(),"ethusd");
             }
             //if ether is paid in for issue of non-USD cash token, we need the exchange rate of ether to the USD (ethusd)
             //and the exchange rate of Via-USD to the requested non-USD cash token (eg, Via-EUR)
             else{
-                bytes32 ViaXid = oracle.request(string(abi.encodePacked("Via_USD_to_", cashtokenName)),"ver","Cash", address(this)); 
+                bytes32 ViaXid = oracle.request(abi.encodePacked("Via_USD_to_", cashtokenName),"ver","Cash", address(this)); 
                 bytes32 EthXid = oracle.request("eth","ethusd","EthCash", address(this)); 
                 oracle.setCallbackId(EthXid,ViaXid);
                 //bytes32 EthXid = "11";
                 //bytes32 ViaXid = "22";
                 conversionQ[ViaXid] = conversion(buyer, address(0x0), "issue", currency, cashtokenName, EthXid, amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(0));
-                //convert("22",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
-                //convert("22",ABDKMathQuad.fromUInt("1.2".stringToUint()),"ver");                
+                //convert("22","451.25".stringToBytes16(),"ethusd");
+                //convert("22","1.2".stringToBytes16(),"ver");                
             }
         }
         //if ether is not paid in and instead, some other Via cash token is paid in
         //we need to find the exchange rate between the paid in Via cash token and the cash token this cash contract represents
         else{
-            bytes32 ViaXid = oracle.request(string(abi.encodePacked(currency.substring(0,7),"_to_",cashtokenName)),"er","Cash", address(this)); 
+            bytes32 ViaXid = oracle.request(abi.encodePacked(currency.substring(0,7),"_to_",cashtokenName),"er","Cash", address(this)); 
             //bytes32 ViaXid = "33";
             conversionQ[ViaXid] = conversion(buyer, address(0x0), "issue", currency, cashtokenName, ABDKMathQuad.fromUInt(0), amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(0));
-            //convert("33",ABDKMathQuad.fromUInt("7.6".stringToUint()),"er");
+            //convert("33","7.6".stringToBytes16(),"er");
         }
         return true;
     }
@@ -279,28 +270,28 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
                     bytes32 EthXid = oracle.request("eth","ethusd","Cash", address(this)); 
                     //bytes32 EthXid = "11";
                     conversionQ[EthXid] = conversion(seller, receiver, operation, token, currency_in_deposit, EthXid, amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(1));
-                    //convert("11",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
+                    //convert("11","451.25".stringToBytes16(),"ethusd");
                 }
                 //and if cash token to redeem is not Via USD, we need to get the exchange rate of ether to the Via-USD, 
                 //and then the exchange rate of this Via cash token to redeeem and the Via-USD
                 else{
                     bytes32 EthXid = oracle.request("eth","ethusd","EthCash", address(this)); 
-                    bytes32 ViaXid = oracle.request(string(abi.encodePacked(token.substring(0,7),"_to_Via_USD")),"ver","Cash", address(this)); 
+                    bytes32 ViaXid = oracle.request(abi.encodePacked(token.substring(0,7),"_to_Via_USD"),"ver","Cash", address(this)); 
                     oracle.setCallbackId(EthXid,ViaXid);
                     //bytes32 EthXid = "11";
                     //bytes32 ViaXid = "22";
                     conversionQ[ViaXid] = conversion(seller, receiver, operation, token, currency_in_deposit, EthXid, amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(0));
-                    //convert("22",ABDKMathQuad.fromUInt("451.25".stringToUint()),"ethusd");
-                    //convert("22",ABDKMathQuad.fromUInt("1.2".stringToUint()),"ver");
+                    //convert("22","451.25".stringToBytes16(),"ethusd");
+                    //convert("22","1.2".stringToBytes16(),"ver");
                 }
             }
             //else if the currency this cash token can be redeemed is another Via cash token,
             //we just need the exchange rate of this Via cash token to redeem and the currency that is in deposit
             else{
-                bytes32 ViaXid = oracle.request(string(abi.encodePacked(token.substring(0,7),"_to_",currency_in_deposit)),"er","Cash", address(this)); //"1234"; //only for testing
+                bytes32 ViaXid = oracle.request(abi.encodePacked(token.substring(0,7),"_to_",currency_in_deposit),"er","Cash", address(this)); //"1234"; //only for testing
                 //bytes32 ViaXid = "33";
                 conversionQ[ViaXid] = conversion(seller, receiver, operation, token, currency_in_deposit, ABDKMathQuad.fromUInt(0), amount, ABDKMathQuad.fromUInt(0), ABDKMathQuad.fromUInt(0));
-                //convert("33",ABDKMathQuad.fromUInt("7.6".stringToUint()),"er");
+                //convert("33","7.6".stringToBytes16(),"er");
             }
         }
         else
@@ -309,8 +300,8 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
     }    
 
     //function called back from Via oracle
-    function convert(bytes32 txId, bytes16 result, bytes32 rtype) public {//external {
-        //require(viaoracle == msg.sender);
+    function convert(bytes32 txId, bytes16 result, bytes32 rtype) external {
+        require(oracle == ViaOracle(msg.sender));
         //check type of result returned
         if(rtype =="ethusd"){
             conversionQ[txId].EthXvalue = result;
@@ -400,7 +391,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
                     //adjust total supply
                     totalSupply_ = ABDKMathQuad.sub(totalSupply_, amount);
                     //check if any fee is payable on redemption and pay it if that is the case
-                    value = fee.payRedemptionFee(value);
+                    value = payRedemptionFee(value);
                     //send redeemed ether to party
                     address(uint160(party)).transfer(ABDKMathQuad.toUInt(value));
                     //generate event
@@ -431,7 +422,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
                     //adjust total supply
                     totalSupply_ = ABDKMathQuad.sub(totalSupply_, amtSend);
                     //check if any fee is payable on redemption and pay it if that is the case
-                    amtSend = fee.payRedemptionFee(amtSend);
+                    amtSend = payRedemptionFee(amtSend);
                     //send redeemed ether to party which is all of the ether in deposit with this user (party)
                     address(uint160(party)).transfer(ABDKMathQuad.toUInt(amtSend));
                     //generate event
@@ -463,7 +454,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
                     //adjust total supply
                     totalSupply_ = ABDKMathQuad.sub(totalSupply_, amount);
                     //check if any fee is payable on redemption and pay it if that is the case
-                    value = fee.payRedemptionFee(value);
+                    value = payRedemptionFee(value);
                     //send redeemed currency to party
                     if(cashtokenName.substringinbytes(4,7)==currency){
                         //if currency to redeem is fiat counterpart of this cash token, request oracle to pay out fiat
@@ -499,7 +490,7 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
                     //adjust total supply
                     totalSupply_ = ABDKMathQuad.sub(totalSupply_, amtSend);
                     //check if any fee is payable on redemption and pay it if that is the case
-                    amtSend = fee.payRedemptionFee(amtSend);
+                    amtSend = payRedemptionFee(amtSend);
                     // send redeemed currency to party which is all of the currency in deposit with this user (party)
                     if(cashtokenName.substringinbytes(4,7)==currency){
                         //if currency to redeem is fiat counterpart of this cash token, request oracle to pay out fiat
@@ -539,6 +530,30 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
             }
         }
         return (amount, value);
+    }
+
+    function payRedemptionFee(bytes16 value) private returns (bytes16){
+        bytes16 fees = factory.getFee("redemption");
+        bytes16 returnValue;
+        if(ABDKMathQuad.toUInt(fees)!=0){
+            address feeTo = factory.getFeeToSetter();
+            if(feeTo!=address(0x0)){
+                address(uint160(feeTo)).transfer(ABDKMathQuad.toUInt(ABDKMathQuad.mul(fees, value)));
+                returnValue = ABDKMathQuad.sub(value, ABDKMathQuad.mul(fees, value));
+            }
+        }
+        return returnValue;
+    }
+
+    //check AML status for account address
+    function amlCheck(address account) private view returns(bool){
+        address client = factory.getClient();
+        if(client==address(0x0))
+            return true;
+        if(VerifiedClient(client).getAMLStatus(account))
+            return true;
+        else
+            return false;
     }
 
     function pause() public {

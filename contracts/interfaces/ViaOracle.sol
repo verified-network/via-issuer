@@ -6,7 +6,7 @@ pragma solidity 0.5.7;
 
 interface ViaOracle{
 
-    function request(string calldata _currency, bytes32 _ratetype, bytes32 _tokenType, address payable _tokenContract)
+    function request(bytes calldata _currency, bytes32 _ratetype, bytes32 _tokenType, address payable _tokenContract)
         external
         payable
         returns (bytes32);

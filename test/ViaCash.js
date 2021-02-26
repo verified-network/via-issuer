@@ -63,7 +63,7 @@ contract("Cash contract testing", async (accounts) => {
     await viausdCash.sendTransaction({from:accounts[0], to:viausdCashAddress, value:1e18});
     console.log("Via-USD cash token contract ether balance after sending ether:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Account ether balance after sending ether:", await web3.eth.getBalance(accounts[0]));  
-        
+       
     try{
       await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
     }catch(error){
@@ -109,7 +109,7 @@ contract("Cash contract testing", async (accounts) => {
     }catch(error){
       console.log(error);
     }
-
+    
     console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
     console.log("Account Via-EUR cash token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
 
@@ -151,7 +151,7 @@ contract("Cash contract testing", async (accounts) => {
       }catch(error){
         console.log(error);
       }
-
+      
       console.log("Account Via-EUR cash token balance after sending Via-EUR to Via-INR contract :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
       console.log("Account Via-INR cash token balance after sending Via-EUR to Via-INR contract :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viainrCash.balanceOf(accounts[0]))));
   });
@@ -186,7 +186,7 @@ contract("Cash contract testing", async (accounts) => {
     }catch(error){
       console.log(error);
     }
-
+    
     console.log("Account ether balance after redeeming Via-USD:", await web3.eth.getBalance(accounts[0]));
     console.log("Account Via-USD cash token balance after redeeming Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[0]))));
     console.log("Via-USD cash token contract ether balance after redeeming Via-USD:", await web3.eth.getBalance(viausdCashAddress));
@@ -222,7 +222,7 @@ contract("Cash contract testing", async (accounts) => {
       }catch(error){
         console.log(error);
       }
-
+      
       console.log("Account ether balance after redeeming Via-EUR:", await web3.eth.getBalance(accounts[0]));
       console.log("Via-EUR cash token contract ether balance after redeeming Via-EUR:", await web3.eth.getBalance(viaeurCashAddress));
       console.log("Account Via-EUR cash token balance after sending Via-EUR:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
@@ -261,7 +261,7 @@ contract("Cash contract testing", async (accounts) => {
       }catch(error){
         console.log(error);
       }
-
+      
       console.log("Account Via-EUR cash token balance after redeeming Via-INR :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viaeurCash.balanceOf(accounts[0]))));
       console.log("Account Via-INR cash token balance after redeeming Via-INR :", await web3.utils.hexToNumberString(await web3.utils.toHex(await viainrCash.balanceOf(accounts[0]))));
   });
@@ -289,7 +289,7 @@ contract("Cash contract testing", async (accounts) => {
     console.log();
     
     await viausdCash.transferFrom(accounts[0], accounts[1], 100);
-
+    
     try{
       await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
     }catch(error){
@@ -326,14 +326,14 @@ contract("Cash contract testing", async (accounts) => {
     console.log();
     
     await viausdCash.transferFrom(accounts[1], viausdCashAddress, 50);
-
+    
     try{
       await getFirstEvent(oracle.LogResult({fromBlock:'latest'}));
       //await getFirstEvent(cash.ViaCashRedeemed({fromBlock:'latest'}));
     }catch(error){
       console.log(error);
     }
-
+    
     console.log("Via-USD cash token contract ether balance after redeeming Via-USD:", await web3.eth.getBalance(viausdCashAddress));
     console.log("Redeemer ether balance after redeeming Via-USD:", await web3.eth.getBalance(accounts[1]));
     console.log("Redeemer account Via-USD cash token balance after redeeming Via-USD:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdCash.balanceOf(accounts[1]))));

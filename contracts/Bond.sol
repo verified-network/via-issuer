@@ -209,7 +209,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
             //To derive the bond's face value, the exchange rate of ether to Via-USD and then to the currency paid in is applied.
             if(bondName!="Via_USD"){
                 bytes32 EthXid = oracle.request("eth","ethusd","EthBond", address(this));
-                bytes32 ViaXid = oracle.request(string(abi.encodePacked("Via_USD_to_", bondName)),"ver","Bond", address(this));
+                bytes32 ViaXid = oracle.request(abi.encodePacked("Via_USD_to_", bondName),"ver","Bond", address(this));
                 oracle.setCallbackId(EthXid,ViaXid);
                 //bytes32 EthXid = "11";
                 //bytes32 ViaXid = "22";
@@ -247,10 +247,10 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
             //tokens of this bond need to be transferred from an issuers' account after pricing the bond with applicable coupon rates
             if(currency!=bondName){
                 amount = fee.payTradingFee(amount, cashContract);
-                bytes32 ViaXid = oracle.request(string(abi.encodePacked(currency, "_to_", bondName)),"er","Bond", address(this));                
+                bytes32 ViaXid = oracle.request(abi.encodePacked(currency, "_to_", bondName),"er","Bond", address(this));                
                 bytes32 ViaRateId;
                 if(currency!="Via_USD"){
-                    ViaRateId = oracle.request(string(abi.encodePacked("Via_USD_to_", currency)), "ir","Bond",address(this));
+                    ViaRateId = oracle.request(abi.encodePacked("Via_USD_to_", currency), "ir","Bond",address(this));
                 }
                 else{
                     ViaRateId = oracle.request("USD", "ir","Bond",address(this));
@@ -285,7 +285,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
                 //tokens of this bond need to be transferred from an issuer's account after pricing the bond with the domestic (paid in currency) coupon rates
                 else{
                     amount = fee.payTradingFee(amount, cashContract);
-                    bytes32 ViaRateId = oracle.request(string(abi.encodePacked(currency)), "ir","Bond",address(this));
+                    bytes32 ViaRateId = oracle.request(abi.encodePacked(currency), "ir","Bond",address(this));
                     //bytes32 ViaRateId = "44";
                     conversion storage c = conversionQ[ViaRateId];
                     c.operation = "purchase";

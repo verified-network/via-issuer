@@ -75,19 +75,23 @@ contract Oracle is ViaOracle, usingProvable, Initializable {
         
         if(mpramas.tokenType == "Cash"){
             ViaCash(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
+            //ViaCash(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(safeParseInt(_result)), mpramas.rateType);
         }
         else if(mpramas.tokenType == "Bond"){
             ViaBond(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
+            //ViaBond(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(safeParseInt(_result)), mpramas.rateType);
         }
         else if(mpramas.tokenType == "EthCash"){
             ViaCash(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
+            //ViaCash(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(safeParseInt(_result)), mpramas.rateType);
         }
         else if(mpramas.tokenType == "EthBond"){
             ViaBond(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(_result.stringToUint()), mpramas.rateType);
+            //ViaBond(mpramas.caller).convert(callbackId, ABDKMathQuad.fromUInt(safeParseInt(_result)), mpramas.rateType);
         }
     }
 
-    function request(string calldata _currency, bytes32 _ratetype, bytes32 _tokenType, address payable _tokenContract)
+    function request(bytes calldata _currency, bytes32 _ratetype, bytes32 _tokenType, address payable _tokenContract)
         external
         payable
         returns (bytes32)
@@ -96,24 +100,24 @@ contract Oracle is ViaOracle, usingProvable, Initializable {
         if (provable_getPrice("URL", CUSTOM_GASLIMIT) > address(this).balance) {
             emit LogNewProvableQuery("Provable query was NOT sent, please add some ETH to cover for the query fee!");
         } else {
-            string memory currency = _currency.stringToBytes32().substring(0,18);
+            string memory currency = string(_currency).stringToBytes32().substring(0,18);
             string memory url = factory.getViaOracleUrl();
             if(_ratetype == "er" || _ratetype == "ver"){
                 bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(",url,"/rates/er/",currency,").rate")),CUSTOM_GASLIMIT);  
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype,"");
-                emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via exchange rates for ",_currency)));
+                //emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via exchange rates for ",_currency)));
                 return queryId;
             }
             else if(_ratetype == "ir"){
                 bytes32 queryId = provable_query("URL", string(abi.encodePacked("json(",url,"/rates/ir/",currency,").rate")),CUSTOM_GASLIMIT);
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype,"");
-                emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via interest rates for ",_currency)));
+                //emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for Via interest rates for ",_currency)));
                 return queryId;
             }
             else if(_ratetype == "ethusd"){
                 bytes32 queryId = provable_query("URL", "json(https://api.pro.coinbase.com/products/ETH-USD/ticker).price",CUSTOM_GASLIMIT);
                 pendingQueries[queryId] = params(_tokenContract, _tokenType, _ratetype,"");
-                emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for ETH-USD, standing by for the answer...")));
+                //emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for ETH-USD, standing by for the answer...")));
                 return queryId;
             }
         }        
@@ -131,11 +135,11 @@ contract Oracle is ViaOracle, usingProvable, Initializable {
         if (provable_getPrice("URL", CUSTOM_GASLIMIT) > address(this).balance) {
             emit LogNewProvableQuery("Provable query was NOT sent, please add some ETH to cover for the query fee!");
         } else {
-            string memory currency = _currency.bytes32ToString();
+            string memory currency = string(abi.encodePacked(_currency)); 
             string memory url = factory.getViaOracleUrl();
-            string memory amount = bytes32(_amount).bytes32ToString();
+            string memory amount = string(abi.encodePacked(_amount)); 
             provable_query("URL", string(abi.encodePacked("json(",url,"/payout/",currency,"/",amount,").pay")),CUSTOM_GASLIMIT);  
-            emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for paying out ",_currency)));
+            //emit LogNewProvableQuery(string(abi.encodePacked("Provable query was sent for paying out ",_currency)));
         }      
     }
 

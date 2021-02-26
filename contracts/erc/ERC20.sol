@@ -43,13 +43,13 @@ contract ERC20 {
                 ABDKMathQuad.cmp(ABDKMathQuad.fromUInt(tokens),balances[address(this)])==0);
         balances[address(this)] = ABDKMathQuad.sub(balances[address(this)], ABDKMathQuad.fromUInt(tokens));
         balances[receiver] = ABDKMathQuad.add(balances[receiver], ABDKMathQuad.fromUInt(tokens));
-        emit Transfer(address(this), receiver, tokens);
+        //emit Transfer(address(this), receiver, tokens);
         return true;
     }    
 
     function approve(address spender, uint tokens)  public returns (bool){
         allowed[msg.sender][spender] = ABDKMathQuad.fromUInt(tokens);
-        emit Approval(msg.sender, spender, tokens);
+        //emit Approval(msg.sender, spender, tokens);
         return true;
     }
 
@@ -65,7 +65,7 @@ contract ERC20 {
         balances[owner] = ABDKMathQuad.sub(balances[owner], ABDKMathQuad.fromUInt(tokens));
         allowed[owner][msg.sender] = ABDKMathQuad.sub(allowed[owner][msg.sender], ABDKMathQuad.fromUInt(tokens));
         balances[buyer] = ABDKMathQuad.add(balances[buyer], ABDKMathQuad.fromUInt(tokens));
-        emit Transfer(owner, buyer, tokens);
+        //emit Transfer(owner, buyer, tokens);
         return true;
     }
 

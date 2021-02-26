@@ -63,7 +63,7 @@ module.exports = {
                }
            }
         }
-    },
+    }/*,
     mocha: {
         reporter: 'eth-gas-reporter',
         reporterOptions : { 
@@ -75,8 +75,8 @@ module.exports = {
             src : 'contracts',
             url : 'http://localhost:8545',
             //outputFile : 'gas-report.txt'
-            showMethodSig : true,
+            showMethodSig : false,
             onlyCalledMethods : true 
         } 
-    }
+    }*/
 };
