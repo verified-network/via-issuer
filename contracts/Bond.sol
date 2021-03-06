@@ -36,7 +36,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
 
     //via oracle
     ViaOracle private oracle;
-    address viaoracle;
+    //address viaoracle;
 
     //verified client
     address private client;
@@ -69,10 +69,10 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
     mapping(address => mapping (address => bond)) public purchases;
 
     //array of issues of this via bond, where bond IDs are their addresses of their token issues
-    address[] private bondsIssued;
+    address[] bondsIssued;
 
     //array of issuers
-    address[] private issuers;
+    address[] issuers;
 
     //data structure holding details of currency conversion requests pending on oraclize
     struct conversion{
@@ -106,7 +106,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
         Ownable.initialize(_owner);
         factory = ViaFactory(msg.sender);
         oracle = ViaOracle(_oracle);
-        viaoracle = _oracle;
+        //viaoracle = _oracle;
         name = string(abi.encodePacked(_name));
         symbol = string(abi.encodePacked(_type));
         bondName = _name;
@@ -448,7 +448,7 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
 
     //function called back from Oraclize
     function convert(bytes32 txId, bytes16 result, bytes32 rtype) public { //external {
-        //require(viaoracle == msg.sender);
+        //require(oracle == ViaOracle(msg.sender));
         //check type of result returned
         if(rtype =="ethusd"){
             conversionQ[txId].EthXvalue = result;
@@ -505,23 +505,20 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
             //adjust issued bonds to total supply first
             ViaToken vt = ViaToken(issuedBond);
             vt.addTotalSupply(margin);
-            //first, add bond balance
-            vt.addBalance(issuedBond, margin);
-            //issue bond to payer if ether is paid in as collateral
-            if(vt.requestTransfer(payer, margin)){    
-                //keep track of issues
-                storeBond("issue", payer, payer, margin, bondPrice, ABDKMathQuad.fromUInt(0), paidInAmount, paidInCashToken, issueTime, issuedBond);
-                bondsIssued.push(issuedBond);
-                //keep track of issuers
-                for(uint256 i=0; i<issuers.length; i++){
-                    if(issuers[i]==payer){
-                        found = true;
-                        break;
-                    }
+            //add issued bond balance
+            vt.addBalance(payer, margin);
+            //keep track of issues
+            storeBond("issue", payer, payer, margin, bondPrice, ABDKMathQuad.fromUInt(0), paidInAmount, paidInCashToken, issueTime, issuedBond);
+            //bondsIssued.push(issuedBond);
+            //keep track of issuers
+            for(uint256 i=0; i<issuers.length; i++){
+                if(issuers[i]==payer){
+                    found = true;
+                    break;
                 }
-                if(!found)
-                    issuers.push(payer);
             }
+            if(!found)
+            //    issuers.push(payer);
             //generate event
             emit ViaBondIssued(issuedBond, payer, ABDKMathQuad.toUInt(bondPrice));
             //emit ViaBondCollateral(issuedBond, paidInCashToken, ABDKMathQuad.toUInt(paidInAmount));
@@ -585,33 +582,32 @@ contract Bond is ViaBond, ERC20, Initializable, Ownable, Pausable {
     }
     
     //stores issued and purchased bond details
-    function storeBond( bytes32 _operation,
-                        address _payer,
-                        address _party,
-                        bytes16 _parValue,
-                        bytes16 _bondPrice,
-                        bytes16 _purchasedIssueAmount,
-                        bytes16 _paidInAmount,
-                        bytes32 _paidInCashToken,
-                        uint256 _timeIssued,
-                        address _issuedBond) private {
+    function storeBond(bytes32 _operation, address _payer, address _party, bytes16 _parValue, bytes16 _bondPrice, bytes16 _purchasedIssueAmount, bytes16 _paidInAmount, bytes32 _paidInCashToken, uint256 _timeIssued, address _issuedBond) private {
         if(_operation=="issue"){
-            issues[_payer][_issuedBond].counterParties[0] = _party;
+            /*issues[_payer][_issuedBond].counterParties.push(_party);
             issues[_payer][_issuedBond].parValue = _parValue;
             issues[_payer][_issuedBond].price = _bondPrice;
             issues[_payer][_issuedBond].purchasedIssueAmount = _purchasedIssueAmount;
             issues[_payer][_issuedBond].paidInAmount = _paidInAmount;
             issues[_payer][_issuedBond].paidInCurrency = _paidInCashToken;
-            issues[_payer][_issuedBond].timeIssuedOrSubscribed = _timeIssued;
+            issues[_payer][_issuedBond].timeIssuedOrSubscribed = _timeIssued;*/
+
+            /*address[] counterParties;
+            bytes16 parValue;
+            bytes16 price;
+            bytes16 purchasedIssueAmount;
+            bytes16 paidInAmount;
+            bytes32 paidInCurrency;
+            uint256 timeIssuedOrSubscribed;*/
         }
         else if(_operation=="purchase"){
-            purchases[_payer][_issuedBond].counterParties[0] = _party;
+            /*purchases[_payer][_issuedBond].counterParties[0] = _party;
             purchases[_payer][_issuedBond].parValue = _parValue;
             purchases[_payer][_issuedBond].price = _bondPrice;
             purchases[_payer][_issuedBond].purchasedIssueAmount = _purchasedIssueAmount;
             purchases[_payer][_issuedBond].paidInAmount = _paidInAmount;
             purchases[_payer][_issuedBond].paidInCurrency = _paidInCashToken;
-            purchases[_payer][_issuedBond].timeIssuedOrSubscribed = _timeIssued;
+            purchases[_payer][_issuedBond].timeIssuedOrSubscribed = _timeIssued;*/
         }
     }
     

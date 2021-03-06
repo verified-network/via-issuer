@@ -195,6 +195,8 @@ contract Cash is ViaCash, ERC20, Initializable, Ownable, Pausable {
     //handles fiat pay in for issue of cash tokens
     function payIn(uint256 tokens, address payer, bytes32 currency, address sender) external returns(bool){
         require(factory.getTreasury(sender)==true);
+        //contract must not be paused
+        require(paused == false);
         if(issue(ABDKMathQuad.fromUInt(tokens), payer, currency))
             return true;
         else

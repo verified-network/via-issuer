@@ -36,7 +36,6 @@ contract("Bond contract testing", async (accounts) => {
     });    
   });
 
-  /*
   //test 2
   it("should send ether to Via-USD bond contract and then get some Via-USD bond tokens to sender (issuer)", async () => {
       var abdkMathQuad = await ABDKMathQuad.deployed();
@@ -74,11 +73,12 @@ contract("Bond contract testing", async (accounts) => {
       });
             
       viausdBondToken = await Token.at(emittedTokenAddress);
+      console.log("Via USD bond token address :", emittedTokenAddress);
       console.log("Via oracle ether balance after query:", await web3.eth.getBalance(oracle.address));
       console.log("Account Via-USD bond token balance after sending ether:", await web3.utils.hexToNumberString(await web3.utils.toHex(await viausdBondToken.balanceOf(accounts[0]))));
       
   });
-  
+  /*  
   //test 3
   it("should transfer Via-USD bond to another account", async () => {
     var abdkMathQuad = await ABDKMathQuad.deployed();
